@@ -43,6 +43,9 @@ require_once 'includes/lessons-header.php';
 include'../lesson-details/css.php'; 
 ?>
 
+<!-- إضافة بعد سطر include'../lesson-details/css.php'; -->
+<link rel="stylesheet" href="/content/lesson-details/css/notes.css">
+
 <!-- شريط التنقل العلوي -->
 <div class="navigation-bar bg-light py-3 mb-4 border-bottom">
     <div class="container">

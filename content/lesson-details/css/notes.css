@@ -1,0 +1,107 @@
+/* تنسيقات قسم الملاحظات */
+.notes-section {
+    direction: rtl;
+}
+
+/* تنسيق بطاقة الملاحظة */
+.note-card {
+    margin-bottom: 1.5rem;
+}
+
+/* تنسيق محتوى الكود */
+.code-wrapper {
+    direction: ltr;
+    text-align: left;
+    background: #1e1e1e;
+    border-radius: 4px;
+    position: relative;
+}
+
+.code-wrapper pre {
+    margin: 0;
+    padding: 1rem;
+    max-height: 400px;
+    overflow: auto;
+}
+
+.code-wrapper code {
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* أزرار التحكم في الكود */
+.code-controls {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.code-controls button {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.code-controls button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* تنسيق محرر الكود */
+.code-editor {
+    direction: ltr;
+    font-family: 'Fira Code', monospace;
+    resize: vertical;
+}
+
+/* تنسيق روابط الملاحظات */
+.link-note .note-content {
+    word-break: break-all;
+}
+
+/* تنسيق وصف الروابط */
+.link-description {
+    margin-top: 0.5rem;
+    color: #6c757d;
+}
+
+/* تنسيق محتوى النص */
+.text-note .note-content {
+    direction: rtl;
+    text-align: right;
+}
+
+/* تحسين عرض أزرار التحكم في الملاحظة */
+.note-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.note-actions button {
+    padding: 0.25rem 0.5rem;
+    background: none;
+    border: none;
+    color: #6c757d;
+    transition: color 0.2s;
+}
+
+.note-actions button:hover {
+    color: #0d6efd;
+}
+
+/* تنسيق رأس الملاحظة */
+.note-card .card-header {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* تحسين عرض التاريخ */
+.note-card .card-footer {
+    background-color: rgba(0, 0, 0, 0.02);
+    font-size: 0.875rem;
+} 

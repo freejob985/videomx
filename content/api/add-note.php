@@ -58,7 +58,7 @@ try {
             break;
             
         case 'code':
-            $note['content'] = filter_input(INPUT_POST, 'code_content', FILTER_SANITIZE_STRING);
+            $note['content'] = $_POST['code_content'];
             $note['code_language'] = filter_input(INPUT_POST, 'code_language', FILTER_SANITIZE_STRING);
             break;
             
