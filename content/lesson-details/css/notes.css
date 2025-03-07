@@ -97,12 +97,15 @@
     bottom: 0;
     background: rgba(0, 0, 0, 0.9);
     z-index: 1050;
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
 .code-modal.active {
     display: flex;
     align-items: center;
     justify-content: center;
+    opacity: 1;
 }
 
 .code-modal-content {
@@ -113,6 +116,12 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    transform: scale(0.95);
+    transition: transform 0.3s;
+}
+
+.code-modal.active .code-modal-content {
+    transform: scale(1);
 }
 
 .code-modal-header {
@@ -207,8 +216,10 @@
 
 /* تمييز نتائج البحث */
 .search-highlight {
-    background-color: rgba(255, 255, 0, 0.2);
+    background-color: #ffd700;
+    color: #000;
     border-radius: 2px;
+    padding: 0 2px;
 }
 
 .search-highlight.active {
