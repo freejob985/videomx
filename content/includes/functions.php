@@ -2068,3 +2068,19 @@ function formatArabicDate($date) {
     $monthName = date('F', $timestamp);
     return date('d', $timestamp) . ' ' . $months[$monthName] . ' ' . date('Y', $timestamp);
 }
+
+// التأكد من وجود متغير الاتصال بقاعدة البيانات
+global $db;
+
+// دالة التحقق من تسجيل الدخول إذا لم تكن موجودة
+function isLoggedIn() {
+    return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+}
+
+// إضافة دالة للتحقق من صلاحية الجلسة
+function validateSession() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    return isLoggedIn();
+}

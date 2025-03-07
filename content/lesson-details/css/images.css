@@ -1,0 +1,135 @@
+.images-section {
+    position: relative;
+}
+
+.dropzone {
+    border: 2px dashed #0087F7;
+    border-radius: 5px;
+    background: white;
+    min-height: 150px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.dropzone .dz-message {
+    margin: 2em 0;
+}
+
+.dropzone .dz-preview {
+    margin: 1rem;
+}
+
+.lesson-image {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.lesson-image:hover {
+    transform: scale(1.02);
+}
+
+.image-actions {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    padding: 0.5rem;
+}
+
+.card:hover .image-actions {
+    opacity: 1;
+}
+
+.image-actions button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    color: white;
+    background: transparent;
+    border: 1px solid white;
+    margin-left: 0.25rem;
+}
+
+.image-actions button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.images-content.collapsed {
+    display: none;
+}
+
+/* تحسينات للتوافق مع RTL */
+.dropzone .dz-preview .dz-progress {
+    right: 50%;
+    left: auto;
+    margin-right: -40px;
+    margin-left: 0;
+}
+
+/* إضافة أنماط معرض الصور */
+.gallery-container {
+    position: relative;
+    text-align: center;
+}
+
+.gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 1rem;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.gallery-nav:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.gallery-nav.prev {
+    right: 1rem;
+}
+
+.gallery-nav.next {
+    left: 1rem;
+}
+
+.image-counter {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* إضافة أنماط لمعاينة الصورة */
+.preview-container {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.preview-container img {
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.preview-container input,
+.preview-container textarea {
+    margin-top: 1rem;
+    width: 100%;
+    max-width: 400px;
+}
+
+/* تحسين مظهر مربع الحوار */
+.swal2-popup {
+    font-size: 1rem;
+}
+
+.swal2-input, 
+.swal2-textarea {
+    margin: 1rem auto;
+} 

@@ -1,5 +1,6 @@
 <?php
-require_once '../includes/functions.php';
+require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../lesson-details/image-section.php';
 
 // التحقق من معرف الدرس
 $lesson_id = $_GET['id'] ?? null;
@@ -600,6 +601,82 @@ include'../lesson-details/css.php';
                 </div>
             </div>
         </div>
+
+        <!-- بعد قسم الملاحظات مباشرة، نضيف قسم الصور -->
+        <div class="images-section mt-5">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-images me-2"></i>
+                        <h3 class="mb-0">صور الدرس</h3>
+                    </div>
+                    <button type="button" 
+                            class="btn btn-light btn-sm toggle-images" 
+                            data-bs-toggle="tooltip" 
+                            title="إخفاء/إظهار الصور">
+                        <i class="fas fa-chevron-up"></i>
+                    </button>
+                </div>
+                <div class="card-body images-content">
+                    <!-- منطقة السحب والإفلات -->
+                    <div class="dropzone-wrapper mb-4">
+                        <div id="imageDropzone" class="dropzone">
+                            <div class="dz-message">
+                                <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                                <h4>اسحب وأفلت الصور هنا</h4>
+                                <p>أو انقر للاختيار من جهازك</p>
+                                <p class="small text-muted">يمكنك أيضاً لصق الصور مباشرة (Ctrl+V)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- عرض الصور -->
+                    <div id="lessonImages" class="row g-4">
+                        <?php 
+                        $images = getLessonImages($lesson['id']);
+                        foreach ($images as $image):
+                        ?>
+                            <div class="col-md-6 col-lg-4" data-image-id="<?php echo $image['id']; ?>">
+                                <div class="card h-100">
+                                    <div class="position-relative">
+                                        <img src="<?php echo htmlspecialchars($image['image_url']); ?>" 
+                                             class="card-img-top lesson-image" 
+                                             alt="<?php echo htmlspecialchars($image['title']); ?>">
+                                        <div class="image-actions position-absolute top-0 end-0 p-2">
+                                            <button class="btn btn-light btn-sm me-1 copy-image-url" 
+                                                    data-url="<?php echo htmlspecialchars($image['image_url']); ?>"
+                                                    title="نسخ رابط الصورة">
+                                                <i class="fas fa-link"></i>
+                                            </button>
+                                            <button class="btn btn-light btn-sm me-1 edit-image" 
+                                                    title="تعديل">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-light btn-sm delete-image" 
+                                                    title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title"><?php echo htmlspecialchars($image['title']); ?></h5>
+                                        <?php if ($image['description']): ?>
+                                            <p class="card-text"><?php echo nl2br(htmlspecialchars($image['description'])); ?></p>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="card-footer text-muted">
+                                        <small>
+                                            <i class="fas fa-clock me-1"></i>
+                                            <?php echo formatDate($image['created_at']); ?>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <?php require_once '../includes/footer.php'; ?>
@@ -623,3 +700,68 @@ include'../lesson-details/css.php';
 
 <!-- في نهاية الملف، قبل إغلاق body -->
 <script src="/content/assets/js/code-controls.js"></script>
+
+<!-- إضافة مكتبة Dropzone.js -->
+<link href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" rel="stylesheet" type="text/css" />
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+
+<!-- إضافة ملف JavaScript الخاص بالصور -->
+<script src="/content/assets/js/lesson-images.js"></script>
+
+<!-- تعريف متغير lessonId للاستخدام في ملف JavaScript -->
+<script>
+    const lessonId = <?php echo json_encode($lesson['id']); ?>;
+    const baseUrl = '<?php echo rtrim(dirname($_SERVER['PHP_SELF']), '/\\'); ?>';
+</script>
+
+<!-- تحديث ترتيب تضمين المكتبات -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+<script src="/content/assets/js/lesson-images.js"></script>
+
+<!-- في بداية الملف بعد تضمين PHP -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <!-- Meta tags & title -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo htmlspecialchars($pageTitle); ?></title>
+
+    <!-- CSS Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/toolbar/prism-toolbar.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/content/lesson-details/css/notes.css">
+    <link rel="stylesheet" href="/content/lesson-details/css/images.css">
+</head>
+<body>
+    <!-- محتوى الصفحة -->
+
+    <!-- في نهاية الملف قبل إغلاق body -->
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/toolbar/prism-toolbar.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+    <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+
+    <!-- تعريف المتغيرات العامة -->
+    <script>
+        const lessonId = <?php echo json_encode($lesson['id']); ?>;
+        const baseUrl = '<?php echo rtrim(dirname($_SERVER['PHP_SELF']), '/\\'); ?>';
+    </script>
+
+    <!-- Custom JavaScript -->
+    <script src="/content/assets/js/code-controls.js"></script>
+    <script src="/content/assets/js/lesson-images.js"></script>
+</body>
+</html>
