@@ -1,0 +1,153 @@
+/* تنسيقات صفحة اللغات */
+.language-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.language-card {
+    position: relative;
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    color: #333;
+}
+
+.language-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+.language-card .card-header {
+    background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+    padding: 1.5rem;
+    border: none;
+}
+
+.language-card .card-title {
+    color: #ffffff;
+    font-size: 1.5rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.language-card .stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.stat-item {
+    background: rgba(var(--primary-rgb), 0.1);
+    padding: 1rem;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1a237e;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.sections-input {
+    position: relative;
+    margin-top: 1rem;
+}
+
+.sections-input input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid rgba(var(--primary-rgb), 0.2);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.sections-input input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.sections-list {
+    margin-top: 1rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.section-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background: rgba(26, 35, 126, 0.05);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.section-item:hover {
+    background: rgba(26, 35, 126, 0.1);
+}
+
+.section-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.delete-section {
+    color: var(--danger);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.delete-section:hover {
+    background: var(--danger);
+    color: white;
+}
+
+/* تنسيقات الصفحات */
+.pagination {
+    margin-top: 2rem;
+}
+
+.page-link {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin: 0 0.25rem;
+    border: none;
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary-color);
+    transition: all 0.2s ease;
+}
+
+.page-link:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.page-item.active .page-link {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* تأثيرات الحركة */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.language-card {
+    animation: fadeIn 0.5s ease forwards;
+} 

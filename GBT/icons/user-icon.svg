@@ -1,0 +1,19 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Outer Circle with Gradient -->
+    <circle cx="24" cy="24" r="23" fill="url(#userGradient)" stroke="#4285f4" stroke-width="2">
+        <animate attributeName="stroke-dasharray" from="0 100" to="100 100" dur="1s" />
+    </circle>
+    
+    <!-- User Icon -->
+    <path d="M24 14C21.8 14 20 15.8 20 18C20 20.2 21.8 22 24 22C26.2 22 28 20.2 28 18C28 15.8 26.2 14 24 14ZM24 24C20.7 24 14 25.7 14 29V32H34V29C34 25.7 27.3 24 24 24Z" fill="white">
+        <animate attributeName="fill-opacity" values="0;1" dur="0.5s" />
+    </path>
+    
+    <!-- Gradient Definition -->
+    <defs>
+        <linearGradient id="userGradient" x1="0" y1="0" x2="48" y2="48">
+            <stop offset="0%" stop-color="#4285f4" />
+            <stop offset="100%" stop-color="#34A853" />
+        </linearGradient>
+    </defs>
+</svg> 

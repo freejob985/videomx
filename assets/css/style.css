@@ -1,0 +1,46 @@
+:root {
+    --primary-color: #2563eb;
+    --secondary-color: #475569;
+}
+
+body {
+    font-family: 'Cairo', 'Tajawal', sans-serif;
+    background-color: #f8fafc;
+    padding-bottom: 300px; /* Space for footer */
+}
+
+.custom-card {
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    background-color: white;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+/* Gradient backgrounds */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+/* Form styles */
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgb(37 99 235 / 25%);
+}
+
+/* Custom animations */
+.hover-scale {
+    transition: transform 0.2s;
+}
+
+.hover-scale:hover {
+    transform: scale(1.02);
+} 

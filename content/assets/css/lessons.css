@@ -1,0 +1,299 @@
+/* تنسيقات عامة للصفحة */
+.lessons-page {
+    background: #f8f9fa;
+    font-family: 'Changa', sans-serif;
+}
+
+/* تنسيقات الهيدر */
+.lessons-header {
+    background: linear-gradient(135deg, #1a237e, #0d47a1);
+    color: white;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.lessons-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('../images/pattern.svg') center/cover;
+    opacity: 0.1;
+}
+
+/* تنسيقات البريدكرمب */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+}
+
+.breadcrumb-item a {
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: white;
+}
+
+.breadcrumb-item.active {
+    color: white;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: rgba(255,255,255,0.5);
+}
+
+/* عنوان الكورس */
+.course-title {
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin: 1rem 0;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.course-description {
+    color: rgba(255,255,255,0.9);
+    font-size: 1.1rem;
+    max-width: 800px;
+    margin-bottom: 0;
+}
+
+/* معلومات الكورس */
+.course-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255,255,255,0.9);
+    font-size: 1.1rem;
+}
+
+.meta-item i {
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+/* تنسيقات البروجرس بار */
+.course-progress {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.course-progress h6 {
+    font-family: 'Cairo', sans-serif;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.course-progress .progress {
+    height: 12px;
+    border-radius: 6px;
+    background: #e9ecef;
+    overflow: hidden;
+}
+
+.course-progress .progress-bar {
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+    transition: width 0.6s ease;
+}
+
+/* تنسيقات إحصائيات الحالات */
+.status-stats {
+    margin-bottom: 2rem;
+}
+
+.status-stats .card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+}
+
+.status-stats .card:hover {
+    transform: translateY(-5px);
+}
+
+/* تحسينات للموبايل */
+@media (max-width: 768px) {
+    .lessons-header {
+        padding: 2rem 0;
+    }
+    
+    .course-title {
+        font-size: 1.8rem;
+    }
+    
+    .course-meta {
+        justify-content: flex-start;
+        margin-top: 1.5rem;
+    }
+}
+
+.lesson-card {
+    transition: transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.lesson-card:hover {
+    transform: translateY(-5px);
+}
+
+.card-img-wrapper {
+    position: relative;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    overflow: hidden;
+}
+
+.card-img-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.card-img-wrapper:hover .play-icon {
+    opacity: 1;
+}
+
+.status-select {
+    transition: all 0.3s;
+}
+
+.theory {
+    border-left: 4px solid var(--bs-secondary);
+}
+
+.important {
+    border-left: 4px solid var(--bs-warning);
+}
+
+/* تنسيق قسم الإحصائيات */
+.course-stats .card {
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.course-stats .card:hover {
+    transform: translateY(-5px);
+}
+
+.course-stats .card-body {
+    padding: 1.5rem;
+}
+
+.course-stats .card-title {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+    white-space: nowrap;
+}
+
+.course-stats .d-flex {
+    gap: 1.5rem;
+}
+
+.course-stats h3 {
+    color: #333;
+    font-weight: bold;
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.course-stats .fas {
+    opacity: 0.8;
+    font-size: 2rem;
+}
+
+.course-stats small {
+    display: block;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    color: #666;
+}
+
+/* تحسين مظهر الأيقونات */
+.course-stats .icon-wrapper {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.05);
+}
+
+.course-stats .text-primary + .icon-wrapper { background: rgba(13, 110, 253, 0.1); }
+.course-stats .text-success + .icon-wrapper { background: rgba(25, 135, 84, 0.1); }
+.course-stats .text-warning + .icon-wrapper { background: rgba(255, 193, 7, 0.1); }
+
+/* تحسينات للموبايل */
+@media (max-width: 768px) {
+    .course-stats .col-md-2 {
+        width: 50%;
+    }
+}
+
+@media (max-width: 576px) {
+    .course-stats .col-md-2 {
+        width: 100%;
+    }
+}
+
+/* تنسيق دائرة نسبة الإكمال */
+.completion-circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.circle-progress {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.percentage {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #28a745;
+} 

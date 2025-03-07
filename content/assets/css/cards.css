@@ -1,0 +1,293 @@
+/**
+ * تنسيقات خاصة بكروت الدروس
+ * يستخدم خط Cairo و Changa
+ */
+
+/* تنسيقات أساسية للكارد */
+.lesson-card {
+    --card-radius: 20px;
+    --header-gradient: linear-gradient(135deg, #2196f3, #1565c0);
+    --footer-gradient: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    --hover-transform: translateY(-8px);
+    --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+    
+    position: relative;
+    border: none;
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    transition: all 0.4s var(--transition-timing);
+    background: #ffffff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    font-family: 'Changa', sans-serif;
+    height: 100%; /* تأكيد ارتفاع متساوي */
+    display: flex;
+    flex-direction: column;
+}
+
+.lesson-card:hover {
+    transform: var(--hover-transform);
+    box-shadow: 0 15px 35px rgba(33,150,243,0.15);
+}
+
+/* تنسيقات الصورة المصغرة */
+.lesson-card .card-img-wrapper {
+    position: relative;
+    padding-top: 56.25%; /* نسبة 16:9 */
+    overflow: hidden;
+    background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+}
+
+.lesson-card .card-img-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s var(--transition-timing);
+}
+
+.lesson-card:hover .card-img-wrapper img {
+    transform: scale(1.05);
+}
+
+/* تراكب الصورة */
+.lesson-card .card-img-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.lesson-card:hover .card-img-overlay {
+    opacity: 1;
+}
+
+/* تحسين تنسيقات الهيدر */
+.lesson-card .card-header {
+    background: var(--header-gradient);
+    padding: 1.5rem;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.lesson-card .card-header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        rgba(255,255,255,0.1) 0%, 
+        rgba(255,255,255,0) 60%);
+    z-index: -1;
+}
+
+.lesson-card .card-header .card-title {
+    color: white;
+    margin: 0;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    line-height: 1.5;
+    min-height: 3rem; /* ارتفاع ثابت للعنوان */
+}
+
+/* محتوى الكارد */
+.lesson-card .card-body {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    flex: 1; /* يأخذ المساحة المتبقية */
+}
+
+.lesson-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* تحسين تنسيقات البادجات */
+.lesson-card .badges-wrapper {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 2;
+}
+
+.lesson-card .badge {
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    white-space: nowrap;
+}
+
+.lesson-card .badge.bg-info {
+    background: linear-gradient(135deg, #03a9f4, #0288d1) !important;
+}
+
+/* تحسين تنسيقات الأزرار */
+.lesson-card .btn-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.lesson-card .btn {
+    position: relative;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    font-family: 'Cairo', sans-serif;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 45px; /* ارتفاع ثابت للأزرار */
+}
+
+/* تأثيرات الأزرار */
+.lesson-card .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.lesson-card .btn i {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.lesson-card .btn:hover i {
+    transform: scale(1.1);
+}
+
+/* تنسيقات خاصة للأزرار */
+.lesson-card .btn-warning,
+.lesson-card .btn-outline-warning {
+    --button-color: #ffa000;
+    --text-color: #fff;
+    --hover-color: #ff6f00;
+}
+
+.lesson-card .btn-info,
+.lesson-card .btn-outline-info {
+    --button-color: #03a9f4;
+    --text-color: #fff;
+    --hover-color: #0288d1;
+}
+
+.lesson-card .btn-primary {
+    --button-color: #1976d2;
+    --text-color: #fff;
+    --hover-color: #1565c0;
+}
+
+/* تطبيق الألوان المخصصة */
+.lesson-card .btn-warning,
+.lesson-card .btn-info,
+.lesson-card .btn-primary {
+    background: var(--button-color);
+    color: var(--text-color);
+    border-color: var(--button-color);
+}
+
+.lesson-card .btn-outline-warning,
+.lesson-card .btn-outline-info {
+    background: transparent;
+    color: var(--button-color);
+    border-color: var(--button-color);
+}
+
+.lesson-card .btn:hover {
+    background: var(--hover-color);
+    border-color: var(--hover-color);
+    color: var(--text-color);
+}
+
+/* تنسيقات خاصة للحالات */
+.lesson-card.theory {
+    --header-gradient: linear-gradient(135deg, #607d8b, #455a64);
+    background: linear-gradient(145deg, #f1f3f4, #e8eaed);
+}
+
+.lesson-card.important {
+    --header-gradient: linear-gradient(135deg, #ffa000, #ff6f00);
+    background: linear-gradient(145deg, #fff8e1, #ffecb3);
+}
+
+.lesson-card.theory .card-img-wrapper::before {
+    content: 'درس نظري';
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(96,125,139,0.9);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    z-index: 2;
+    backdrop-filter: blur(4px);
+}
+
+.lesson-card.important .card-img-wrapper::before {
+    content: '⭐ مهم';
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(255,160,0,0.9);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    z-index: 2;
+    backdrop-filter: blur(4px);
+}
+
+/* تنسيقات السيلكت */
+.lesson-card .status-select {
+    border-radius: 10px;
+    border: 2px solid rgba(0,0,0,0.1);
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    font-family: 'Changa', sans-serif;
+    transition: all 0.3s ease;
+    min-width: 160px;
+    background: white;
+    height: 45px; /* ارتفاع ثابت */
+}
+
+.lesson-card .status-select:focus {
+    border-color: #2196f3;
+    box-shadow: 0 0 0 3px rgba(33,150,243,0.2);
+}
+
+/* تحسينات للموبايل */
+@media (max-width: 768px) {
+    .lesson-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .lesson-card .btn-group {
+        grid-template-columns: 1fr;
+    }
+    
+    .lesson-card .btn {
+        width: 100%;
+    }
+    
+    .lesson-card .card-header .card-title {
+        font-size: 1.1rem;
+        min-height: auto;
+    }
+} 

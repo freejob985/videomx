@@ -1,0 +1,27 @@
+:root {
+    /* الألوان الأساسية */
+    --bs-primary-lighter: rgba(13, 110, 253, 0.05);
+    --bs-primary-light: rgba(13, 110, 253, 0.1);
+    --bs-primary-dark: #0d47a1;
+    --bs-primary-border: rgba(13, 110, 253, 0.2);
+
+    --bs-success-lighter: rgba(25, 135, 84, 0.05);
+    --bs-success-light: rgba(25, 135, 84, 0.1);
+    --bs-success-dark: #1b5e20;
+    --bs-success-border: rgba(25, 135, 84, 0.2);
+
+    --bs-info-lighter: rgba(13, 202, 240, 0.05);
+    --bs-info-light: rgba(13, 202, 240, 0.1);
+    --bs-info-dark: #0277bd;
+    --bs-info-border: rgba(13, 202, 240, 0.2);
+
+    --bs-warning-lighter: rgba(255, 193, 7, 0.05);
+    --bs-warning-light: rgba(255, 193, 7, 0.1);
+    --bs-warning-dark: #f57f17;
+    --bs-warning-border: rgba(255, 193, 7, 0.2);
+
+    --bs-danger-lighter: rgba(220, 53, 69, 0.05);
+    --bs-danger-light: rgba(220, 53, 69, 0.1);
+    --bs-danger-dark: #c62828;
+    --bs-danger-border: rgba(220, 53, 69, 0.2);
+} 
