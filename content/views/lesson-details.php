@@ -334,15 +334,24 @@ include'../lesson-details/css.php';
             ?>
                 <div class="related-lessons-section mt-5">
                     <div class="card border-primary">
-                        <div class="card-header bg-primary text-white d-flex align-items-center">
-                            <i class="fas fa-link me-2 fa-fw"></i>
-                            <h3 class="mb-0 flex-grow-1">دروس مرتبطة من نفس القسم</h3>
-                            <span class="badge bg-light text-primary">
-                                <?php echo count($relatedLessons); ?> دروس
-                            </span>
+                        <div class="card-header bg-primary text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-link me-2 fa-fw"></i>
+                                    <h3 class="mb-0">دروس مرتبطة من نفس القسم</h3>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="badge bg-light text-primary">
+                                        <?php echo count($relatedLessons); ?> دروس
+                                    </span>
+                                    <button type="button" class="toggle-related-lessons">
+                                        <i class="fas fa-chevron-up"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         
-                        <div class="card-body">
+                        <div class="related-lessons-content">
                             <!-- عرض القسم الحالي -->
                             <div class="current-section mb-4">
                                 <span class="badge bg-info">
@@ -549,6 +558,17 @@ include'../lesson-details/css.php';
                                             </div>
                                         <?php elseif ($note['type'] === 'code'): ?>
                                             <div class="code-wrapper">
+                                                <div class="code-controls">
+                                                    <button type="button" class="font-size-increase" title="تكبير الخط">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                    <button type="button" class="font-size-decrease" title="تصغير الخط">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <button type="button" class="fullscreen-toggle" title="عرض بملء الشاشة">
+                                                        <i class="fas fa-expand"></i>
+                                                    </button>
+                                                </div>
                                                 <pre><code class="language-<?php echo htmlspecialchars($note['code_language']); ?>"><?php echo htmlspecialchars($note['content']); ?></code></pre>
                                             </div>
                                         <?php else: ?>
