@@ -3,6 +3,21 @@
     direction: rtl;
 }
 
+/* تنسيق العنوان الرئيسي */
+.lesson-title-header {
+    background: #f8f9fa;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+.lesson-title-header h2 {
+    margin: 0;
+    color: #0d6efd;
+    font-size: 1.5rem;
+}
+
 /* تنسيق بطاقة الملاحظة */
 .note-card {
     margin-bottom: 1.5rem;
@@ -37,20 +52,91 @@
     right: 0.5rem;
     display: flex;
     gap: 0.5rem;
+    z-index: 10;
 }
 
 .code-controls button {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.2);
     border: none;
     color: #fff;
     padding: 0.25rem 0.5rem;
     border-radius: 3px;
     cursor: pointer;
     font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 .code-controls button:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.code-controls button i {
+    font-size: 14px;
+}
+
+/* تنسيق النافذة المنبثقة للكود */
+.code-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1050;
+}
+
+.code-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.code-modal-content {
+    background: #1e1e1e;
+    width: 90%;
+    height: 90%;
+    border-radius: 8px;
+    position: relative;
+}
+
+.code-modal-header {
+    padding: 1rem;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.code-modal-title {
+    color: #fff;
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.code-modal-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.code-modal-body {
+    padding: 1rem;
+    height: calc(100% - 60px);
+    overflow: auto;
+}
+
+/* تنسيق أزرار التحكم في النافذة المنبثقة */
+.code-modal-controls {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
 }
 
 /* تنسيق محرر الكود */
@@ -58,6 +144,30 @@
     direction: ltr;
     font-family: 'Fira Code', monospace;
     resize: vertical;
+}
+
+/* تنسيق أزرار التحكم في الملاحظة */
+.note-actions button {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+}
+
+.note-actions button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* تحسينات إضافية */
+.font-size-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.font-size-controls button {
+    padding: 0.25rem 0.5rem;
 }
 
 /* تنسيق روابط الملاحظات */
@@ -75,24 +185,6 @@
 .text-note .note-content {
     direction: rtl;
     text-align: right;
-}
-
-/* تحسين عرض أزرار التحكم في الملاحظة */
-.note-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.note-actions button {
-    padding: 0.25rem 0.5rem;
-    background: none;
-    border: none;
-    color: #6c757d;
-    transition: color 0.2s;
-}
-
-.note-actions button:hover {
-    color: #0d6efd;
 }
 
 /* تنسيق رأس الملاحظة */

@@ -88,6 +88,13 @@ include'../lesson-details/css.php';
     </div>
 </div>
 
+<!-- بعد قسم التنقل العلوي -->
+<div class="lesson-title-header">
+    <div class="container">
+        <h2><?php echo htmlspecialchars($lesson['title']); ?></h2>
+    </div>
+</div>
+
 <div class="lesson-content">
     <div class="container py-4">
         <!-- شريط التنقل -->
@@ -593,3 +600,6 @@ include'../lesson-details/css.php';
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
 
 <?php include '../lesson-details/js.php'; ?>
+
+<!-- في نهاية الملف، قبل إغلاق body -->
+<script src="/content/assets/js/code-controls.js"></script>
