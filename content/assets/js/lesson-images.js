@@ -1,187 +1,164 @@
+// Disable Dropzone auto discover
+Dropzone.autoDiscover = false;
+
 document.addEventListener('DOMContentLoaded', function() {
-    // منع الاكتشاف التلقائي لـ Dropzone
-    if (typeof Dropzone !== 'undefined') {
-        Dropzone.autoDiscover = false;
+    // إدارة حالة الأقسام
+    initializeSectionState('images');
+    
+    // Initialize Dropzone
+    const myDropzone = new Dropzone("#imageDropzone", {
+        url: "/content/api/image-notes.php",
+        paramName: "file",
+        maxFilesize: 5, // MB
+        acceptedFiles: "image/*",
+        addRemoveLinks: true,
+        uploadMultiple: false,
+        createImageThumbnails: true,
+        thumbnailWidth: 120,
+        thumbnailHeight: 120,
         
-        const dropzoneElement = document.getElementById('imageDropzone');
-        if (dropzoneElement && !dropzoneElement.dropzone) {
-            const dropzoneOptions = {
-                url: "/content/api/image-notes.php",
-                paramName: "image",
-                maxFilesize: 5,
-                acceptedFiles: "image/*",
-                addRemoveLinks: true,
-                dictDefaultMessage: "اسحب وأفلت الصور هنا أو انقر للاختيار",
-                dictRemoveFile: "حذف",
-                dictCancelUpload: "إلغاء",
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                init: function() {
-                    this.on("sending", function(file, xhr, formData) {
-                        formData.append("action", "upload");
-                        formData.append("lesson_id", lessonId);
-                        formData.append("title", file.name);
-                    });
+        // تخصيص الرسائل بالعربية
+        dictDefaultMessage: `
+            <i class="fas fa-cloud-upload-alt fa-3x"></i>
+            <h4>اسحب وأفلت الصور هنا</h4>
+            <p>أو انقر للاختيار من جهازك</p>
+            <p class="small text-muted">يمكنك أيضاً لصق الصور مباشرة (Ctrl+V)</p>
+        `,
+        dictFallbackMessage: "متصفحك لا يدعم السحب والإفلات للملفات.",
+        dictFileTooBig: "حجم الملف كبير جداً ({{filesize}}MB). الحد الأقصى هو {{maxFilesize}}MB.",
+        dictInvalidFileType: "لا يمكنك رفع هذا النوع من الملفات.",
+        dictResponseError: "حدث خطأ في الخادم برمز {{statusCode}}.",
+        dictCancelUpload: "إلغاء الرفع",
+        dictUploadCanceled: "تم إلغاء الرفع.",
+        dictCancelUploadConfirmation: "هل أنت متأكد من إلغاء الرفع؟",
+        dictRemoveFile: "حذف الملف",
+        dictMaxFilesExceeded: "لا يمكنك رفع المزيد من الملفات.",
 
-                    this.on("success", function(file, response) {
-                        try {
-                            const data = JSON.parse(response);
-                            if (data.success) {
-                                refreshImagesList();
-                                this.removeFile(file);
-                                showToast('تم رفع الصورة بنجاح');
-                            } else {
-                                showToast(data.error || 'حدث خطأ أثناء رفع الصورة', 'error');
-                            }
-                        } catch (e) {
-                            console.error('Error parsing response:', e);
-                            showToast('حدث خطأ غير متوقع', 'error');
-                        }
-                    });
+        headers: {
+            'X-Lesson-ID': lessonId
+        },
+        
+        init: function() {
+            this.on("sending", function(file, xhr, formData) {
+                formData.append("action", "upload");
+                formData.append("lesson_id", lessonId);
+            });
 
-                    this.on("error", function(file, message) {
-                        showToast(message, 'error');
-                        this.removeFile(file);
-                    });
+            this.on("success", function(file, response) {
+                try {
+                    const data = typeof response === 'string' ? JSON.parse(response) : response;
+                    if (data.success) {
+                        showToast('تم رفع الصورة بنجاح');
+                        refreshImagesList();
+                    } else {
+                        showToast(data.error || 'حدث خطأ أثناء رفع الصورة', 'error');
+                    }
+                } catch (e) {
+                    console.error('Error parsing response:', e);
+                    showToast('حدث خطأ غير متوقع', 'error');
                 }
-            };
+                this.removeFile(file);
+            });
 
-            try {
-                new Dropzone(dropzoneElement, dropzoneOptions);
-            } catch (e) {
-                console.error('Error initializing Dropzone:', e);
-            }
+            this.on("error", function(file, errorMessage) {
+                showToast(typeof errorMessage === 'string' ? errorMessage : 'حدث خطأ أثناء الرفع', 'error');
+                this.removeFile(file);
+            });
         }
-    }
+    });
 
     // تحسين معالجة لصق الصور
     let isProcessingPaste = false;
     let lastPasteTime = 0;
     const PASTE_COOLDOWN = 1000;
 
-    document.addEventListener('paste', function(event) {
-        const currentTime = Date.now();
-        
-        if (isProcessingPaste || (currentTime - lastPasteTime) < PASTE_COOLDOWN) {
-            event.preventDefault();
-            return;
-        }
+    document.addEventListener('paste', async function(event) {
+        try {
+            const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+            for (let item of items) {
+                if (item.type.indexOf('image') === 0) {
+                    event.preventDefault();
+                    const file = item.getAsFile();
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('action', 'upload');
+                    formData.append('lesson_id', lessonId);
 
-        const items = (event.clipboardData || event.originalEvent.clipboardData).items;
-        let imageFile = null;
-        
-        for (let item of items) {
-            if (item.type.indexOf('image') === 0) {
-                imageFile = item.getAsFile();
-                break;
+                    const response = await fetch('/content/api/image-notes.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        showToast('تم رفع الصورة بنجاح');
+                        refreshImagesList();
+                    } else {
+                        showToast(data.error || 'حدث خطأ أثناء رفع الصورة', 'error');
+                    }
+                    break;
+                }
             }
-        }
-
-        if (imageFile) {
-            // عرض معاينة الصورة قبل الرفع
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                Swal.fire({
-                    title: 'معاينة الصورة',
-                    html: `
-                        <div class="preview-container">
-                            <img src="${e.target.result}" style="max-height: 300px; max-width: 100%;">
-                            <input type="text" id="imageTitle" class="swal2-input" placeholder="عنوان الصورة" value="صورة ملصقة">
-                            <textarea id="imageDescription" class="swal2-textarea" placeholder="وصف الصورة (اختياري)"></textarea>
-                        </div>
-                    `,
-                    showCancelButton: true,
-                    confirmButtonText: 'رفع',
-                    cancelButtonText: 'إلغاء',
-                    preConfirm: () => {
-                        return {
-                            title: document.getElementById('imageTitle').value || 'صورة ملصقة',
-                            description: document.getElementById('imageDescription').value
-                        };
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        isProcessingPaste = true;
-                        lastPasteTime = currentTime;
-
-                        const formData = new FormData();
-                        formData.append('action', 'upload');
-                        formData.append('lesson_id', lessonId);
-                        formData.append('image', imageFile);
-                        formData.append('title', result.value.title);
-                        formData.append('description', result.value.description);
-
-                        fetch('/content/api/image-notes.php', {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                refreshImagesList();
-                                showToast('تم رفع الصورة بنجاح');
-                            } else {
-                                showToast(data.error || 'حدث خطأ أثناء رفع الصورة', 'error');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            showToast('حدث خطأ غير متوقع', 'error');
-                        })
-                        .finally(() => {
-                            isProcessingPaste = false;
-                        });
-                    }
-                });
-            };
-            reader.readAsDataURL(imageFile);
+        } catch (error) {
+            console.error('Error handling paste:', error);
+            showToast('حدث خطأ أثناء معالجة الصورة الملصقة', 'error');
         }
     });
 
-    // زر إخفاء/إظهار الصور
-    const toggleImagesBtn = document.querySelector('.toggle-images');
-    const imagesContent = document.querySelector('.images-content');
-    
-    if (toggleImagesBtn && imagesContent) {
-        // استخدام مفتاح عام لحالة قسم الصور لجميع الدروس
-        const storageKey = 'images_section_collapsed';
-        const isCollapsed = localStorage.getItem(storageKey) === 'true';
-        
-        // تطبيق الحالة المحفوظة
-        if (isCollapsed) {
-            imagesContent.classList.add('collapsed');
-            toggleImagesBtn.querySelector('i').classList.replace('fa-chevron-up', 'fa-chevron-down');
-        }
-
-        toggleImagesBtn.addEventListener('click', function() {
-            imagesContent.classList.toggle('collapsed');
-            const icon = this.querySelector('i');
-            const isNowCollapsed = imagesContent.classList.contains('collapsed');
-            
-            // تحديث الأيقونة
-            icon.classList.toggle('fa-chevron-up', !isNowCollapsed);
-            icon.classList.toggle('fa-chevron-down', isNowCollapsed);
-
-            // حفظ الحالة في localStorage لجميع الدروس
-            localStorage.setItem(storageKey, isNowCollapsed);
-        });
-    }
-
     // تحديث قائمة الصور
     function refreshImagesList() {
-        fetch(`/content/api/image-notes.php?action=list&lesson_id=${lessonId}`)
+        fetch(`/content/api/image-notes.php?lesson_id=${lessonId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success && Array.isArray(data.images)) {
                     const imagesContainer = document.getElementById('lessonImages');
                     if (imagesContainer) {
-                        imagesContainer.innerHTML = data.images.map(image => createImageCard(image)).join('');
+                        imagesContainer.innerHTML = data.images.map(image => `
+                            <div class="col-md-6 col-lg-4" data-image-id="${image.id}">
+                                <div class="card h-100">
+                                    <div class="position-relative">
+                                        <img src="${image.image_url}" 
+                                             class="card-img-top lesson-image" 
+                                             alt="${image.title}">
+                                        <div class="image-actions position-absolute top-0 end-0 p-2">
+                                            <button class="btn btn-light btn-sm me-1 copy-image-url" 
+                                                    data-url="${image.image_url}"
+                                                    title="نسخ رابط الصورة">
+                                                <i class="fas fa-link"></i>
+                                            </button>
+                                            <button class="btn btn-light btn-sm me-1 edit-image" 
+                                                    data-id="${image.id}"
+                                                    data-title="${image.title}"
+                                                    data-description="${image.description || ''}"
+                                                    title="تعديل">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-light btn-sm delete-image" 
+                                                    data-id="${image.id}"
+                                                    title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title">${image.title}</h5>
+                                        ${image.description ? `<p class="card-text">${image.description}</p>` : ''}
+                                    </div>
+                                    <div class="card-footer text-muted">
+                                        <small>
+                                            <i class="fas fa-clock me-1"></i>
+                                            ${formatDate(image.created_at)}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('');
+                        
                         initializeImageActions();
                     }
                 } else {
                     console.error('Invalid response format:', data);
-                    showToast(data.error || 'حدث خطأ أثناء تحديث الصور', 'error');
+                    showToast('حدث خطأ أثناء تحديث الصور', 'error');
                 }
             })
             .catch(error => {
@@ -368,12 +345,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // تنسيق التاريخ
     function formatDate(dateString) {
-        return new Date(dateString).toLocaleDateString('ar-SA', {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ar-SA', {
             year: 'numeric',
             month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+            day: 'numeric'
         });
     }
 
@@ -449,28 +425,32 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // إضافة دالة لإضافة صورة خارجية
-    function showExternalImageModal() {
+    // إضافة صورة خارجية
+    document.getElementById('addExternalImageBtn')?.addEventListener('click', function() {
         Swal.fire({
             title: 'إضافة صورة خارجية',
             html: `
-                <input type="url" id="externalUrl" class="swal2-input" placeholder="رابط الصورة">
-                <input type="text" id="imageTitle" class="swal2-input" placeholder="عنوان الصورة">
-                <textarea id="imageDescription" class="swal2-textarea" placeholder="وصف الصورة"></textarea>
+                <input type="url" id="external-image-url" class="swal2-input" placeholder="رابط الصورة">
+                <input type="text" id="external-image-title" class="swal2-input" placeholder="عنوان الصورة">
+                <textarea id="external-image-description" class="swal2-textarea" placeholder="وصف الصورة (اختياري)"></textarea>
             `,
             showCancelButton: true,
             confirmButtonText: 'إضافة',
             cancelButtonText: 'إلغاء',
             preConfirm: () => {
-                const url = document.getElementById('externalUrl').value;
-                const title = document.getElementById('imageTitle').value;
-                const description = document.getElementById('imageDescription').value;
-                
+                const url = document.getElementById('external-image-url').value;
+                const title = document.getElementById('external-image-title').value;
+                const description = document.getElementById('external-image-description').value;
+
                 if (!url) {
                     Swal.showValidationMessage('الرجاء إدخال رابط الصورة');
                     return false;
                 }
-                
+                if (!title) {
+                    Swal.showValidationMessage('الرجاء إدخال عنوان الصورة');
+                    return false;
+                }
+
                 return { url, title, description };
             }
         }).then((result) => {
@@ -478,40 +458,76 @@ document.addEventListener('DOMContentLoaded', function() {
                 addExternalImage(result.value);
             }
         });
-    }
+    });
 
-    // دالة إضافة الصورة الخارجية
-    function addExternalImage(data) {
-        const formData = new FormData();
-        formData.append('action', 'upload');
-        formData.append('lesson_id', lessonId);
-        formData.append('external_url', data.url);
-        formData.append('title', data.title);
-        formData.append('description', data.description);
+    // دالة إضافة صورة خارجية
+    async function addExternalImage(data) {
+        try {
+            const formData = new FormData();
+            formData.append('action', 'add_external');
+            formData.append('lesson_id', lessonId);
+            formData.append('url', data.url);
+            formData.append('title', data.title);
+            formData.append('description', data.description);
 
-        fetch('/content/api/image-notes.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
+            const response = await fetch('/content/api/image-notes.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.success) {
                 showToast('تم إضافة الصورة بنجاح');
                 refreshImagesList();
             } else {
-                showToast(data.error || 'حدث خطأ أثناء إضافة الصورة', 'error');
+                showToast(result.error || 'حدث خطأ أثناء إضافة الصورة', 'error');
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+        } catch (error) {
+            console.error('Error adding external image:', error);
             showToast('حدث خطأ غير متوقع', 'error');
-        });
+        }
     }
-
-    // إضافة معالج النقر على زر إضافة صورة خارجية
-    document.getElementById('addExternalImageBtn')?.addEventListener('click', showExternalImageModal);
 
     // تهيئة الأحداث عند تحميل الصفحة
     initializeImageActions();
     initializeGallery();
-}); 
+});
+
+// دالة تهيئة حالة القسم
+function initializeSectionState(sectionName) {
+    const toggleBtn = document.querySelector(`[data-section="${sectionName}"]`);
+    const content = document.querySelector(`[data-section-content="${sectionName}"]`);
+    
+    if (toggleBtn && content) {
+        // استرجاع الحالة من localStorage
+        const isCollapsed = localStorage.getItem(`section_${sectionName}_collapsed`) === 'true';
+        
+        // تطبيق الحالة المحفوظة
+        if (isCollapsed) {
+            content.classList.add('collapsed');
+            toggleBtn.querySelector('i').classList.replace('fa-chevron-up', 'fa-chevron-down');
+            toggleBtn.setAttribute('title', 'إظهار الصور');
+        }
+
+        // إضافة معالج النقر
+        toggleBtn.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            content.classList.toggle('collapsed');
+            
+            // تحديث الأيقونة
+            if (content.classList.contains('collapsed')) {
+                icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+                this.setAttribute('title', 'إظهار الصور');
+            } else {
+                icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+                this.setAttribute('title', 'إخفاء الصور');
+            }
+            
+            // حفظ الحالة في localStorage
+            localStorage.setItem(
+                `section_${sectionName}_collapsed`, 
+                content.classList.contains('collapsed')
+            );
+        });
+    }
+} 

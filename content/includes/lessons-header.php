@@ -58,6 +58,18 @@
 </html>
 
 <style>
+/* تنسيقات أساسية */
+:root {
+    --primary-color: #0d6efd;
+    --primary-hover: #0b5ed7;
+}
+
+/* تنسيق الشريط العلوي */
+.navbar {
+    background-color: var(--primary-color) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 /* تنسيق أزرار تبديل طريقة العرض */
 .btn-group .btn {
     border-color: rgba(255,255,255,0.5);
@@ -78,4 +90,32 @@
     background-color: rgba(255,255,255,0.1);
     border-color: #fff;
 }
+
+/* تنسيق الأزرار */
+.btn-outline-light {
+    color: #fff;
+    border-color: rgba(255,255,255,0.5);
+}
+
+.btn-outline-light:hover {
+    background-color: rgba(255,255,255,0.1);
+    border-color: #fff;
+}
+
+/* تنسيق الأيقونات */
+.fas {
+    margin-left: 0.5rem;
+}
+
+.lessons-header {
+    transition: max-height 0.3s ease-out;
+    overflow: hidden;
+    max-height: 2000px;
+    background: #3b677e;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
 </style> 

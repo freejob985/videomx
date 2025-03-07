@@ -1,39 +1,18 @@
 <?php
-// دالة للحصول على صور الدرس
-function getLessonImages($lessonId) {
-    try {
-        $db = connectDB();
-        if (!$db) {
-            throw new Exception("فشل الاتصال بقاعدة البيانات");
-        }
-        
-        $sql = "SELECT * FROM lesson_image_notes 
-                WHERE lesson_id = ? 
-                ORDER BY created_at DESC";
-        $stmt = $db->prepare($sql);
-        $stmt->execute([$lessonId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (Exception $e) {
-        error_log("Error in getLessonImages: " . $e->getMessage());
-        return [];
-    }
-}
+// حذف تعريف الدالة getLessonImages من هنا لأنها معرفة في functions.php
+require_once __DIR__ . '/../includes/functions.php';
 
 // دالة لإضافة صورة جديدة
 function addLessonImage($lessonId, $title, $description, $imageUrl) {
     try {
         $db = connectDB();
-        if (!$db) {
-            throw new Exception("فشل الاتصال بقاعدة البيانات");
-        }
-        
-        $sql = "INSERT INTO lesson_image_notes 
-                (lesson_id, title, description, image_url, created_at) 
-                VALUES (?, ?, ?, ?, NOW())";
-        $stmt = $db->prepare($sql);
+        $stmt = $db->prepare("
+            INSERT INTO lesson_image_notes (lesson_id, title, description, image_url) 
+            VALUES (?, ?, ?, ?)
+        ");
         return $stmt->execute([$lessonId, $title, $description, $imageUrl]);
     } catch (Exception $e) {
-        error_log("Error in addLessonImage: " . $e->getMessage());
+        error_log($e->getMessage());
         return false;
     }
 }
@@ -42,17 +21,14 @@ function addLessonImage($lessonId, $title, $description, $imageUrl) {
 function updateLessonImage($imageId, $title, $description) {
     try {
         $db = connectDB();
-        if (!$db) {
-            throw new Exception("فشل الاتصال بقاعدة البيانات");
-        }
-        
-        $sql = "UPDATE lesson_image_notes 
-                SET title = ?, description = ?, updated_at = NOW() 
-                WHERE id = ?";
-        $stmt = $db->prepare($sql);
+        $stmt = $db->prepare("
+            UPDATE lesson_image_notes 
+            SET title = ?, description = ? 
+            WHERE id = ?
+        ");
         return $stmt->execute([$title, $description, $imageId]);
     } catch (Exception $e) {
-        error_log("Error in updateLessonImage: " . $e->getMessage());
+        error_log($e->getMessage());
         return false;
     }
 }
@@ -61,15 +37,28 @@ function updateLessonImage($imageId, $title, $description) {
 function deleteLessonImage($imageId) {
     try {
         $db = connectDB();
-        if (!$db) {
-            throw new Exception("فشل الاتصال بقاعدة البيانات");
-        }
         
-        $sql = "DELETE FROM lesson_image_notes WHERE id = ?";
-        $stmt = $db->prepare($sql);
-        return $stmt->execute([$imageId]);
+        // جلب معلومات الصورة قبل حذفها
+        $stmt = $db->prepare("SELECT image_url FROM lesson_image_notes WHERE id = ?");
+        $stmt->execute([$imageId]);
+        $image = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($image) {
+            // حذف الملف من السيرفر إذا كان محلياً
+            if (strpos($image['image_url'], '/content/uploads/') !== false) {
+                $filePath = __DIR__ . '/../../' . ltrim($image['image_url'], '/');
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+            }
+            
+            // حذف السجل من قاعدة البيانات
+            $stmt = $db->prepare("DELETE FROM lesson_image_notes WHERE id = ?");
+            return $stmt->execute([$imageId]);
+        }
+        return false;
     } catch (Exception $e) {
-        error_log("Error in deleteLessonImage: " . $e->getMessage());
+        error_log($e->getMessage());
         return false;
     }
 }

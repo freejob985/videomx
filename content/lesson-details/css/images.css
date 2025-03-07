@@ -4,20 +4,78 @@
 
 .dropzone {
     border: 2px dashed #0087F7;
-    border-radius: 5px;
-    background: white;
+    border-radius: 8px;
+    background: #f8f9fa;
     min-height: 150px;
     padding: 20px;
-    text-align: center;
+    position: relative;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dropzone:hover {
+    background: #fff;
+    border-color: #0056b3;
 }
 
 .dropzone .dz-message {
+    text-align: center;
     margin: 2em 0;
+}
+
+.dropzone .dz-message i {
+    color: #0087F7;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.dropzone .dz-message h4 {
+    color: #495057;
+    margin-bottom: 10px;
+    font-size: 1.25rem;
+}
+
+.dropzone .dz-message p {
+    color: #6c757d;
+    margin-bottom: 5px;
 }
 
 .dropzone .dz-preview {
     margin: 1rem;
+    min-height: auto;
+}
+
+.dropzone .dz-preview .dz-image {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dropzone .dz-preview .dz-details {
+    padding: 1em;
+}
+
+.dropzone .dz-preview .dz-progress {
+    height: 6px;
+    border-radius: 3px;
+}
+
+.dropzone .dz-preview .dz-progress .dz-upload {
+    background: #0087F7;
+}
+
+.dropzone .dz-preview .dz-error-message {
+    top: 140px;
+}
+
+.dropzone .dz-preview .dz-remove {
+    color: #dc3545;
+    text-decoration: none;
+    margin-top: 5px;
+    font-size: 0.875rem;
+}
+
+.dropzone .dz-preview .dz-remove:hover {
+    text-decoration: underline;
 }
 
 .lesson-image {
@@ -32,36 +90,36 @@
     transform: scale(1.02);
 }
 
+.image-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-bottom: 20px;
+}
+
+.image-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
 .image-actions {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(255,255,255,0.9);
     border-radius: 4px;
-    opacity: 0;
-    transition: opacity 0.3s;
-    padding: 0.5rem;
+    padding: 5px;
+}
+
+.image-actions button {
+    padding: 4px 8px;
+    margin: 0 2px;
 }
 
 .card:hover .image-actions {
     opacity: 1;
 }
 
-.image-actions button {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-    color: white;
-    background: transparent;
-    border: 1px solid white;
-    margin-left: 0.25rem;
-}
-
-.image-actions button:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
 .images-content.collapsed {
     display: none;
 }
 
-/* تحسينات للتوافق مع RTL */
+/* تحسين تصميم منطقة Dropzone */
 .dropzone .dz-preview .dz-progress {
     right: 50%;
     left: auto;
@@ -75,34 +133,46 @@
     text-align: center;
 }
 
+.gallery-modal .swal2-content {
+    padding: 0;
+}
+
 .gallery-nav {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.5);
-    color: white;
+    background: rgba(255,255,255,0.9);
     border: none;
-    padding: 1rem;
-    cursor: pointer;
     border-radius: 50%;
-    transition: background-color 0.3s;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .gallery-nav:hover {
-    background: rgba(0, 0, 0, 0.8);
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
 }
 
 .gallery-nav.prev {
-    right: 1rem;
+    right: 10px;
 }
 
 .gallery-nav.next {
-    left: 1rem;
+    left: 10px;
 }
 
 .image-counter {
-    color: #666;
-    font-size: 0.9rem;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    display: inline-block;
+    margin-top: 10px;
 }
 
 /* إضافة أنماط لمعاينة الصورة */
@@ -132,4 +202,64 @@
 .swal2-input, 
 .swal2-textarea {
     margin: 1rem auto;
+}
+
+/* تحسين تصميم قسم الصور */
+.images-section .card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.images-section .card-header {
+    background: linear-gradient(45deg, #0087F7, #00a1ff);
+    border: none;
+    padding: 15px 20px;
+}
+
+.images-section .card-header h3 {
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.images-section .toggle-images {
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 5px;
+}
+
+.images-section .toggle-images:hover {
+    opacity: 0.8;
+}
+
+/* تحديث تأثيرات الطي */
+[data-section-content] {
+    transition: max-height 0.3s ease-out;
+    overflow: hidden;
+    max-height: 2000px;
+}
+
+[data-section-content].collapsed {
+    max-height: 0;
+    padding: 0;
+    border: none;
+}
+
+/* تحسين تصميم الزر */
+[data-section] {
+    background: transparent;
+    border: none;
+    color: inherit;
+    padding: 5px;
+    transition: opacity 0.2s;
+}
+
+[data-section]:hover {
+    opacity: 0.8;
+}
+
+/* إضافة تأثيرات حركية */
+.dropzone .dz-preview.dz-complete .dz-progress {
+    opacity: 0;
+    transition: opacity 0.4s ease-in;
 } 

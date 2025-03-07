@@ -3,6 +3,7 @@
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: X-Requested-With');
+header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
@@ -19,25 +20,118 @@ if (!file_exists($uploadDir)) {
     mkdir($uploadDir, 0777, true);
 }
 
-// التعامل مع الطلبات
-$action = $_POST['action'] ?? $_GET['action'] ?? '';
+try {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $action = $_POST['action'] ?? '';
+        $lessonId = $_POST['lesson_id'] ?? null;
 
-switch ($action) {
-    case 'list':
-        handleImagesList();
-        break;
-    case 'upload':
-        handleImageUpload();
-        break;
-    case 'update':
-        handleImageUpdate();
-        break;
-    case 'delete':
-        handleImageDelete();
-        break;
-    default:
-        http_response_code(400);
-        echo json_encode(['error' => 'إجراء غير صالح']);
+        if (!$lessonId) {
+            throw new Exception('معرف الدرس مطلوب');
+        }
+
+        switch ($action) {
+            case 'upload':
+                handleFileUpload($lessonId);
+                break;
+            
+            case 'add_external':
+                handleExternalImage($lessonId);
+                break;
+
+            default:
+                throw new Exception('إجراء غير صالح');
+        }
+    } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        $lessonId = $_GET['lesson_id'] ?? null;
+        if (!$lessonId) {
+            throw new Exception('معرف الدرس مطلوب');
+        }
+        getImages($lessonId);
+    }
+} catch (Exception $e) {
+    sendError($e->getMessage());
+}
+
+function handleFileUpload($lessonId) {
+    global $uploadDir;
+
+    if (!isset($_FILES['file'])) {
+        throw new Exception('لم يتم تحديد ملف');
+    }
+
+    $file = $_FILES['file'];
+    validateImage($file);
+
+    $fileName = generateUniqueFileName($file['name']);
+    $uploadFile = $uploadDir . $fileName;
+
+    if (move_uploaded_file($file['tmp_name'], $uploadFile)) {
+        $imageUrl = '/content/uploads/lesson-images/' . $fileName;
+        $title = pathinfo($file['name'], PATHINFO_FILENAME);
+        
+        if (addLessonImage($lessonId, $title, '', $imageUrl)) {
+            sendSuccess(['message' => 'تم رفع الصورة بنجاح', 'image_url' => $imageUrl]);
+        } else {
+            unlink($uploadFile);
+            throw new Exception('فشل في حفظ معلومات الصورة');
+        }
+    } else {
+        throw new Exception('فشل في رفع الصورة');
+    }
+}
+
+function handleExternalImage($lessonId) {
+    $url = $_POST['url'] ?? '';
+    $title = $_POST['title'] ?? '';
+    $description = $_POST['description'] ?? '';
+
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        throw new Exception('رابط الصورة غير صالح');
+    }
+
+    if (empty($title)) {
+        throw new Exception('عنوان الصورة مطلوب');
+    }
+
+    if (addLessonImage($lessonId, $title, $description, $url)) {
+        sendSuccess(['message' => 'تم إضافة الصورة بنجاح']);
+    } else {
+        throw new Exception('فشل في إضافة الصورة');
+    }
+}
+
+function validateImage($file) {
+    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    
+    if (!in_array($file['type'], $allowedTypes)) {
+        throw new Exception('نوع الملف غير مدعوم');
+    }
+
+    if ($file['size'] > 5 * 1024 * 1024) {
+        throw new Exception('حجم الملف كبير جداً');
+    }
+}
+
+function generateUniqueFileName($originalName) {
+    return uniqid() . '_' . preg_replace('/[^a-zA-Z0-9.]/', '_', basename($originalName));
+}
+
+function getImages($lessonId) {
+    $images = getLessonImages($lessonId);
+    sendSuccess(['images' => $images]);
+}
+
+function sendSuccess($data) {
+    echo json_encode(array_merge(['success' => true], $data));
+    exit;
+}
+
+function sendError($message) {
+    echo json_encode([
+        'success' => false,
+        'error' => $message
+    ]);
+    exit;
 }
 
 // إضافة دالة جديدة لمعالجة طلب قائمة الصور
@@ -55,82 +149,6 @@ function handleImagesList() {
         'success' => true,
         'images' => $images
     ]);
-}
-
-// معالجة رفع الصور
-function handleImageUpload() {
-    global $uploadDir;
-    
-    $lessonId = $_POST['lesson_id'] ?? null;
-    $title = $_POST['title'] ?? '';
-    $description = $_POST['description'] ?? '';
-    $externalUrl = $_POST['external_url'] ?? '';
-    
-    // التعامل مع الروابط الخارجية
-    if ($externalUrl) {
-        if (filter_var($externalUrl, FILTER_VALIDATE_URL)) {
-            if (addLessonImage($lessonId, $title, $description, $externalUrl)) {
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'تم إضافة الصورة الخارجية بنجاح',
-                    'image_url' => $externalUrl
-                ]);
-            } else {
-                http_response_code(500);
-                echo json_encode(['error' => 'فشل في حفظ الصورة الخارجية']);
-            }
-            return;
-        } else {
-            http_response_code(400);
-            echo json_encode(['error' => 'رابط الصورة غير صالح']);
-            return;
-        }
-    }
-
-    // التعامل مع الملفات المرفوعة
-    if (!isset($_FILES['image'])) {
-        http_response_code(400);
-        echo json_encode(['error' => 'لم يتم تحديد صورة']);
-        return;
-    }
-
-    $file = $_FILES['image'];
-    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    
-    if (!in_array($file['type'], $allowedTypes)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'نوع الملف غير مدعوم']);
-        return;
-    }
-
-    // التحقق من حجم الملف (5MB كحد أقصى)
-    if ($file['size'] > 5 * 1024 * 1024) {
-        http_response_code(400);
-        echo json_encode(['error' => 'حجم الملف كبير جداً']);
-        return;
-    }
-
-    $fileName = uniqid() . '_' . preg_replace('/[^a-zA-Z0-9.]/', '_', basename($file['name']));
-    $uploadFile = $uploadDir . $fileName;
-
-    if (move_uploaded_file($file['tmp_name'], $uploadFile)) {
-        $imageUrl = '/content/uploads/lesson-images/' . $fileName;
-        
-        if (addLessonImage($lessonId, $title, $description, $imageUrl)) {
-            echo json_encode([
-                'success' => true,
-                'message' => 'تم رفع الصورة بنجاح',
-                'image_url' => $imageUrl
-            ]);
-        } else {
-            unlink($uploadFile); // حذف الملف إذا فشل الحفظ في قاعدة البيانات
-            http_response_code(500);
-            echo json_encode(['error' => 'فشل في حفظ معلومات الصورة']);
-        }
-    } else {
-        http_response_code(500);
-        echo json_encode(['error' => 'فشل في رفع الصورة']);
-    }
 }
 
 // معالجة تحديث الصور

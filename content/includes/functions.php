@@ -2084,3 +2084,27 @@ function validateSession() {
     }
     return isLoggedIn();
 }
+
+function getLessonImages($lessonId) {
+    try {
+        $db = connectDB();
+        $stmt = $db->prepare("
+            SELECT 
+                id,
+                lesson_id,
+                title,
+                description,
+                image_url,
+                created_at,
+                updated_at
+            FROM lesson_image_notes 
+            WHERE lesson_id = ? 
+            ORDER BY created_at DESC
+        ");
+        $stmt->execute([$lessonId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return [];
+    }
+}
