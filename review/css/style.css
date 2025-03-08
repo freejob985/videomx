@@ -1,0 +1,514 @@
+/* تعيين الخطوط */
+body {
+    font-family: 'Cairo', 'Tajawal', sans-serif;
+}
+
+/* تنسيق العناوين */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 700;
+}
+
+/* تنسيق الأزرار */
+.btn {
+    font-family: 'Cairo', sans-serif;
+    font-weight: 500;
+}
+
+/* تنسيق البطاقات */
+.card {
+    border-radius: 15px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.card-title {
+    color: #2c3e50;
+    font-weight: 600;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* تنسيق شريط التنقل */
+.navbar {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: 700;
+}
+
+/* تنسيق النموذج */
+.form-label {
+    font-weight: 500;
+}
+
+.form-control {
+    border-radius: 8px;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+/* تنسيق صورة الدرس */
+.lesson-thumbnail-container {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.lesson-thumbnail-container:hover .play-overlay {
+    opacity: 1;
+}
+
+.play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.play-overlay i {
+    font-size: 4rem;
+    color: white;
+}
+
+.lesson-thumbnail {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* تنسيق بطاقات الإحصائيات */
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* تنسيق الأيقونات */
+.fa, .fas, .far {
+    margin-left: 5px;
+}
+
+/* تنسيق شريط التقدم */
+.progress {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    background-color: #4CAF50;
+    transition: width 0.5s ease-in-out;
+}
+
+/* تنسيق الشارات */
+.badge {
+    padding: 8px 12px;
+    font-weight: 500;
+}
+
+/* تنسيق الإحصائيات */
+.border-end {
+    border-left: 1px solid #dee2e6;
+    height: 100%;
+    padding: 0 15px;
+}
+
+/* تنسيق القوائم المنسدلة */
+.custom-select {
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.custom-select:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    border-color: #86b7fe;
+}
+
+/* تنسيق مربعات الاختيار */
+.custom-checkbox .form-check-input {
+    width: 1.2em;
+    height: 1.2em;
+    margin-top: 0.15em;
+    border-radius: 0.25em;
+    transition: all 0.2s ease-in-out;
+}
+
+.custom-checkbox .form-check-input:checked {
+    background-color: #4CAF50;
+    border-color: #4CAF50;
+}
+
+.custom-checkbox .form-check-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+}
+
+/* تنسيق نافذة الفيديو */
+.modal-lg {
+    max-width: 80%;
+}
+
+.video-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+}
+
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* تدرج لوني للهيدر */
+.bg-gradient {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+}
+
+/* تنسيق تفاصيل الدرس */
+.lesson-details {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+.lesson-description-title {
+    color: #1e3c72;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.lesson-description {
+    color: #6c757d;
+    line-height: 1.8;
+}
+
+.lesson-meta {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.lesson-meta i {
+    color: #1e3c72;
+    width: 25px;
+}
+
+/* تنسيق النموذج */
+.lesson-form .card {
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.lesson-form .card-header {
+    border-bottom: none;
+    padding: 1rem 1.5rem;
+}
+
+.lesson-form .card-body {
+    padding: 2rem;
+}
+
+.lesson-form .form-label {
+    color: #1e3c72;
+    font-weight: 600;
+}
+
+.custom-select {
+    height: 45px;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.custom-select:focus {
+    border-color: #1e3c72;
+    box-shadow: 0 0 0 0.2rem rgba(30, 60, 114, 0.15);
+}
+
+.custom-checkbox .form-check-input:checked {
+    background-color: #1e3c72;
+    border-color: #1e3c72;
+}
+
+/* تنسيق شارات الدرس */
+.lesson-badges .badge {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+}
+
+.lesson-badges .badge i {
+    margin-left: 5px;
+}
+
+/* تنسيق قسم معلومات الدرس */
+.lesson-info-section {
+    background-color: #f8f9fa;
+}
+
+.lesson-badges .badge {
+    margin-left: 8px;
+    padding: 8px 12px;
+    font-weight: 500;
+}
+
+.lesson-badges .badge i {
+    margin-left: 5px;
+}
+
+.action-buttons .btn {
+    margin-right: 8px;
+}
+
+.btn-outline-primary {
+    border-color: #1e3c72;
+    color: #1e3c72;
+}
+
+.btn-outline-primary:hover {
+    background-color: #1e3c72;
+    color: white;
+}
+
+/* تنسيق قسم النموذج */
+.lesson-form-section {
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+.lesson-form-section.d-none {
+    display: none;
+}
+
+.lesson-description {
+    color: #6c757d;
+    line-height: 1.6;
+}
+
+/* تنسيق قسم التحكم في الدرس */
+.lesson-controls {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.lesson-tags {
+    padding-top: 1rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.lesson-tags .form-check {
+    margin-right: 1rem;
+}
+
+.action-buttons {
+    border-top: 1px solid #dee2e6;
+    padding-top: 1rem;
+}
+
+/* تحسين مظهر القوائم المنسدلة */
+.status-section,
+.section-select {
+    background-color: white;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* تنسيق شارات الحالة */
+.status-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+/* تنسيق معلومات الدرس في الكارد */
+.lesson-meta {
+    font-size: 0.9rem;
+}
+
+.lesson-meta i {
+    width: 16px;
+    text-align: center;
+    margin-left: 4px;
+}
+
+.lesson-badges .badge {
+    margin-left: 5px;
+    margin-bottom: 5px;
+}
+
+/* تنسيق زر الإغلاق */
+.modal-header {
+    flex-direction: row-reverse;
+}
+
+.modal-header .btn-close {
+    margin: 0;
+    padding: 1rem;
+}
+
+/* تنسيق Select2 */
+.select2-container--bootstrap-5 .select2-selection {
+    border: 2px solid #e9ecef;
+    min-height: 45px;
+    padding: 0.5rem;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single {
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+/* تنسيق Material Switches */
+.form-switch.material-switch {
+    padding-left: 0;
+    padding-right: 3.5rem;
+}
+
+.material-switch .form-check-input {
+    height: 1.5rem;
+    width: 3rem;
+    background-image: none;
+    border: none;
+    background-color: #e9ecef;
+}
+
+.material-switch .form-check-input:checked {
+    background-color: #1e3c72;
+}
+
+.material-switch .form-check-input:focus {
+    box-shadow: none;
+}
+
+/* تنسيق عرض الجدول */
+.lessons-table {
+    display: none;
+}
+
+.lessons-table.active {
+    display: table;
+}
+
+.lessons-cards.hidden {
+    display: none;
+}
+
+/* تنسيق نافذة الفيديو */
+.video-modal-header {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+}
+
+.lesson-info-section {
+    background-color: #f8f9fa;
+    padding: 0;
+}
+
+.lesson-info-header {
+    background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.lesson-description {
+    padding: 0 1.5rem;
+}
+
+.lesson-controls {
+    background-color: white;
+    padding: 1.5rem;
+    margin: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.controls-header {
+    border-bottom: 2px solid #eee;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.lesson-switches {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 2rem;
+}
+
+/* تنسيق المفاتيح */
+.material-switch {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.material-switch .form-check-input {
+    margin-left: 1rem;
+    margin-right: 0;
+}
+
+.material-switch .form-check-label {
+    margin-right: 1rem;
+    font-weight: 500;
+}
+
+/* تنسيق عرض الجدول */
+.lessons-table table {
+    margin: 0;
+}
+
+.lessons-table thead th {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    padding: 1rem;
+    font-weight: 500;
+}
+
+.lessons-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+/* تنسيق أزرار تبديل العرض */
+.view-toggle .btn-group {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.view-toggle .btn {
+    padding: 0.5rem 1.5rem;
+}
+
+.view-toggle .btn.active {
+    background-color: #1e3c72;
+    color: white;
+    border-color: #1e3c72;
+}
+
+/* تنسيق عرض الجدول والبطاقات */
+.lessons-cards,
+.lessons-table {
+    display: none;
+}
+
+.lessons-cards.active,
+.lessons-table.active {
+    display: block;
+} 
