@@ -629,7 +629,7 @@ include'../lesson-details/css.php';
                         $notes = getLessonNotes($lesson['id']);
                         foreach ($notes as $note):
                         ?>
-                            <div class="note-card <?php echo $note['type']; ?>-note">
+                            <div class="note-card <?php echo $note['type']; ?>-note" data-note-id="<?php echo $note['id']; ?>">
                                 <div class="card">
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <h5 class="mb-0">
@@ -637,15 +637,19 @@ include'../lesson-details/css.php';
                                         </h5>
                                         <div class="note-actions">
                                             <?php if ($note['type'] === 'code'): ?>
-                                                <button class="btn btn-sm copy-code" title="نسخ الكود">
+                                                <button class="btn btn-sm copy-code" 
+                                                        title="نسخ الكود"
+                                                        data-note-id="<?php echo $note['id']; ?>">
                                                     <i class="fas fa-copy"></i>
                                                 </button>
                                             <?php endif; ?>
-                                            <button class="btn btn-sm edit-note" title="تعديل"
+                                            <button class="btn btn-sm edit-note" 
+                                                    title="تعديل"
                                                     data-note-id="<?php echo $note['id']; ?>">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            <button class="btn btn-sm delete-note" title="حذف"
+                                            <button class="btn btn-sm delete-note" 
+                                                    title="حذف"
                                                     data-note-id="<?php echo $note['id']; ?>">
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -657,7 +661,7 @@ include'../lesson-details/css.php';
                                                 <?php echo html_entity_decode($note['content']); ?>
                                             </div>
                                         <?php elseif ($note['type'] === 'code'): ?>
-                                            <div class="code-wrapper">
+                                            <div class="code-wrapper" data-note-id="<?php echo $note['id']; ?>">
                                                 <div class="code-controls">
                                                     <button type="button" class="font-size-decrease" title="تصغير الخط">
                                                         <i class="fas fa-minus"></i>

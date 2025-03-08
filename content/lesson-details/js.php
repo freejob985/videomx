@@ -1014,9 +1014,6 @@ function initializeNoteControls() {
                 return;
             }
 
-            const noteCard = this.closest('.note-card');
-
-            // استخدام SweetAlert2 للتأكيد
             const result = await Swal.fire({
                 title: 'هل أنت متأكد؟',
                 text: 'سيتم حذف هذه الملاحظة نهائياً',
@@ -1030,17 +1027,17 @@ function initializeNoteControls() {
 
             if (result.isConfirmed) {
                 try {
+                    const formData = new FormData();
+                    formData.append('note_id', noteId);
+
                     const response = await fetch('../api/delete-note.php', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ note_id: noteId })
+                        body: formData
                     });
 
                     const data = await response.json();
                     if (data.success) {
-                        noteCard.remove();
+                        this.closest('.note-card').remove();
                         Swal.fire({
                             icon: 'success',
                             title: 'تم الحذف',
@@ -1056,7 +1053,7 @@ function initializeNoteControls() {
                     Swal.fire({
                         icon: 'error',
                         title: 'خطأ',
-                        text: error.message || 'حدث خطأ في الاتصال بالخادم'
+                        text: error.message
                     });
                 }
             }
@@ -1078,22 +1075,45 @@ function initializeNoteControls() {
             }
 
             try {
-                const response = await fetch(`../api/get-note.php?id=${noteId}`);
-                const data = await response.json();
+                // تغيير الطريقة إلى GET مع إضافة معرف الملاحظة في URL
+                const response = await fetch(`../api/get-note.php?id=${noteId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
 
-                if (data.success) {
+                const data = await response.json();
+                if (data.success && data.note) {
                     const note = data.note;
                     
                     // تعبئة نموذج التعديل
                     const form = document.getElementById('addNoteForm');
+                    
+                    // إضافة معرف الدرس
+                    let lessonIdInput = form.querySelector('input[name="lesson_id"]');
+                    if (!lessonIdInput) {
+                        lessonIdInput = document.createElement('input');
+                        lessonIdInput.type = 'hidden';
+                        lessonIdInput.name = 'lesson_id';
+                        form.appendChild(lessonIdInput);
+                    }
+                    lessonIdInput.value = window.LESSON_ID;
+
+                    // تعبئة باقي الحقول
                     form.querySelector('#noteTitle').value = note.title;
                     form.querySelector('#noteType').value = note.type;
                     
+                    // معالجة حقول الكود
+                    const codeOptions = document.querySelector('.code-options');
                     if (note.type === 'code') {
-                        document.querySelector('.code-options').classList.remove('d-none');
-                        form.querySelector('#codeLanguage').value = note.code_language || '';
+                        codeOptions.classList.remove('d-none');
+                        const langSelect = form.querySelector('#codeLanguage');
+                        if (langSelect) {
+                            langSelect.value = note.code_language || 'javascript';
+                        }
                     } else {
-                        document.querySelector('.code-options').classList.add('d-none');
+                        codeOptions.classList.add('d-none');
                     }
 
                     // تحديث المحتوى
@@ -1119,11 +1139,13 @@ function initializeNoteControls() {
 
                     // إظهار رسالة نجاح
                     Swal.fire({
-                        icon: 'info',
-                        title: 'تعديل الملاحظة',
+                        icon: 'success',
+                        title: 'جاهز للتعديل',
                         text: 'يمكنك الآن تعديل الملاحظة',
-                        timer: 2000,
-                        showConfirmButton: false
+                        timer: 1500,
+                        showConfirmButton: false,
+                        position: 'top-end',
+                        toast: true
                     });
                 } else {
                     throw new Error(data.error || 'حدث خطأ أثناء تحميل الملاحظة');
@@ -1133,7 +1155,7 @@ function initializeNoteControls() {
                 Swal.fire({
                     icon: 'error',
                     title: 'خطأ',
-                    text: error.message || 'حدث خطأ في الاتصال بالخادم'
+                    text: error.message
                 });
             }
         });
@@ -1143,9 +1165,8 @@ function initializeNoteControls() {
     document.querySelectorAll('.copy-code').forEach(button => {
         button.addEventListener('click', async function(e) {
             e.preventDefault();
-            const codeWrapper = this.closest('.card-body').querySelector('.code-wrapper');
-            const codeElement = codeWrapper.querySelector('code');
-
+            const codeElement = this.closest('.card-body').querySelector('code');
+            
             if (!codeElement) {
                 Swal.fire({
                     icon: 'error',
@@ -1156,9 +1177,14 @@ function initializeNoteControls() {
             }
 
             try {
-                await navigator.clipboard.writeText(codeElement.textContent);
-                
-                // إظهار رسالة النجاح
+                // استخدام execCommand كحل بديل إذا لم يكن Clipboard API متوفراً
+                const textArea = document.createElement('textarea');
+                textArea.value = codeElement.textContent;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+
                 Swal.fire({
                     icon: 'success',
                     title: 'تم النسخ',
@@ -1180,11 +1206,83 @@ function initializeNoteControls() {
     });
 }
 
-// تهيئة عند تحميل الصفحة
+// إضافة دالة للتحكم في وضع ملء الشاشة
+function initializeFullscreenControls() {
+    document.querySelectorAll('.fullscreen-toggle').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const codeWrapper = this.closest('.code-wrapper');
+            if (!codeWrapper) return;
+
+            // تبديل الأيقونة
+            const icon = this.querySelector('i');
+            
+            if (!document.fullscreenElement) {
+                // الدخول في وضع ملء الشاشة
+                if (codeWrapper.requestFullscreen) {
+                    codeWrapper.requestFullscreen();
+                } else if (codeWrapper.mozRequestFullScreen) {
+                    codeWrapper.mozRequestFullScreen();
+                } else if (codeWrapper.webkitRequestFullscreen) {
+                    codeWrapper.webkitRequestFullscreen();
+                } else if (codeWrapper.msRequestFullscreen) {
+                    codeWrapper.msRequestFullscreen();
+                }
+                
+                if (icon) {
+                    icon.classList.replace('fa-expand', 'fa-compress');
+                }
+            } else {
+                // الخروج من وضع ملء الشاشة
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                
+                if (icon) {
+                    icon.classList.replace('fa-compress', 'fa-expand');
+                }
+            }
+        });
+    });
+
+    // مراقبة تغيير حالة ملء الشاشة
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+}
+
+// معالجة تغيير حالة ملء الشاشة
+function handleFullscreenChange() {
+    const fullscreenElement = document.fullscreenElement || 
+                             document.webkitFullscreenElement || 
+                             document.mozFullScreenElement || 
+                             document.msFullscreenElement;
+
+    document.querySelectorAll('.fullscreen-toggle').forEach(button => {
+        const icon = button.querySelector('i');
+        if (icon) {
+            if (fullscreenElement) {
+                icon.classList.replace('fa-expand', 'fa-compress');
+            } else {
+                icon.classList.replace('fa-compress', 'fa-expand');
+            }
+        }
+    });
+}
+
+// تحديث تهيئة الصفحة لتشمل تهيئة أزرار ملء الشاشة
 document.addEventListener('DOMContentLoaded', function() {
     initializeNotesSection();
     initializeNoteType();
     initializeTinyMCE();
     initializeNoteControls();
+    initializeFullscreenControls(); // إضافة تهيئة أزرار ملء الشاشة
 });
 </script>
