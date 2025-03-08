@@ -179,6 +179,15 @@ include'../lesson-details/css.php';
                             <i class="fas fa-robot"></i>
                             <span class="d-none d-md-inline ms-1">ChatGPT</span>
                         </button>
+
+                        <!-- إضافة زر عرض الدروس -->
+                        <a href="/content/lessons.php?course_id=<?php echo $lesson['course_id']; ?>" 
+                           class="btn btn-outline-secondary"
+                           data-bs-toggle="tooltip"
+                           title="عرض جميع دروس الكورس">
+                            <i class="fas fa-list-ul"></i>
+                            <span class="d-none d-md-inline ms-1">عرض الدروس</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -765,6 +774,9 @@ include'../lesson-details/css.php';
 <!-- Add in the head section -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<!-- في قسم head -->
+<link rel="stylesheet" href="/content/assets/css/lesson-details.css">
 
 </body>
 </html>

@@ -156,4 +156,40 @@
     .related-lessons h3 {
         font-size: 1.25rem;
     }
+}
+
+/* أنماط أزرار الدرس */
+.lesson-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.lesson-actions .btn i {
+    font-size: 1.1rem;
+}
+
+/* تأثير التحويم */
+.lesson-actions .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* تخصيص لون زر عرض الدروس */
+.lesson-actions .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* تحسين العرض على الشاشات الصغيرة */
+@media (max-width: 768px) {
+    .lesson-actions .btn {
+        padding: 0.5rem;
+    }
+    
+    .lesson-actions .btn i {
+        margin: 0;
+    }
 } 
