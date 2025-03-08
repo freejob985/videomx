@@ -172,6 +172,89 @@ function getLessonsByCourse($course_id, $page = 1, $perPage = 10) {
     }
 }
 
+
+
+function getLessonsByCoursex($course_id, $page = 1, $perPage = 10) {
+    try {
+        $db = connectDB();
+        
+        // حساب إجمالي عدد الدروس
+        $countQuery = "SELECT COUNT(*) FROM lessons WHERE course_id = :course_id";
+        $countStmt = $db->prepare($countQuery);
+        $countStmt->execute(['course_id' => $course_id]);
+        $totalLessons = $countStmt->fetchColumn();
+        
+        // حساب عدد الصفحات
+        $totalPages = ceil($totalLessons / $perPage);
+        
+        // حساب الإزاحة للصفحة الحالية
+        $offset = ($page - 1) * $perPage;
+        
+        // استعلام جلب الدروس مع معلوماتها الكاملة
+        $query = "SELECT 
+            l.*,
+            s.name as status_name,
+            s.color as status_color,
+            s.text_color as status_text_color
+        FROM lessons l
+        LEFT JOIN statuses s ON l.status_id = s.id
+        WHERE l.course_id = :course_id
+        ORDER BY l.order_number ASC, l.id ASC";
+        
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(':course_id', $course_id, PDO::PARAM_INT);
+
+        $stmt->execute();
+        
+        $lessons = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // معالجة البيانات وتنسيقها
+        foreach ($lessons as &$lesson) {
+            // تنسيق المدة الزمنية
+            $lesson['formatted_duration'] = formatDuration($lesson['duration']);
+            
+            // معالجة التاجات
+            if (!empty($lesson['tags'])) {
+                $lesson['tags_array'] = array_map('trim', explode(',', $lesson['tags']));
+            } else {
+                $lesson['tags_array'] = [];
+            }
+            
+            // التحقق من وجود صورة مصغرة
+            if (empty($lesson['thumbnail'])) {
+                $lesson['thumbnail'] = '../assets/images/default-lesson.jpg';
+            }
+            
+            // تحويل القيم المنطقية
+            $lesson['is_important'] = (bool)$lesson['is_important'];
+            $lesson['is_theory'] = (bool)$lesson['is_theory'];
+            $lesson['completed'] = (bool)$lesson['completed'];
+        }
+        
+        return [
+            'success' => true,
+            'lessons' => $lessons,
+            'total_lessons' => $totalLessons,
+            'total_pages' => $totalPages,
+            'current_page' => $page,
+            'per_page' => $perPage
+        ];
+        
+    } catch (Exception $e) {
+        error_log("Error in getLessonsByCourse: " . $e->getMessage());
+        return [
+            'success' => false,
+            'error' => 'حدث خطأ أثناء جلب الدروس',
+            'lessons' => [],
+            'total_lessons' => 0,
+            'total_pages' => 1,
+            'current_page' => 1,
+            'per_page' => $perPage
+        ];
+    }
+}
+
+
 /**
  * دالة لجلب اللغات مع الترقيم
  * 
@@ -615,7 +698,7 @@ function getFormattedCourseDetails($course_id, $type = 'all') {
     
     // جلب معلومات الكورس
     $course = getCourseInfo($course_id);
-    $lessons = getLessonsByCourse($course_id);
+    $lessons = getLessonsByCoursex($course_id);
     $language = getLanguageInfo($course['language_id']);
     
     $text = '';

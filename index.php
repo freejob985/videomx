@@ -535,6 +535,12 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 الدورات
                             </a>
                         </li>
+                        <li>
+                            <a href="http://videomx.com/review/" class="text-white">
+                                <i class="fas fa-star me-2"></i>
+                                المراجعة
+                            </a>
+                        </li>
                     </ul>
                 </div>
 

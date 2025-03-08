@@ -119,10 +119,16 @@ $(document).ready(function() {
                                 الرئيسية
                             </a>
                         </li>
-                        <li>
+                        <li class="mb-2">
                             <a href="<?php echo buildUrl('courses.php'); ?>">
                                 <i class="fas fa-graduation-cap me-2"></i>
                                 الدورات
+                            </a>
+                        </li>
+                        <li>
+                            <a href="http://videomx.com/" class="portal-link">
+                                <i class="fas fa-door-open me-2"></i>
+                                البوابة
                             </a>
                         </li>
                     </ul>
