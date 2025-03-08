@@ -4,45 +4,137 @@
  */
 class CodeControls {
     constructor() {
+        this.modal = new bootstrap.Modal(document.getElementById('codeModal'));
+        this.currentFontSize = 14;
         this.initializeControls();
         this.setupRelatedLessonsToggle();
         this.setupModalClose();
     }
 
     initializeControls() {
-        // إعداد أزرار التحكم في الكود
+        // إضافة أزرار التحكم لكل كتلة كود
         document.querySelectorAll('.code-wrapper').forEach(wrapper => {
-            const controls = wrapper.querySelector('.code-controls');
-            if (controls) {
-                const increaseBtn = controls.querySelector('.font-size-increase');
-                const decreaseBtn = controls.querySelector('.font-size-decrease');
-                const fullscreenBtn = controls.querySelector('.fullscreen-toggle');
-                const codeElement = wrapper.querySelector('code');
-
-                let fontSize = 14;
-
-                increaseBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (fontSize < 24) {
-                        fontSize += 2;
-                        codeElement.style.fontSize = `${fontSize}px`;
-                    }
-                });
-
-                decreaseBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (fontSize > 12) {
-                        fontSize -= 2;
-                        codeElement.style.fontSize = `${fontSize}px`;
-                    }
-                });
-
-                fullscreenBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.openFullscreen(wrapper);
-                });
+            if (!wrapper.querySelector('.code-controls')) {
+                const controls = this.createCodeControls();
+                wrapper.appendChild(controls);
             }
         });
+
+        // تفعيل وظائف الأزرار
+        this.initializeFullscreenButtons();
+        this.initializeCopyButtons();
+        this.initializeFontSizeControls();
+    }
+
+    createCodeControls() {
+        const controls = document.createElement('div');
+        controls.className = 'code-controls';
+        
+        // زر النسخ
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-code';
+        copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+        copyBtn.title = 'نسخ الكود';
+        
+        // زر ملء الشاشة
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'fullscreen-toggle';
+        fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+        fullscreenBtn.title = 'ملء الشاشة';
+        
+        controls.appendChild(copyBtn);
+        controls.appendChild(fullscreenBtn);
+        
+        return controls;
+    }
+
+    initializeFullscreenButtons() {
+        document.querySelectorAll('.fullscreen-toggle').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const wrapper = e.currentTarget.closest('.code-wrapper');
+                if (wrapper) {
+                    this.openCodeInModal(wrapper);
+                }
+            });
+        });
+
+        // إضافة مستمع لمفتاح ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const fullscreenWrapper = document.querySelector('.code-wrapper.fullscreen');
+                if (fullscreenWrapper) {
+                    const button = fullscreenWrapper.querySelector('.fullscreen-toggle');
+                    this.toggleFullscreen(fullscreenWrapper, button);
+                }
+            }
+        });
+    }
+
+    toggleFullscreen(wrapper, button) {
+        const isFullscreen = wrapper.classList.contains('fullscreen');
+        
+        if (!isFullscreen) {
+            // تفعيل وضع ملء الشاشة
+            wrapper.classList.add('fullscreen');
+            document.body.classList.add('fullscreen-active');
+            button.innerHTML = '<i class="fas fa-compress"></i>';
+            button.title = 'إغلاق ملء الشاشة';
+        } else {
+            // إلغاء وضع ملء الشاشة
+            wrapper.classList.remove('fullscreen');
+            document.body.classList.remove('fullscreen-active');
+            button.innerHTML = '<i class="fas fa-expand"></i>';
+            button.title = 'ملء الشاشة';
+        }
+    }
+
+    initializeCopyButtons() {
+        document.querySelectorAll('.copy-code').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const wrapper = e.currentTarget.closest('.code-wrapper');
+                if (wrapper) {
+                    const code = wrapper.querySelector('code').textContent;
+                    this.copyToClipboard(code, wrapper);
+                }
+            });
+        });
+    }
+
+    copyToClipboard(text, wrapper) {
+        navigator.clipboard.writeText(text).then(() => {
+            this.showCopyFeedback(wrapper);
+        }).catch(err => {
+            console.error('فشل نسخ النص:', err);
+        });
+    }
+
+    showCopyFeedback(wrapper) {
+        // إزالة أي رسائل تأكيد سابقة
+        const existingFeedback = wrapper.querySelector('.copy-feedback');
+        if (existingFeedback) {
+            existingFeedback.remove();
+        }
+
+        // إنشاء رسالة تأكيد جديدة
+        const feedback = document.createElement('div');
+        feedback.className = 'copy-feedback';
+        feedback.textContent = 'تم النسخ!';
+        wrapper.appendChild(feedback);
+
+        // إظهار الرسالة
+        setTimeout(() => {
+            feedback.classList.add('show');
+        }, 50);
+
+        // إخفاء الرسالة بعد ثانيتين
+        setTimeout(() => {
+            feedback.classList.remove('show');
+            setTimeout(() => {
+                feedback.remove();
+            }, 200);
+        }, 2000);
     }
 
     setupModalClose() {
@@ -63,131 +155,53 @@ class CodeControls {
         });
     }
 
-    openFullscreen(wrapper) {
-        // إزالة أي موديول موجود مسبقاً
-        const existingModal = document.querySelector('.code-modal');
-        if (existingModal) existingModal.remove();
-
+    openCodeInModal(wrapper) {
+        const modal = document.getElementById('codeModal');
         const codeElement = wrapper.querySelector('code');
         const noteTitle = wrapper.closest('.note-card').querySelector('.card-header h5').textContent;
-        
-        const modal = document.createElement('div');
-        modal.className = 'code-modal';
-        modal.innerHTML = `
-            <div class="code-modal-content">
-                <div class="code-modal-header">
-                    <h5 class="code-modal-title">${noteTitle}</h5>
-                    <div class="code-modal-controls">
-                        <!-- البحث -->
-                        <div class="search-wrapper">
-                            <input type="text" class="search-input" placeholder="بحث في الكود...">
-                            <span class="search-count"></span>
-                        </div>
-                        
-                        <!-- التحكم في حجم الخط -->
-                        <div class="code-controls-group">
-                            <button type="button" class="font-size-decrease" title="تصغير الخط">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <span class="font-size-display">14px</span>
-                            <button type="button" class="font-size-increase" title="تكبير الخط">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        
-                        <button type="button" class="code-modal-close" title="إغلاق">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="code-modal-body">
-                    <pre><code class="${codeElement.className}">${codeElement.innerHTML}</code></pre>
-                </div>
-            </div>
-        `;
 
-        document.body.appendChild(modal);
-        
-        // تفعيل تنسيق الكود
-        Prism.highlightElement(modal.querySelector('code'));
+        // تحديث عنوان الموديول
+        modal.querySelector('.modal-title').textContent = noteTitle;
 
-        // إعداد أزرار التحكم في الموديول
-        this.setupModalControls(modal);
-
-        // جعل الموديول مرئي
-        requestAnimationFrame(() => {
-            modal.classList.add('active');
-        });
-    }
-
-    setupModalControls(modal) {
+        // نسخ محتوى الكود ولغة البرمجة
         const modalCode = modal.querySelector('code');
-        let fontSize = 14;
+        modalCode.className = codeElement.className;
+        modalCode.textContent = codeElement.textContent;
 
-        // إغلاق الموديول
-        modal.querySelector('.code-modal-close').addEventListener('click', () => {
-            modal.remove();
-        });
+        // إعادة تطبيق تنسيق Prism
+        Prism.highlightElement(modalCode);
 
-        // تكبير الخط
+        // فتح الموديول
+        this.modal.show();
+    }
+
+    initializeFontSizeControls() {
+        const modal = document.getElementById('codeModal');
+        
+        // زر تكبير الخط
         modal.querySelector('.font-size-increase').addEventListener('click', () => {
-            if (fontSize < 24) {
-                fontSize += 2;
-                this.updateModalFontSize(modal, fontSize);
+            if (this.currentFontSize < 24) {
+                this.currentFontSize += 2;
+                this.updateFontSize();
             }
         });
 
-        // تصغير الخط
+        // زر تصغير الخط
         modal.querySelector('.font-size-decrease').addEventListener('click', () => {
-            if (fontSize > 12) {
-                fontSize -= 2;
-                this.updateModalFontSize(modal, fontSize);
+            if (this.currentFontSize > 12) {
+                this.currentFontSize -= 2;
+                this.updateFontSize();
             }
-        });
-
-        // البحث في الكود
-        const searchInput = modal.querySelector('.search-input');
-        searchInput.addEventListener('input', () => {
-            this.handleModalSearch(modal, searchInput.value);
         });
     }
 
-    updateModalFontSize(modal, size) {
+    updateFontSize() {
+        const modal = document.getElementById('codeModal');
         const codeElement = modal.querySelector('code');
         const fontSizeDisplay = modal.querySelector('.font-size-display');
         
-        codeElement.style.fontSize = `${size}px`;
-        fontSizeDisplay.textContent = `${size}px`;
-    }
-
-    handleModalSearch(modal, query) {
-        const codeElement = modal.querySelector('code');
-        const searchCount = modal.querySelector('.search-count');
-        
-        // إزالة التمييز السابق
-        codeElement.innerHTML = codeElement.innerHTML.replace(
-            /<mark class="search-highlight[^>]*>([^<]*)<\/mark>/g,
-            '$1'
-        );
-
-        if (!query) {
-            searchCount.textContent = '';
-            return;
-        }
-
-        const text = codeElement.textContent;
-        const regex = new RegExp(query, 'gi');
-        const matches = text.match(regex);
-        
-        if (matches) {
-            searchCount.textContent = `${matches.length} نتيجة`;
-            codeElement.innerHTML = text.replace(
-                regex,
-                match => `<mark class="search-highlight">${match}</mark>`
-            );
-        } else {
-            searchCount.textContent = 'لا توجد نتائج';
-        }
+        codeElement.style.fontSize = `${this.currentFontSize}px`;
+        fontSizeDisplay.textContent = `${this.currentFontSize}px`;
     }
 
     setupRelatedLessonsToggle() {

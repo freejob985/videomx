@@ -660,7 +660,7 @@ include'../lesson-details/css.php';
                                                     <button type="button" class="font-size-decrease" title="تصغير الخط">
                                                         <i class="fas fa-minus"></i>
                                                     </button>
-                                                    <button type="button" class="fullscreen-toggle" title="عرض بملء الشاشة">
+                                                    <button class="fullscreen-toggle" title="ملء الشاشة">
                                                         <i class="fas fa-expand"></i>
                                                     </button>
                                                 </div>
@@ -851,6 +851,32 @@ window.LESSON_ID = <?php echo json_encode($lesson['id']); ?>;
 
 <!-- تعديل body tag لإضافة الحالة الافتراضية للقائمة -->
 <body data-course-id="<?php echo htmlspecialchars($lesson['course_id']); ?>" class="sidebar-collapsed">
+
+<!-- Modal للكود -->
+<div class="modal fade code-modal" id="codeModal" tabindex="-1" aria-labelledby="codeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="codeModalLabel"></h5>
+                <div class="code-controls-group me-auto ms-3">
+                    <button type="button" class="btn btn-sm btn-outline-secondary font-size-decrease" title="تصغير الخط">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span class="font-size-display mx-2">14px</span>
+                    <button type="button" class="btn btn-sm btn-outline-secondary font-size-increase" title="تكبير الخط">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="code-content h-100">
+                    <pre><code></code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
