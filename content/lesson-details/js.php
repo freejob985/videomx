@@ -1209,53 +1209,55 @@ function initializeNoteControls() {
 // إضافة دالة للتحكم في وضع ملء الشاشة
 function initializeFullscreenControls() {
     document.querySelectorAll('.fullscreen-toggle').forEach(button => {
-        button.addEventListener('click', function(e) {
+        button.addEventListener('click', async function(e) {
             e.preventDefault();
             const codeWrapper = this.closest('.code-wrapper');
             if (!codeWrapper) return;
 
-            // تبديل الأيقونة
             const icon = this.querySelector('i');
+            const codeElement = codeWrapper.querySelector('code');
             
-            if (!document.fullscreenElement) {
-                // الدخول في وضع ملء الشاشة
-                if (codeWrapper.requestFullscreen) {
-                    codeWrapper.requestFullscreen();
-                } else if (codeWrapper.mozRequestFullScreen) {
-                    codeWrapper.mozRequestFullScreen();
-                } else if (codeWrapper.webkitRequestFullscreen) {
-                    codeWrapper.webkitRequestFullscreen();
-                } else if (codeWrapper.msRequestFullscreen) {
-                    codeWrapper.msRequestFullscreen();
+            try {
+                if (!document.fullscreenElement) {
+                    // الدخول في وضع ملء الشاشة
+                    await codeWrapper.requestFullscreen();
+                    
+                    // تحديث حجم الخط والموضع
+                    if (codeElement) {
+                        codeElement.style.fontSize = '16px';
+                        setTimeout(() => {
+                            codeWrapper.scrollTop = 0;
+                            codeElement.style.height = '100%';
+                            codeElement.style.maxHeight = '100vh';
+                        }, 100);
+                    }
+                    
+                    if (icon) {
+                        icon.classList.replace('fa-expand', 'fa-compress');
+                    }
+                } else {
+                    // الخروج من وضع ملء الشاشة
+                    await document.exitFullscreen();
+                    
+                    // إعادة تعيين الأنماط
+                    if (codeElement) {
+                        codeElement.style.fontSize = '14px';
+                        codeElement.style.height = 'auto';
+                        codeElement.style.maxHeight = 'none';
+                    }
+                    
+                    if (icon) {
+                        icon.classList.replace('fa-compress', 'fa-expand');
+                    }
                 }
-                
-                if (icon) {
-                    icon.classList.replace('fa-expand', 'fa-compress');
-                }
-            } else {
-                // الخروج من وضع ملء الشاشة
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-                
-                if (icon) {
-                    icon.classList.replace('fa-compress', 'fa-expand');
-                }
+            } catch (err) {
+                console.error('خطأ في تبديل وضع ملء الشاشة:', err);
             }
         });
     });
 
     // مراقبة تغيير حالة ملء الشاشة
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
 }
 
 // معالجة تغيير حالة ملء الشاشة

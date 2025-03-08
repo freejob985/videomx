@@ -215,29 +215,90 @@
     content: "\f0c1"; /* أيقونة الرابط */
 }
 
-/* تنسيقات الكود */
-.code-wrapper {
-    position: relative;
-    background: #2d2d2d;
-    border-radius: 6px;
-    overflow: hidden;
+/* تنسيقات وضع ملء الشاشة للكود */
+.code-wrapper:-webkit-full-screen,
+.code-wrapper:-moz-full-screen,
+.code-wrapper:-ms-fullscreen,
+.code-wrapper:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    background-color: #1e1e1e;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
 }
 
-.code-header {
-    padding: 0.5rem 1rem;
-    background: rgba(255,255,255,0.1);
+.code-wrapper:fullscreen pre {
+    flex: 1;
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 20px;
+    overflow: auto;
+    background: transparent;
+}
+
+.code-wrapper:fullscreen code {
+    width: 100%;
+    height: 100%;
+    font-size: 16px;
+    line-height: 1.6;
+    white-space: pre;
+    display: block;
+}
+
+.code-wrapper:fullscreen .code-controls {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 9999;
+    display: flex;
+    gap: 10px;
+}
+
+.code-wrapper:fullscreen .code-controls button {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.code-wrapper:fullscreen .code-controls button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* دعم المتصفحات المختلفة */
+.code-wrapper:-webkit-full-screen { width: 100vw !important; height: 100vh !important; }
+.code-wrapper:-moz-full-screen { width: 100vw !important; height: 100vh !important; }
+.code-wrapper:-ms-fullscreen { width: 100vw !important; height: 100vh !important; }
+.code-wrapper:fullscreen { width: 100vw !important; height: 100vh !important; }
+
+/* تنسيق عام للكود خارج وضع ملء الشاشة */
+.code-wrapper {
+    position: relative;
+    background-color: #1e1e1e;
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 .code-wrapper pre {
     margin: 0;
-    padding: 1rem;
-    max-height: 400px;
-    overflow: auto;
+    padding: 15px;
+    background: transparent;
+    overflow-x: auto;
 }
 
 .code-wrapper code {
     font-family: 'Fira Code', monospace;
-    font-size: 0.9rem;
+    line-height: 1.5;
+    font-size: 14px;
 }
 
 /* تنسيقات الروابط */

@@ -792,3 +792,11 @@ body.fullscreen-active {
     border-radius: 4px;
     user-select: none;
 } 
+
+.code-wrapper pre {
+    margin: 0;
+    padding: 1.5rem;
+    max-height: 100%;
+    overflow: auto;
+    background: transparent;
+}
