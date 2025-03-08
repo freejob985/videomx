@@ -310,6 +310,71 @@ $statistics = getLessonsStatistics($courseId);
     <link href="https://unpkg.com/@material-design-icons/font@1.0.0/index.css" rel="stylesheet">
     
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* تنسيق أزرار الأقسام */
+        .sections-toggle {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .section-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-btn:hover {
+            border-color: #2196F3;
+            color: #2196F3;
+        }
+        
+        .section-btn.active {
+            background: #2196F3;
+            border-color: #2196F3;
+            color: white;
+        }
+        
+        .section-btn i {
+            font-size: 16px;
+        }
+        
+        /* تحسين تنسيق النموذج */
+        .lesson-controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .controls-header {
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .lesson-switches {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
@@ -329,7 +394,11 @@ $statistics = getLessonsStatistics($courseId);
                         <div class="row text-center">
                             <div class="col-md-3 mb-3">
                                 <div class="border-end">
-                                    <h4 class="text-primary"><?php echo $statistics['completed_lessons']; ?> / <?php echo $statistics['total_lessons']; ?></h4>
+                                    <h4 class="text-primary">
+                                        <span class="completed-count">
+                                            <?php echo $statistics['completed_lessons']; ?> / <?php echo $statistics['total_lessons']; ?>
+                                        </span>
+                                    </h4>
                                     <p class="text-muted mb-0">الدروس المكتملة</p>
                                     <div class="progress mt-2" style="height: 5px;">
                                         <div class="progress-bar" role="progressbar" 
@@ -340,21 +409,21 @@ $statistics = getLessonsStatistics($courseId);
                             </div>
                             <div class="col-md-3 mb-3">
                                 <div class="border-end">
-                                    <h4 class="text-info"><?php echo $statistics['theory_lessons']; ?></h4>
+                                    <h4 class="text-info theory-count"><?php echo $statistics['theory_lessons']; ?></h4>
                                     <p class="text-muted mb-0">الدروس النظرية</p>
                                 </div>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <div class="border-end">
-                                    <h4 class="text-danger"><?php echo $statistics['important_lessons']; ?></h4>
+                                    <h4 class="text-danger important-count"><?php echo $statistics['important_lessons']; ?></h4>
                                     <p class="text-muted mb-0">الدروس المهمة</p>
                                 </div>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <div>
-                                    <h4 class="text-success"><?php echo formatDuration($statistics['completed_duration']); ?></h4>
+                                    <h4 class="text-success completed-duration"><?php echo formatDuration($statistics['completed_duration']); ?></h4>
                                     <p class="text-muted mb-0">الوقت المكتمل</p>
-                                    <small class="text-muted">من <?php echo formatDuration($statistics['total_duration']); ?></small>
+                                    <small class="text-muted">من <span class="total-duration"><?php echo formatDuration($statistics['total_duration']); ?></span></small>
                                 </div>
                             </div>
                         </div>
@@ -559,18 +628,17 @@ $statistics = getLessonsStatistics($courseId);
                                 <h6 class="mb-3">إعدادات الدرس</h6>
                             </div>
                             <div class="row g-3">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <label class="form-label">الحالة</label>
                                     <div class="status-section">
-                                        <select name="status_id" class="form-select custom-select status-select">
+                                        <select class="form-select custom-select status-select" id="modal_status">
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-12 mt-4">
                                     <label class="form-label">القسم</label>
-                                    <div class="section-select">
-                                        <select name="section_id" class="form-select custom-select section-select">
-                                        </select>
+                                    <div class="sections-toggle" id="sections_toggle">
+                                        <!-- سيتم إضافة الأزرار ديناميكياً -->
                                     </div>
                                 </div>
                             </div>
@@ -638,7 +706,10 @@ $statistics = getLessonsStatistics($courseId);
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     
     <script>
-    // تعريف المتغيرات العامة
+    // تعريف البيانات العامة
+    const courseId = <?php echo $courseId; ?>;
+    const statuses = <?php echo json_encode($statuses); ?>;
+    const sections = <?php echo json_encode($sections); ?>;
     let currentLessonData = null;
 
     // دالة عرض الفيديو
@@ -652,7 +723,8 @@ $statistics = getLessonsStatistics($courseId);
 
             // حفظ بيانات الدرس الحالي
             currentLessonData = lessonData;
-
+            console.log('Setting current lesson:', currentLessonData);
+            
             // تحديث الفيديو
             const embedUrl = `https://www.youtube.com/embed/${videoId[1]}?autoplay=1&rel=0`;
             document.getElementById('videoContainer').innerHTML = `
@@ -695,34 +767,48 @@ $statistics = getLessonsStatistics($courseId);
             if (!currentLessonData) return;
 
             // تحديث قائمة الحالات
-            const statusSelect = document.querySelector('.status-select');
+            const statusSelect = document.querySelector('#modal_status');
             if (statusSelect) {
-                statusSelect.innerHTML = `
-                    <?php foreach ($statuses as $status): ?>
-                    <option value="<?php echo $status['id']; ?>" 
-                            ${currentLessonData.status_id == <?php echo $status['id']; ?> ? 'selected' : ''}>
-                        <?php echo addslashes($status['name']); ?>
+                statusSelect.innerHTML = statuses.map(status => `
+                    <option value="${status.id}" 
+                            ${currentLessonData.status_id == status.id ? 'selected' : ''}>
+                        ${status.name}
                     </option>
-                    <?php endforeach; ?>
-                `;
+                `).join('');
             }
 
-            // تحديث قائمة الأقسام
-            const sectionSelect = document.querySelector('.section-select');
-            if (sectionSelect) {
-                sectionSelect.innerHTML = `
-                    <option value="">اختر القسم</option>
-                    <?php foreach ($sections as $section): ?>
-                    <option value="<?php echo $section['id']; ?>" 
-                            ${currentLessonData.section_id == <?php echo $section['id']; ?> ? 'selected' : ''}>
-                        <?php echo addslashes($section['name']); ?>
-                    </option>
-                    <?php endforeach; ?>
-                `;
+            // تحديث أزرار الأقسام
+            const sectionsToggle = document.querySelector('#sections_toggle');
+            if (sectionsToggle) {
+                sectionsToggle.innerHTML = sections.map(section => `
+                    <button type="button" 
+                            class="section-btn ${currentLessonData.section_id == section.id ? 'active' : ''}"
+                            data-section-id="${section.id}"
+                            onclick="selectSection(${section.id})">
+                        <i class="fas fa-layer-group"></i>
+                        ${section.name}
+                    </button>
+                `).join('');
             }
+
+            // تسجيل للتحقق
+            console.log('Current lesson data:', currentLessonData);
+            console.log('Available statuses:', statuses);
+            console.log('Available sections:', sections);
+            console.log('Status select:', statusSelect?.innerHTML);
+            console.log('Section select:', sectionsToggle?.innerHTML);
         } catch (error) {
             console.error('Error in updateSelects:', error);
+            console.log('Current lesson data:', currentLessonData);
         }
+    }
+
+    // دالة اختيار القسم
+    function selectSection(sectionId) {
+        const buttons = document.querySelectorAll('.section-btn');
+        buttons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.sectionId == sectionId);
+        });
     }
 
     // دالة حفظ التغييرات
@@ -733,9 +819,19 @@ $statistics = getLessonsStatistics($courseId);
                 return;
             }
 
-            const statusId = document.querySelector('.status-select').value;
-            const sectionId = document.querySelector('.section-select').value;
+            const statusSelect = document.querySelector('#modal_status');
+            const sectionsToggle = document.querySelector('#sections_toggle');
             
+            if (!statusSelect || !sectionsToggle) {
+                showToast("لم يتم العثور على عناصر التحكم", "error");
+                console.error('Select elements not found:', { statusSelect, sectionsToggle });
+                return;
+            }
+            
+            const statusId = statusSelect.value;
+            const activeSection = document.querySelector('.section-btn.active');
+            const sectionId = activeSection ? activeSection.dataset.sectionId : null;
+
             if (!statusId) {
                 showToast("يرجى اختيار الحالة", "error");
                 return;
@@ -744,21 +840,44 @@ $statistics = getLessonsStatistics($courseId);
             const formData = new FormData();
             formData.append('lesson_id', currentLessonData.id);
             formData.append('status_id', statusId);
-            formData.append('section_id', sectionId || '');
-            formData.append('is_theory', document.querySelector('#modal_theory').checked ? 1 : 0);
-            formData.append('is_important', document.querySelector('#modal_important').checked ? 1 : 0);
-            formData.append('completed', document.querySelector('#modal_completed').checked ? 1 : 0);
-            formData.append('is_reviewed', document.querySelector('#modal_reviewed').checked ? 1 : 0);
+            if (sectionId) {
+                formData.append('section_id', sectionId);
+            }
+            
+            // التحقق من وجود عناصر التحكم قبل استخدامها
+            const theoryCheckbox = document.querySelector('#modal_theory');
+            const importantCheckbox = document.querySelector('#modal_important');
+            const completedCheckbox = document.querySelector('#modal_completed');
+            const reviewedCheckbox = document.querySelector('#modal_reviewed');
+            
+            if (!theoryCheckbox || !importantCheckbox || !completedCheckbox || !reviewedCheckbox) {
+                showToast("لم يتم العثور على بعض عناصر التحكم", "error");
+                return;
+            }
+            
+            formData.append('is_theory', theoryCheckbox.checked ? 1 : 0);
+            formData.append('is_important', importantCheckbox.checked ? 1 : 0);
+            formData.append('completed', completedCheckbox.checked ? 1 : 0);
+            formData.append('is_reviewed', reviewedCheckbox.checked ? 1 : 0);
 
-            // إضافة تسجيل للبيانات المرسلة
+            // تسجيل البيانات المرسلة للتحقق
+            console.log('Form elements:', {
+                statusSelect,
+                sectionsToggle,
+                theoryCheckbox,
+                importantCheckbox,
+                completedCheckbox,
+                reviewedCheckbox
+            });
+            
             console.log('Sending data:', {
                 lesson_id: currentLessonData.id,
                 status_id: statusId,
-                section_id: sectionId || '',
-                is_theory: document.querySelector('#modal_theory').checked ? 1 : 0,
-                is_important: document.querySelector('#modal_important').checked ? 1 : 0,
-                completed: document.querySelector('#modal_completed').checked ? 1 : 0,
-                is_reviewed: document.querySelector('#modal_reviewed').checked ? 1 : 0
+                section_id: sectionId,
+                is_theory: theoryCheckbox.checked ? 1 : 0,
+                is_important: importantCheckbox.checked ? 1 : 0,
+                completed: completedCheckbox.checked ? 1 : 0,
+                is_reviewed: reviewedCheckbox.checked ? 1 : 0
             });
 
             showToast("جاري تحديث البيانات...", "info");
@@ -777,7 +896,12 @@ $statistics = getLessonsStatistics($courseId);
                 currentLessonData = result.data;
                 
                 showToast("تم تحديث حالة الدرس بنجاح");
+                
+                // تحديث عرض البطاقة والجدول
                 updateLessonDisplay(currentLessonData);
+                
+                // تحديث الإحصائيات
+                updateStatistics();
             })
             .catch(error => {
                 console.error('Error saving changes:', error);
@@ -806,28 +930,55 @@ $statistics = getLessonsStatistics($courseId);
                     `;
                 }
 
-                // تحديث القسم والحالة
-                const sectionElement = card.querySelector('.section-name');
+                // تحديث القسم
+                const sectionElement = card.querySelector('.text-muted i.fas.fa-layer-group').parentElement;
                 if (sectionElement) {
-                    const selectedSection = document.querySelector(`.section-select option[value="${lessonData.section_id}"]`);
-                    sectionElement.textContent = selectedSection ? selectedSection.textContent : 'غير محدد';
+                    sectionElement.innerHTML = `
+                        <i class="fas fa-layer-group"></i> القسم:
+                        ${lessonData.section_name || 'غير محدد'}
+                    `;
                 }
 
+                // تحديث الحالة
                 const statusElement = card.querySelector('.status-badge');
                 if (statusElement) {
-                    const selectedStatus = document.querySelector(`.status-select option[value="${lessonData.status_id}"]`);
-                    statusElement.textContent = selectedStatus ? selectedStatus.textContent : 'غير محدد';
+                    statusElement.style.backgroundColor = lessonData.status_color;
+                    statusElement.style.color = lessonData.status_text_color;
+                    statusElement.textContent = lessonData.status_name || 'غير محدد';
                 }
             }
 
             // تحديث الصف في الجدول
             const tableRow = document.querySelector(`tr[data-lesson-id="${lessonData.id}"]`);
             if (tableRow) {
-                // تحديث نفس العناصر في الجدول
-                // ... تحديث عناصر الجدول المماثلة
+                // تحديث القسم
+                const sectionCell = tableRow.querySelector('td:nth-child(2)');
+                if (sectionCell) {
+                    sectionCell.textContent = lessonData.section_name || 'غير محدد';
+                }
+                
+                // تحديث الحالة
+                const statusBadge = tableRow.querySelector('.status-badge');
+                if (statusBadge) {
+                    statusBadge.style.backgroundColor = lessonData.status_color;
+                    statusBadge.style.color = lessonData.status_text_color;
+                    statusBadge.textContent = lessonData.status_name || 'غير محدد';
+                }
+                
+                // تحديث الشارات
+                const badgesContainer = tableRow.querySelector('.lesson-badges');
+                if (badgesContainer) {
+                    badgesContainer.innerHTML = `
+                        ${lessonData.is_important ? '<span class="badge bg-danger">مهم</span>' : ''}
+                        ${lessonData.is_theory ? '<span class="badge bg-info">نظري</span>' : ''}
+                        ${lessonData.completed ? '<span class="badge bg-success">مكتمل</span>' : ''}
+                        ${lessonData.is_reviewed ? '<span class="badge bg-warning">مراجعة</span>' : ''}
+                    `;
+                }
             }
         } catch (error) {
             console.error('Error updating lesson display:', error);
+            console.log('Lesson data:', lessonData);
         }
     }
 
@@ -864,7 +1015,7 @@ $statistics = getLessonsStatistics($courseId);
 
     // تهيئة Select2
     $(document).ready(function() {
-        $('.status-select, .section-select').select2({
+        $('.status-select').select2({
             theme: 'bootstrap-5',
             width: '100%'
         });
@@ -876,21 +1027,26 @@ $statistics = getLessonsStatistics($courseId);
         const cardsView = document.querySelector('.lessons-cards');
         const tableView = document.querySelector('.lessons-table');
         
-        // تعيين العرض الافتراضي
-        setView('cards');
+        // استرجاع العرض المحفوظ أو استخدام العرض الافتراضي
+        const savedView = localStorage.getItem('lessonsView') || 'cards';
+        setView(savedView);
         
         viewButtons.forEach(btn => {
             btn.addEventListener('click', function() {
                 const view = this.dataset.view;
                 setView(view);
+                // حفظ اختيار العرض
+                localStorage.setItem('lessonsView', view);
             });
         });
         
         function setView(view) {
+            // تحديث الأزرار
             viewButtons.forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.view === view);
             });
             
+            // تحديث العرض
             if (view === 'cards') {
                 cardsView.classList.add('active');
                 cardsView.classList.remove('d-none');
@@ -904,6 +1060,36 @@ $statistics = getLessonsStatistics($courseId);
             }
         }
     });
+
+    // دالة تحديث الإحصائيات
+    function updateStatistics() {
+        fetch(`get_statistics.php?course_id=${courseId}`)
+            .then(response => response.json())
+            .then(stats => {
+                // تحديث عدد الدروس المكتملة
+                document.querySelector('.completed-count').textContent = 
+                    `${stats.completed_lessons} / ${stats.total_lessons}`;
+                
+                // تحديث شريط التقدم
+                const progressBar = document.querySelector('.progress-bar');
+                const percentage = (stats.total_lessons > 0) ? 
+                    (stats.completed_lessons / stats.total_lessons * 100) : 0;
+                progressBar.style.width = `${percentage}%`;
+                
+                // تحديث الدروس النظرية
+                document.querySelector('.theory-count').textContent = stats.theory_lessons;
+                
+                // تحديث الدروس المهمة
+                document.querySelector('.important-count').textContent = stats.important_lessons;
+                
+                // تحديث الوقت المكتمل
+                document.querySelector('.completed-duration').textContent = formatDuration(stats.completed_duration);
+                document.querySelector('.total-duration').textContent = formatDuration(stats.total_duration);
+            })
+            .catch(error => {
+                console.error('Error updating statistics:', error);
+            });
+    }
     </script>
 </body>
 </html> 
