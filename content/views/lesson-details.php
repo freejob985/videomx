@@ -173,7 +173,7 @@ include'../lesson-details/css.php';
 
                         <!-- ChatGPT Button -->
                         <button class="btn btn-outline-primary chatgpt-link"
-                                data-question="<?php echo htmlspecialchars(formatChatGPTQuery($lesson['title'])); ?>"
+                                data-title="<?php echo htmlspecialchars($lesson['title']); ?>"
                                 data-bs-toggle="tooltip"
                                 title="فتح في ChatGPT">
                             <i class="fas fa-robot"></i>

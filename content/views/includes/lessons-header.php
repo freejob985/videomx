@@ -54,6 +54,17 @@
             width: auto;
             max-width: inherit;
         }
+
+        .lessons-header {
+    transition: max-height 0.3s ease-out;
+    overflow: hidden;
+    max-height: 2000px;
+    background: #22237c !important;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    padding: 20px;
+}
     </style>
 
     <!-- المكتبات JavaScript -->
