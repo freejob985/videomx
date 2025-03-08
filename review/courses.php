@@ -108,29 +108,63 @@ function formatDuration($minutes) {
 </head>
 <body>
     <div class="container mt-5">
-        <!-- إضافة قسم الإحصائيات -->
+        <!-- تعديل قسم الإحصائيات -->
         <div class="row mb-5">
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-body">
                         <h3 class="card-title mb-4">إحصائيات الدروس المراجعة</h3>
+                        
+                        <!-- إضافة البروجرس بار -->
+                        <div class="progress-stats mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="progress-label">نسبة إكمال المراجعة</span>
+                                <span class="progress-percentage">
+                                    <?php 
+                                    $completionPercentage = $statistics['total_lessons'] > 0 
+                                        ? round(($statistics['completed_lessons'] / $statistics['total_lessons']) * 100) 
+                                        : 0;
+                                    echo $completionPercentage . '%';
+                                    ?>
+                                </span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-success" 
+                                     role="progressbar" 
+                                     style="width: <?php echo $completionPercentage; ?>%"
+                                     aria-valuenow="<?php echo $completionPercentage; ?>" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row text-center">
                             <div class="col-md-4 mb-3">
-                                <div class="border-end">
+                                <div class="stats-card border-end">
+                                    <div class="stats-icon bg-primary-subtle mb-2">
+                                        <i class="fas fa-book-open"></i>
+                                    </div>
                                     <h4 class="text-primary"><?php echo $statistics['total_lessons']; ?></h4>
                                     <p class="text-muted mb-0">إجمالي الدروس</p>
                                     <small class="text-muted"><?php echo formatDuration($statistics['total_duration']); ?></small>
                                 </div>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <div class="border-end">
+                                <div class="stats-card border-end">
+                                    <div class="stats-icon bg-success-subtle mb-2">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
                                     <h4 class="text-success"><?php echo $statistics['completed_lessons']; ?></h4>
                                     <p class="text-muted mb-0">الدروس المكتملة</p>
                                     <small class="text-muted"><?php echo formatDuration($statistics['completed_duration']); ?></small>
                                 </div>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <div>
+                                <div class="stats-card">
+                                    <div class="stats-icon bg-warning-subtle mb-2">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
                                     <h4 class="text-warning"><?php echo $statistics['remaining_lessons']; ?></h4>
                                     <p class="text-muted mb-0">الدروس المتبقية</p>
                                     <small class="text-muted"><?php echo formatDuration($statistics['remaining_duration']); ?></small>
@@ -335,6 +369,66 @@ function formatDuration($minutes) {
             gap: 5px;
         }
     }
+
+    /* تنسيقات الإحصائيات */
+    .stats-card {
+        padding: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stats-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 1.5em;
+    }
+
+    .progress-stats {
+        padding: 0 15px;
+    }
+
+    .progress-label {
+        font-weight: 600;
+        color: #6c757d;
+    }
+
+    .progress-percentage {
+        font-weight: 600;
+        color: #198754;
+    }
+
+    .progress {
+        background-color: #e9ecef;
+        overflow: hidden;
+        border-radius: 15px;
+    }
+
+    .progress-bar {
+        transition: width 1s ease;
+        border-radius: 15px;
+        background: linear-gradient(45deg, #198754, #20c997);
+    }
+
+    @media (max-width: 768px) {
+        .stats-card {
+            border: none !important;
+            padding: 10px;
+        }
+        
+        .stats-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2em;
+        }
+    }
     </style>
 
     <script>
@@ -378,6 +472,15 @@ function formatDuration($minutes) {
                 this.style.transform = '';
             }, 150);
         });
+
+        // إضافة تأثير حركي للبروجرس بار عند التحميل
+        const progressBar = document.querySelector('.progress-bar');
+        if (progressBar) {
+            progressBar.style.width = '0%';
+            setTimeout(() => {
+                progressBar.style.width = progressBar.getAttribute('aria-valuenow') + '%';
+            }, 300);
+        }
     });
     </script>
 
