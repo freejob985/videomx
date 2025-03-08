@@ -169,20 +169,12 @@ function logLessonUpdate($lessonId, $data) {
 function getLessonsStatistics($courseId) {
     global $conn;
     
-    $stats = [
-        'total_lessons' => 0,
-        'completed_lessons' => 0,
-        'theory_lessons' => 0,
-        'important_lessons' => 0,
-        'total_duration' => 0,
-        'completed_duration' => 0
-    ];
-    
     $sql = "SELECT 
             COUNT(*) as total_lessons,
             SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END) as completed_lessons,
             SUM(CASE WHEN is_theory = 1 THEN 1 ELSE 0 END) as theory_lessons,
             SUM(CASE WHEN is_important = 1 THEN 1 ELSE 0 END) as important_lessons,
+            /* حساب إجمالي وقت الدروس والدروس المكتملة */
             SUM(duration) as total_duration,
             SUM(CASE WHEN completed = 1 THEN duration ELSE 0 END) as completed_duration
             FROM lessons 
@@ -194,10 +186,17 @@ function getLessonsStatistics($courseId) {
     $result = $stmt->get_result();
     
     if ($row = $result->fetch_assoc()) {
-        $stats = array_merge($stats, $row);
+        return $row;
     }
     
-    return $stats;
+    return [
+        'total_lessons' => 0,
+        'completed_lessons' => 0,
+        'theory_lessons' => 0,
+        'important_lessons' => 0,
+        'total_duration' => 0,
+        'completed_duration' => 0
+    ];
 }
 
 /**
@@ -206,12 +205,26 @@ function getLessonsStatistics($courseId) {
  * @return string الوقت بتنسيق ساعات ودقائق
  */
 function formatDuration($minutes) {
-    if (!$minutes) return "0 دقيقة";
+    if (!$minutes || !is_numeric($minutes)) {
+        return "0 دقيقة";
+    }
+    
+    $minutes = (int)$minutes;
+    // التحقق من أن الوقت منطقي (أقل من 24 ساعة)
+    if ($minutes > 1440) {
+        $minutes = 0;
+    }
+    
     $hours = floor($minutes / 60);
     $mins = $minutes % 60;
+    
     if ($hours > 0) {
-        return sprintf("%d ساعة و %d دقيقة", $hours, $mins);
+        if ($mins > 0) {
+            return sprintf("%d ساعة و %d دقيقة", $hours, $mins);
+        }
+        return sprintf("%d ساعة", $hours);
     }
+    
     return sprintf("%d دقيقة", $mins);
 }
 
@@ -374,6 +387,79 @@ $statistics = getLessonsStatistics($courseId);
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
+        
+        /* تنسيق زر إخفاء الدروس المكتملة */
+        .form-switch {
+            padding-left: 2.5em;
+        }
+        
+        .form-switch .form-check-input {
+            width: 3em;
+            margin-left: -2.5em;
+            cursor: pointer;
+        }
+        
+        .form-switch .form-check-label {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+        }
+        
+        /* تنسيق الدروس المخفية */
+        .col-md-6.mb-4.completed {
+            display: none !important;
+        }
+        
+        tr.completed {
+            display: none !important;
+        }
+
+        /* تحسين ظهور زر التبديل */
+        .form-switch {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .form-check.form-switch {
+    margin-right: 22px !important;
+    margin-left: 33px !important;
+}
+
+        /* تنسيق أزرار التنقل */
+        .navigation-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .keyboard-shortcuts {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .keyboard-shortcuts i {
+            margin-left: 5px;
+        }
+        
+        .navigation-buttons .btn {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .navigation-buttons .btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .navigation-buttons .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
     </style>
 </head>
 <body>
@@ -434,13 +520,22 @@ $statistics = getLessonsStatistics($courseId);
 
         <!-- أزرار تبديل العرض -->
         <div class="view-toggle mb-4">
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-primary view-btn active" data-view="cards">
-                    <i class="fas fa-th-large"></i> بطاقات
-                </button>
-                <button type="button" class="btn btn-outline-primary view-btn" data-view="table">
-                    <i class="fas fa-list"></i> جدول
-                </button>
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary view-btn active" data-view="cards">
+                        <i class="fas fa-th-large"></i> بطاقات
+                    </button>
+                    <button type="button" class="btn btn-outline-primary view-btn" data-view="table">
+                        <i class="fas fa-list"></i> جدول
+                    </button>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="hideCompletedToggle">
+                    <label class="form-check-label" for="hideCompletedToggle">
+                        <i class="fas fa-check-circle text-success"></i>
+                        إخفاء الدروس المكتملة
+                    </label>
+                </div>
             </div>
         </div>
 
@@ -448,7 +543,7 @@ $statistics = getLessonsStatistics($courseId);
         <div class="lessons-cards">
             <div class="row">
                 <?php foreach ($lessons as $lesson): ?>
-                    <div class="col-md-6 mb-4">
+                    <div class="col-md-6 mb-4 <?php echo $lesson['completed'] ? 'completed' : ''; ?>">
                         <div class="card h-100" data-lesson-id="<?php echo $lesson['id']; ?>">
                             <?php if ($lesson['thumbnail']): ?>
                                 <div class="lesson-thumbnail-container" onclick='showVideo(<?php echo json_encode([
@@ -517,10 +612,7 @@ $statistics = getLessonsStatistics($courseId);
                             
                             <div class="card-footer bg-light">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-muted">
-                                        <i class="far fa-clock"></i> 
-                                        <?php echo $lesson['duration']; ?> دقيقة
-                                    </span>
+                                    <span></span>
                                     <button class="btn btn-primary btn-sm" 
                                             onclick='showVideo(<?php echo json_encode([
                                                 "url" => $lesson['video_url'],
@@ -547,14 +639,14 @@ $statistics = getLessonsStatistics($courseId);
                                     <th>عنوان الدرس</th>
                                     <th>القسم</th>
                                     <th>الحالة</th>
-                                    <th>المدة</th>
                                     <th>الخصائص</th>
                                     <th>الإجراءات</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($lessons as $lesson): ?>
-                                <tr data-lesson-id="<?php echo $lesson['id']; ?>">
+                                <tr data-lesson-id="<?php echo $lesson['id']; ?>" 
+                                    class="<?php echo $lesson['completed'] ? 'completed' : ''; ?>">
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <img src="<?php echo htmlspecialchars($lesson['thumbnail']); ?>" 
@@ -568,7 +660,6 @@ $statistics = getLessonsStatistics($courseId);
                                             <?php echo htmlspecialchars($lesson['status_name'] ?: 'غير محدد'); ?>
                                         </span>
                                     </td>
-                                    <td><?php echo $lesson['duration']; ?> دقيقة</td>
                                     <td>
                                         <div class="lesson-badges">
                                             <?php if ($lesson['is_important']): ?>
@@ -607,6 +698,18 @@ $statistics = getLessonsStatistics($courseId);
             <div class="modal-content">
                 <div class="modal-header video-modal-header">
                     <h5 class="modal-title lesson-title"></h5>
+                    <div class="navigation-buttons ms-auto me-3">
+                        <button type="button" class="btn btn-outline-light btn-sm" onclick="showPreviousLesson()">
+                            <i class="fas fa-chevron-right"></i> السابق (→)
+                        </button>
+                        <button type="button" class="btn btn-outline-light btn-sm" onclick="showNextLesson()">
+                            التالي (←) <i class="fas fa-chevron-left"></i>
+                        </button>
+                    </div>
+                    <small class="keyboard-shortcuts text-light ms-2">
+                        <i class="fas fa-keyboard"></i>
+                        استخدم الأسهم للتنقل
+                    </small>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="stopVideo()"></button>
                 </div>
                 <div class="modal-body p-0">
@@ -711,6 +814,8 @@ $statistics = getLessonsStatistics($courseId);
     const statuses = <?php echo json_encode($statuses); ?>;
     const sections = <?php echo json_encode($sections); ?>;
     let currentLessonData = null;
+    let lessonsList = <?php echo json_encode($lessons); ?>;
+    let currentLessonIndex = -1;
 
     // دالة عرض الفيديو
     function showVideo(params) {
@@ -718,12 +823,14 @@ $statistics = getLessonsStatistics($courseId);
             const videoUrl = params.url;
             const lessonData = params.data;
             
+            // تحديث مؤشر الدرس الحالي
+            currentLessonIndex = lessonsList.findIndex(lesson => lesson.id === lessonData.id);
+            
             const videoId = videoUrl.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/watch\?.+&v=))([\w-]{11})/);
             if (!videoId) return;
 
             // حفظ بيانات الدرس الحالي
             currentLessonData = lessonData;
-            console.log('Setting current lesson:', currentLessonData);
             
             // تحديث الفيديو
             const embedUrl = `https://www.youtube.com/embed/${videoId[1]}?autoplay=1&rel=0`;
@@ -737,6 +844,15 @@ $statistics = getLessonsStatistics($courseId);
             document.querySelector('.lesson-title').textContent = lessonData.title || '';
             document.querySelector('.lesson-description').textContent = lessonData.description || '';
             
+            // تحديث رابط تفاصيل الدرس
+            const detailsLink = document.querySelector('.btn-details');
+            if (detailsLink) {
+                detailsLink.href = `http://videomx.com/content/views/lesson-details.php?id=${lessonData.id}`;
+            }
+            
+            // تحديث حالة أزرار التنقل
+            updateNavigationButtons();
+            
             // تحديث القوائم المنسدلة
             updateSelects();
             
@@ -746,12 +862,6 @@ $statistics = getLessonsStatistics($courseId);
             document.querySelector('#modal_completed').checked = lessonData.completed == 1;
             document.querySelector('#modal_reviewed').checked = lessonData.is_reviewed == 1;
             
-            // تحديث رابط التفاصيل
-            const detailsLink = document.querySelector('.btn-details');
-            if (detailsLink) {
-                detailsLink.href = `http://videomx.com/content/views/lesson-details.php?id=${lessonData.id}`;
-            }
-
             // عرض الموديول
             const modal = new bootstrap.Modal(document.getElementById('videoModal'));
             modal.show();
@@ -976,9 +1086,24 @@ $statistics = getLessonsStatistics($courseId);
                     `;
                 }
             }
+
+            // تحديث حالة الإخفاء
+            const hideCompleted = localStorage.getItem('hideCompletedLessons') === 'true';
+            if (hideCompleted && lessonData.completed == 1) {
+                // إخفاء البطاقة
+                const cardElement = document.querySelector(`.col-md-6 .card[data-lesson-id="${lessonData.id}"]`);
+                if (cardElement) {
+                    cardElement.closest('.col-md-6').classList.add('completed');
+                }
+                
+                // إخفاء الصف
+                const rowElement = document.querySelector(`tr[data-lesson-id="${lessonData.id}"]`);
+                if (rowElement) {
+                    rowElement.classList.add('completed');
+                }
+            }
         } catch (error) {
             console.error('Error updating lesson display:', error);
-            console.log('Lesson data:', lessonData);
         }
     }
 
@@ -999,14 +1124,79 @@ $statistics = getLessonsStatistics($courseId);
         currentLessonData = null;
     }
 
-    // إضافة مستمعات الأحداث
+    // انتظار تحميل المستند
     document.addEventListener('DOMContentLoaded', function() {
+        // تهيئة زر إخفاء الدروس المكتملة
+        initializeHideCompleted();
+        
         // مستمع لإغلاق الموديول
         const videoModal = document.getElementById('videoModal');
         if (videoModal) {
             videoModal.addEventListener('hidden.bs.modal', stopVideo);
         }
+
+        // إضافة مستمع لاختصارات لوحة المفاتيح
+        document.addEventListener('keydown', function(e) {
+            // التحقق من أن الموديول مفتوح
+            if (document.querySelector('#videoModal').classList.contains('show')) {
+                switch(e.key) {
+                    case 'ArrowRight':
+                        showPreviousLesson();
+                        break;
+                    case 'ArrowLeft':
+                        showNextLesson();
+                        break;
+                }
+            }
+        });
     });
+
+    // دالة تهيئة إخفاء الدروس المكتملة
+    function initializeHideCompleted() {
+        const hideCompletedToggle = document.getElementById('hideCompletedToggle');
+        if (!hideCompletedToggle) return;
+        
+        // استرجاع الحالة المحفوظة
+        const hideCompleted = localStorage.getItem('hideCompletedLessons') === 'true';
+        hideCompletedToggle.checked = hideCompleted;
+        
+        // تطبيق الحالة الأولية
+        updateCompletedLessonsVisibility(hideCompleted);
+        
+        // إضافة مستمع الحدث
+        hideCompletedToggle.addEventListener('change', function() {
+            const shouldHide = this.checked;
+            localStorage.setItem('hideCompletedLessons', shouldHide);
+            updateCompletedLessonsVisibility(shouldHide);
+        });
+    }
+
+    // دالة تحديث ظهور الدروس المكتملة
+    function updateCompletedLessonsVisibility(hide) {
+        try {
+            console.log('Updating visibility, hide:', hide);
+            
+            // تحديث البطاقات
+            document.querySelectorAll('.col-md-6.mb-4').forEach(card => {
+                const completedBadge = card.querySelector('.badge.bg-success');
+                console.log('Card:', card, 'Has completed badge:', !!completedBadge);
+                if (completedBadge) {
+                    card.classList.toggle('completed', hide);
+                }
+            });
+            
+            // تحديث صفوف الجدول
+            document.querySelectorAll('tr[data-lesson-id]').forEach(row => {
+                const completedBadge = row.querySelector('.badge.bg-success');
+                console.log('Row:', row, 'Has completed badge:', !!completedBadge);
+                if (completedBadge) {
+                    row.classList.toggle('completed', hide);
+                }
+            });
+        } catch (error) {
+            console.error('Error updating visibility:', error);
+        }
+    }
 
     // إظهار رسالة نجاح بعد تحديث الحالة
     <?php if ($_SERVER['REQUEST_METHOD'] === 'POST'): ?>
@@ -1083,12 +1273,52 @@ $statistics = getLessonsStatistics($courseId);
                 document.querySelector('.important-count').textContent = stats.important_lessons;
                 
                 // تحديث الوقت المكتمل
-                document.querySelector('.completed-duration').textContent = formatDuration(stats.completed_duration);
-                document.querySelector('.total-duration').textContent = formatDuration(stats.total_duration);
+                const completedDuration = document.querySelector('.completed-duration');
+                const totalDuration = document.querySelector('.total-duration');
+                
+                if (completedDuration) {
+                    completedDuration.textContent = formatDuration(stats.completed_duration);
+                }
+                if (totalDuration) {
+                    totalDuration.textContent = formatDuration(stats.total_duration);
+                }
             })
             .catch(error => {
                 console.error('Error updating statistics:', error);
             });
+    }
+
+    // دالة تحديث حالة أزرار التنقل
+    function updateNavigationButtons() {
+        const prevButton = document.querySelector('.navigation-buttons button:first-child');
+        const nextButton = document.querySelector('.navigation-buttons button:last-child');
+        
+        if (prevButton && nextButton) {
+            prevButton.disabled = currentLessonIndex <= 0;
+            nextButton.disabled = currentLessonIndex >= lessonsList.length - 1;
+        }
+    }
+
+    // دالة عرض الدرس السابق
+    function showPreviousLesson() {
+        if (currentLessonIndex > 0) {
+            const previousLesson = lessonsList[currentLessonIndex - 1];
+            showVideo({
+                url: previousLesson.video_url,
+                data: previousLesson
+            });
+        }
+    }
+
+    // دالة عرض الدرس التالي
+    function showNextLesson() {
+        if (currentLessonIndex < lessonsList.length - 1) {
+            const nextLesson = lessonsList[currentLessonIndex + 1];
+            showVideo({
+                url: nextLesson.video_url,
+                data: nextLesson
+            });
+        }
     }
     </script>
 </body>
