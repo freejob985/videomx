@@ -30,7 +30,7 @@ function getReviewedLessons($courseId) {
             LEFT JOIN statuses st ON l.status_id = st.id
             LEFT JOIN courses c ON l.course_id = c.id
             WHERE l.course_id = ? AND l.is_reviewed = 1
-            ORDER BY l.order_number";
+            ORDER BY l.id ASC";
     
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $courseId);
@@ -344,6 +344,8 @@ $statistics = getLessonsStatistics($courseId);
             display: flex;
             align-items: center;
             gap: 8px;
+            position: relative;
+            overflow: hidden;
         }
         
         .section-btn:hover {
@@ -355,6 +357,8 @@ $statistics = getLessonsStatistics($courseId);
             background: #2196F3;
             border-color: #2196F3;
             color: white;
+            transform: scale(1.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
         .section-btn i {
@@ -458,6 +462,66 @@ $statistics = getLessonsStatistics($courseId);
         .navigation-buttons .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        /* تنسيق أزرار الحالة */
+        .statuses-toggle {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .status-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* تأثير الموجة عند النقر */
+        .status-btn::after,
+        .section-btn::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            opacity: 1;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        .status-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .status-btn.active {
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .status-btn i {
+            font-size: 16px;
         }
 
     </style>
@@ -733,9 +797,8 @@ $statistics = getLessonsStatistics($courseId);
                             <div class="row g-3">
                                 <div class="col-md-12">
                                     <label class="form-label">الحالة</label>
-                                    <div class="status-section">
-                                        <select class="form-select custom-select status-select" id="modal_status">
-                                        </select>
+                                    <div class="statuses-toggle" id="statuses_toggle">
+                                        <!-- سيتم إضافة الأزرار ديناميكياً -->
                                     </div>
                                 </div>
                                 <div class="col-md-12 mt-4">
@@ -814,7 +877,7 @@ $statistics = getLessonsStatistics($courseId);
     const statuses = <?php echo json_encode($statuses); ?>;
     const sections = <?php echo json_encode($sections); ?>;
     let currentLessonData = null;
-    let lessonsList = <?php echo json_encode($lessons); ?>;
+    let lessonsList = <?php echo json_encode($lessons); ?>.sort((a, b) => a.id - b.id);
     let currentLessonIndex = -1;
 
     // دالة عرض الفيديو
@@ -876,14 +939,18 @@ $statistics = getLessonsStatistics($courseId);
         try {
             if (!currentLessonData) return;
 
-            // تحديث قائمة الحالات
-            const statusSelect = document.querySelector('#modal_status');
-            if (statusSelect) {
-                statusSelect.innerHTML = statuses.map(status => `
-                    <option value="${status.id}" 
-                            ${currentLessonData.status_id == status.id ? 'selected' : ''}>
+            // تحديث أزرار الحالات
+            const statusesToggle = document.querySelector('#statuses_toggle');
+            if (statusesToggle) {
+                statusesToggle.innerHTML = statuses.map(status => `
+                    <button type="button" 
+                            class="status-btn ${currentLessonData.status_id == status.id ? 'active' : ''}"
+                            data-status-id="${status.id}"
+                            onclick="selectStatus(${status.id})"
+                            style="background-color: ${status.color}; color: ${status.text_color}; border-color: ${status.color}">
+                        <i class="fas fa-tag"></i>
                         ${status.name}
-                    </option>
+                    </button>
                 `).join('');
             }
 
@@ -905,7 +972,7 @@ $statistics = getLessonsStatistics($courseId);
             console.log('Current lesson data:', currentLessonData);
             console.log('Available statuses:', statuses);
             console.log('Available sections:', sections);
-            console.log('Status select:', statusSelect?.innerHTML);
+            console.log('Status select:', statusesToggle?.innerHTML);
             console.log('Section select:', sectionsToggle?.innerHTML);
         } catch (error) {
             console.error('Error in updateSelects:', error);
@@ -915,10 +982,47 @@ $statistics = getLessonsStatistics($courseId);
 
     // دالة اختيار القسم
     function selectSection(sectionId) {
+        const button = event.currentTarget;
+        addClickEffect(button);
+        
         const buttons = document.querySelectorAll('.section-btn');
         buttons.forEach(btn => {
             btn.classList.toggle('active', btn.dataset.sectionId == sectionId);
         });
+    }
+
+    // دالة اختيار الحالة
+    function selectStatus(statusId) {
+        const button = event.currentTarget;
+        addClickEffect(button);
+        
+        const buttons = document.querySelectorAll('.status-btn');
+        buttons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.statusId == statusId);
+        });
+    }
+
+    // دالة إضافة تأثير النقر
+    function addClickEffect(button) {
+        // إزالة التأثير السابق إن وجد
+        button.classList.remove('ripple');
+        
+        // إضافة التأثير
+        const rect = button.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        const ripple = document.createElement('div');
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+        ripple.classList.add('ripple');
+        
+        button.appendChild(ripple);
+        
+        // إزالة عنصر التأثير بعد انتهاء الأنيميشن
+        setTimeout(() => {
+            ripple.remove();
+        }, 600);
     }
 
     // دالة حفظ التغييرات
@@ -929,16 +1033,17 @@ $statistics = getLessonsStatistics($courseId);
                 return;
             }
 
-            const statusSelect = document.querySelector('#modal_status');
+            const statusesToggle = document.querySelector('#statuses_toggle');
             const sectionsToggle = document.querySelector('#sections_toggle');
             
-            if (!statusSelect || !sectionsToggle) {
+            if (!statusesToggle || !sectionsToggle) {
                 showToast("لم يتم العثور على عناصر التحكم", "error");
-                console.error('Select elements not found:', { statusSelect, sectionsToggle });
+                console.error('Select elements not found:', { statusesToggle, sectionsToggle });
                 return;
             }
             
-            const statusId = statusSelect.value;
+            const activeStatus = document.querySelector('.status-btn.active');
+            const statusId = activeStatus ? activeStatus.dataset.statusId : null;
             const activeSection = document.querySelector('.section-btn.active');
             const sectionId = activeSection ? activeSection.dataset.sectionId : null;
 
@@ -972,7 +1077,7 @@ $statistics = getLessonsStatistics($courseId);
 
             // تسجيل البيانات المرسلة للتحقق
             console.log('Form elements:', {
-                statusSelect,
+                statusesToggle,
                 sectionsToggle,
                 theoryCheckbox,
                 importantCheckbox,
