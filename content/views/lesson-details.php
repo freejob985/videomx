@@ -793,8 +793,8 @@ include'../lesson-details/css.php';
     </div>
 </div>
 
-<button id="sidebarToggle" class="sidebar-toggle">
-    <i class="fas fa-chevron-right"></i>
+<button id="sidebarToggle" class="sidebar-toggle" title="عرض/إخفاء قائمة الدروس">
+    <i class="fas fa-chevron-left"></i>
 </button>
 
 <?php require_once '../includes/footer.php'; ?>

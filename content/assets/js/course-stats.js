@@ -9,6 +9,7 @@ class CourseStats {
         this.courseId = courseId;
         this.showCompleted = true;
         this.initializeElements();
+        this.initializeSidebarState();
         this.initializeEvents();
         this.loadInitialData();
     }
@@ -26,6 +27,16 @@ class CourseStats {
         
         // زر إخفاء/إظهار الدروس المكتملة
         this.toggleCompletedBtn = document.getElementById('toggleCompleted');
+    }
+
+    initializeSidebarState() {
+        // قراءة الحالة المخزنة أو استخدام الحالة الافتراضية (مخفية)
+        const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') !== 'false';
+        if (isSidebarCollapsed) {
+            document.body.classList.add('sidebar-collapsed');
+        } else {
+            document.body.classList.remove('sidebar-collapsed');
+        }
     }
 
     initializeEvents() {
@@ -47,6 +58,8 @@ class CourseStats {
         if (sidebarToggle) {
             sidebarToggle.addEventListener('click', () => {
                 document.body.classList.toggle('sidebar-collapsed');
+                // تخزين الحالة الجديدة
+                localStorage.setItem('sidebarCollapsed', document.body.classList.contains('sidebar-collapsed'));
             });
         }
         
@@ -116,22 +129,30 @@ class CourseStats {
         const remainingDuration = document.getElementById('remainingDuration');
         
         if (totalDuration) {
-            totalDuration.textContent = this.formatDuration(stats.total_duration);
+            const total = Math.floor(parseFloat(stats.total_duration) || 0);
+            totalDuration.textContent = this.formatDuration(total);
         }
         if (remainingDuration) {
-            const remainingTime = Math.max(0, stats.total_duration - stats.completed_duration);
-            remainingDuration.textContent = this.formatDuration(remainingTime);
+            const total = Math.floor(parseFloat(stats.total_duration) || 0);
+            const completed = Math.floor(parseFloat(stats.completed_duration) || 0);
+            const remaining = Math.max(0, total - completed);
+            remainingDuration.textContent = this.formatDuration(remaining);
         }
     }
 
     formatDuration(minutes) {
-        if (!minutes) return '0:00:00';
+        if (!minutes || isNaN(minutes)) return '00:00:00';
         
-        const hours = Math.floor(minutes / 60);
-        const mins = Math.floor(minutes % 60);
-        const secs = Math.round((minutes % 1) * 60);
+        // تحويل الدقائق إلى ساعات ودقائق
+        const totalMinutes = Math.floor(minutes);
+        const hours = Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
         
-        return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        // تنسيق الوقت بشكل أفضل
+        const formattedHours = String(hours).padStart(2, '0');
+        const formattedMins = String(mins).padStart(2, '0');
+        
+        return `${formattedHours}:${formattedMins}:00`;
     }
 
     async loadLessons() {

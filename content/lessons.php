@@ -874,7 +874,7 @@ toastr.options = {
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th width="50">#</th>
+                        <th width="50">#</th> <!-- عمود واحد للترقيم والمراجعة -->
                         <th>العنوان</th>
                         <th width="120">المدة</th>
                         <th width="150">القسم</th>
@@ -885,7 +885,25 @@ toastr.options = {
                 <tbody>
                     <?php foreach ($lessons as $index => $lesson): ?>
                         <tr data-lesson-id="<?php echo $lesson['id']; ?>">
-                            <td><?php echo $index + 1; ?></td>
+                            <!-- دمج الترقيم مع المراجعة -->
+                            <td>
+                                <div class="review-number-wrapper">
+                                    <?php if ($lesson['is_reviewed']): ?>
+                                        <input type="checkbox" 
+                                               class="form-check-input review-checkbox" 
+                                               data-lesson-id="<?php echo $lesson['id']; ?>"
+                                               checked
+                                               onchange="toggleReview(this, <?php echo $lesson['id']; ?>)">
+                                        <i class="fas fa-check number"></i>
+                                    <?php else: ?>
+                                        <input type="checkbox" 
+                                               class="form-check-input review-checkbox" 
+                                               data-lesson-id="<?php echo $lesson['id']; ?>"
+                                               onchange="toggleReview(this, <?php echo $lesson['id']; ?>)">
+                                        <span class="number"><?php echo $index + 1; ?></span>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
                             <td>
                                 <div class="lesson-content">
                                     <div class="lesson-title-wrapper">
@@ -1846,4 +1864,237 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+</script> 
+
+<!-- إضافة JavaScript للتعامل مع المراجعة -->
+<script>
+/**
+ * تبديل حالة المراجعة للدرس
+ * @param {HTMLElement} checkbox - عنصر checkbox المضغوط
+ * @param {number} lessonId - معرف الدرس
+ */
+function toggleReview(checkbox, lessonId) {
+    const isReviewed = checkbox.checked ? 1 : 0;
+    const numberElement = checkbox.nextElementSibling;
+    
+    // عرض مؤشر التحميل
+    const loader = document.querySelector('.loader');
+    if (loader) loader.style.display = 'block';
+
+    fetch('api/update-lesson-review.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            lesson_id: lessonId,
+            is_reviewed: isReviewed
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            toastr.success(isReviewed ? 'تمت إضافة الدرس للمراجعة' : 'تم إزالة الدرس من المراجعة');
+            
+            // تحديث الواجهة
+            checkbox.checked = isReviewed;
+            checkbox.style.backgroundColor = isReviewed ? '#28a745' : '#dc3545';
+            
+            // تحديث الرقم/الأيقونة
+            if (isReviewed) {
+                numberElement.className = 'fas fa-check number';
+                numberElement.textContent = '';
+            } else {
+                numberElement.className = 'number';
+                numberElement.textContent = numberElement.closest('tr').querySelector('td:first-child').textContent;
+            }
+        } else {
+            throw new Error(data.error || 'حدث خطأ أثناء تحديث حالة المراجعة');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        toastr.error(error.message);
+        checkbox.checked = !isReviewed;
+        checkbox.style.backgroundColor = !isReviewed ? '#28a745' : '#dc3545';
+    })
+    .finally(() => {
+        if (loader) loader.style.display = 'none';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const reviewCheckboxes = document.querySelectorAll('.review-checkbox');
+    
+    reviewCheckboxes.forEach(checkbox => {
+        new bootstrap.Tooltip(checkbox, {
+            title: checkbox.checked ? 'تمت المراجعة' : 'لم تتم المراجعة',
+            placement: 'top'
+        });
+        
+        checkbox.addEventListener('change', function() {
+            const tooltip = bootstrap.Tooltip.getInstance(this);
+            if (tooltip) {
+                tooltip.dispose();
+            }
+            new bootstrap.Tooltip(this, {
+                title: this.checked ? 'تمت المراجعة' : 'لم تتم المراجعة',
+                placement: 'top'
+            });
+        });
+    });
+});
+</script>
+
+<style>
+/* تنسيقات checkbox المراجعة */
+.review-checkbox {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+}
+
+.review-checkbox:checked {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.review-checkbox:hover {
+    border-color: #28a745;
+}
+
+/* تحسين مظهر tooltip */
+.tooltip {
+    font-size: 12px;
+}
+
+.tooltip .tooltip-inner {
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+</style> 
+
+<style>
+.review-number-wrapper {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.review-checkbox {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    margin: 0;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.review-checkbox:checked {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.review-checkbox:not(:checked) {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.review-number-wrapper .number {
+    position: absolute;
+    color: white;
+    font-size: 12px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.review-number-wrapper .fa-check {
+    font-size: 14px;
+}
+
+/* تحسين مظهر tooltip */
+.tooltip {
+    font-size: 12px;
+}
+
+.tooltip .tooltip-inner {
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const reviewCheckboxes = document.querySelectorAll('.review-checkbox');
+    
+    reviewCheckboxes.forEach(checkbox => {
+        // إضافة tooltip
+        new bootstrap.Tooltip(checkbox, {
+            title: checkbox.checked ? 'تمت المراجعة' : 'لم تتم المراجعة',
+            placement: 'top'
+        });
+        
+        // تحديث tooltip عند تغيير الحالة
+        checkbox.addEventListener('change', function() {
+            const tooltip = bootstrap.Tooltip.getInstance(this);
+            if (tooltip) {
+                tooltip.dispose();
+            }
+            new bootstrap.Tooltip(this, {
+                title: this.checked ? 'تمت المراجعة' : 'لم تتم المراجعة',
+                placement: 'top'
+            });
+        });
+    });
+});
+
+function toggleReview(checkbox, lessonId) {
+    const isReviewed = checkbox.checked ? 1 : 0;
+    
+    // عرض مؤشر التحميل
+    const loader = document.querySelector('.loader');
+    if (loader) loader.style.display = 'block';
+
+    // إرسال الطلب لتحديث حالة المراجعة
+    fetch('api/update-lesson-review.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            lesson_id: lessonId,
+            is_reviewed: isReviewed
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // عرض رسالة نجاح
+            toastr.success(isReviewed ? 'تمت إضافة الدرس للمراجعة' : 'تم إزالة الدرس من المراجعة');
+            
+            // تحديث الواجهة
+            checkbox.checked = isReviewed;
+            checkbox.style.backgroundColor = isReviewed ? '#28a745' : '#dc3545';
+        } else {
+            throw new Error(data.error || 'حدث خطأ أثناء تحديث حالة المراجعة');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        toastr.error(error.message);
+        // إعادة الـ checkbox لحالته السابقة
+        checkbox.checked = !isReviewed;
+        checkbox.style.backgroundColor = !isReviewed ? '#28a745' : '#dc3545';
+    })
+    .finally(() => {
+        if (loader) loader.style.display = 'none';
+    });
+}
 </script> 

@@ -49,25 +49,35 @@ function getCourseDetailedStats($course_id) {
                 COALESCE(SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END), 0) as completed_lessons,
                 COALESCE(SUM(CASE WHEN is_reviewed = 1 THEN 1 ELSE 0 END), 0) as reviewed_lessons,
                 COALESCE(ROUND((SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0)), 1), 0) as completion_percentage,
-                COALESCE(SUM(duration), 0) as total_duration,
-                COALESCE(SUM(CASE WHEN completed = 1 THEN duration ELSE 0 END), 0) as completed_duration
+                -- حساب وقت الكورس الكلي
+                (SELECT COALESCE(duration, 0) 
+                 FROM courses 
+                 WHERE id = ?) as total_duration,
+                -- حساب الوقت المكتمل من الكورس
+                (SELECT COALESCE(
+                    (duration * (SELECT COALESCE(ROUND((SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0)), 1), 0) / 100
+                     FROM lessons 
+                     WHERE course_id = courses.id)), 0)
+                 FROM courses 
+                 WHERE id = ?) as completed_duration
             FROM lessons 
             WHERE course_id = ?
         ";
+        
         $stmt = $pdo->prepare($query);
-        $stmt->execute([$course_id]);
+        $stmt->execute([$course_id, $course_id, $course_id]);
         $stats = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        // تنسيق المدة الزمنية
-        $stats['formatted_total_duration'] = formatDuration($stats['total_duration']);
-        $stats['formatted_completed_duration'] = formatDuration($stats['completed_duration']);
-        
-        // التأكد من أن جميع القيم رقمية
+        // تحويل جميع القيم إلى أرقام
         foreach ($stats as $key => $value) {
             if (is_numeric($value)) {
                 $stats[$key] = (float)$value;
             }
         }
+        
+        // التأكد من أن الأوقات أرقام صحيحة
+        $stats['total_duration'] = floor($stats['total_duration']);
+        $stats['completed_duration'] = floor($stats['completed_duration']);
         
         return $stats;
     } catch (Exception $e) {
@@ -78,9 +88,7 @@ function getCourseDetailedStats($course_id) {
             'reviewed_lessons' => 0,
             'completion_percentage' => 0,
             'total_duration' => 0,
-            'completed_duration' => 0,
-            'formatted_total_duration' => '0:00',
-            'formatted_completed_duration' => '0:00'
+            'completed_duration' => 0
         ];
     }
 }
