@@ -254,7 +254,7 @@ include'../lesson-details/css.php';
                     <!-- معلومات الدرس الأساسية -->
                     <div class="card mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">
+                            <h5 class="card-title mb-0" style="color: black;">
                                 <i class="fas fa-info-circle me-2"></i>
                                 معلومات الدرس
                             </h5>
@@ -280,7 +280,7 @@ include'../lesson-details/css.php';
                     <!-- زر نسخ جميع المعلومات -->
                     <div class="card mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">
+                            <h5 class="card-title mb-0" style="color: black;">
                                 <i class="fas fa-copy me-2"></i>
                                 نسخ المعلومات
                             </h5>
@@ -551,72 +551,77 @@ include'../lesson-details/css.php';
                     </button>
                 </div>
                 <div class="card-body notes-content">
-                    <!-- نموذج إضافة ملاحظة -->
-                    <form id="addNoteForm" class="mb-4">
-                        <input type="hidden" name="lesson_id" value="<?php echo $lesson['id']; ?>">
-                        
-                        <!-- نوع الملاحظة -->
-                        <div class="mb-3">
-                            <label class="form-label">نوع الملاحظة</label>
-                            <select class="form-select" name="type" id="noteType">
-                                <option value="text" selected>نص</option>
-                                <option value="code">كود</option>
-                                <option value="link">رابط</option>
-                            </select>
+                    <!-- نموذج إضافة الملاحظات -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0" style="color: black;">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                إضافة ملاحظة جديدة
+                            </h5>
                         </div>
-                        
-                        <!-- العنوان -->
-                        <div class="mb-3">
-                            <label class="form-label">العنوان</label>
-                            <input type="text" class="form-control" name="title" required>
+                        <div class="card-body">
+                            <form id="addNoteForm">
+                                <div class="mb-3">
+                                    <label for="noteTitle" class="form-label">عنوان الملاحظة</label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="noteTitle" 
+                                           name="title" 
+                                           value="<?php echo htmlspecialchars($lesson['title']); ?>"
+                                           required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="noteType" class="form-label">نوع الملاحظة</label>
+                                    <select class="form-select" id="noteType" name="type" required>
+                                        <option value="text">نص</option>
+                                        <option value="code">كود</option>
+                                        <option value="link">رابط</option>
+                                    </select>
+                                </div>
+                                <!-- باقي حقول النموذج -->
+                                <div class="code-options d-none">
+                                    <div class="mb-3">
+                                        <label for="codeLanguage" class="form-label">لغة البرمجة</label>
+                                        <select class="form-select" id="codeLanguage" name="code_language">
+                                            <option value="javascript">JavaScript</option>
+                                            <option value="php">PHP</option>
+                                            <option value="html">HTML</option>
+                                            <option value="css">CSS</option>
+                                            <option value="sql">SQL</option>
+                                            <option value="python">Python</option>
+                                            <option value="java">Java</option>
+                                            <option value="csharp">C#</option>
+                                            <option value="cpp">C++</option>
+                                            <option value="typescript">TypeScript</option>
+                                            <option value="ruby">Ruby</option>
+                                            <option value="swift">Swift</option>
+                                            <option value="go">Go</option>
+                                            <option value="rust">Rust</option>
+                                            <option value="kotlin">Kotlin</option>
+                                            <option value="bash">Bash</option>
+                                            <option value="powershell">PowerShell</option>
+                                            <option value="json">JSON</option>
+                                            <option value="xml">XML</option>
+                                            <option value="yaml">YAML</option>
+                                            <option value="markdown">Markdown</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="noteContent" class="form-label">المحتوى</label>
+                                    <textarea class="form-control" 
+                                              id="noteContent" 
+                                              name="content" 
+                                              rows="5" 
+                                              required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>
+                                    حفظ الملاحظة
+                                </button>
+                            </form>
                         </div>
-                        
-                        <!-- حقول النص - تظهر افتراضياً -->
-                        <div class="note-fields text-fields">
-                            <div class="mb-3">
-                                <label class="form-label">المحتوى</label>
-                                <textarea class="form-control tinymce" name="content" id="textContent"></textarea>
-                            </div>
-                        </div>
-                        
-                        <!-- حقول الكود - مخفية -->
-                        <div class="note-fields code-fields d-none">
-                            <div class="mb-3">
-                                <label class="form-label">لغة البرمجة</label>
-                                <select class="form-select" name="code_language">
-                                    <option value="javascript">JavaScript</option>
-                                    <option value="php">PHP</option>
-                                    <option value="html">HTML</option>
-                                    <option value="css">CSS</option>
-                                    <option value="sql">SQL</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">الكود</label>
-                                <textarea class="form-control code-editor" name="code_content" rows="10"></textarea>
-                            </div>
-                        </div>
-                        
-                        <!-- حقول الرابط - مخفية -->
-                        <div class="note-fields link-fields d-none">
-                            <div class="mb-3">
-                                <label class="form-label">الرابط</label>
-                                <input type="url" 
-                                       class="form-control" 
-                                       name="link_url" 
-                                       data-required="true">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">الوصف</label>
-                                <textarea class="form-control" name="link_description" rows="3"></textarea>
-                            </div>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>
-                            إضافة ملاحظة
-                        </button>
-                    </form>
+                    </div>
                     
                     <!-- عرض الملاحظات -->
                     <div id="notesList" class="notes-list">
@@ -654,13 +659,13 @@ include'../lesson-details/css.php';
                                         <?php elseif ($note['type'] === 'code'): ?>
                                             <div class="code-wrapper">
                                                 <div class="code-controls">
-                                                    <button type="button" class="font-size-increase" title="تكبير الخط">
-                                                        <i class="fas fa-plus"></i>
-                                                    </button>
                                                     <button type="button" class="font-size-decrease" title="تصغير الخط">
                                                         <i class="fas fa-minus"></i>
                                                     </button>
-                                                    <button class="fullscreen-toggle" title="ملء الشاشة">
+                                                    <button type="button" class="font-size-increase" title="تكبير الخط">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                    <button type="button" class="fullscreen-toggle" title="ملء الشاشة">
                                                         <i class="fas fa-expand"></i>
                                                     </button>
                                                 </div>

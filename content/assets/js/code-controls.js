@@ -12,40 +12,107 @@ class CodeControls {
     }
 
     initializeControls() {
-        // إضافة أزرار التحكم لكل كتلة كود
+        // تهيئة أزرار التحكم في حجم الخط لكل كتلة كود
         document.querySelectorAll('.code-wrapper').forEach(wrapper => {
-            if (!wrapper.querySelector('.code-controls')) {
-                const controls = this.createCodeControls();
-                wrapper.appendChild(controls);
-            }
+            this.initializeSectionFontControls(wrapper);
         });
 
-        // تفعيل وظائف الأزرار
+        // تهيئة أزرار التحكم في الموديول
+        const modal = document.getElementById('codeModal');
+        if (modal) {
+            this.initializeModalFontControls(modal);
+        }
+
+        // تفعيل وظائف الأزرار الأخرى
         this.initializeFullscreenButtons();
         this.initializeCopyButtons();
-        this.initializeFontSizeControls();
     }
 
-    createCodeControls() {
-        const controls = document.createElement('div');
-        controls.className = 'code-controls';
-        
-        // زر النسخ
-        const copyBtn = document.createElement('button');
-        copyBtn.className = 'copy-code';
-        copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
-        copyBtn.title = 'نسخ الكود';
-        
-        // زر ملء الشاشة
-        const fullscreenBtn = document.createElement('button');
-        fullscreenBtn.className = 'fullscreen-toggle';
-        fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
-        fullscreenBtn.title = 'ملء الشاشة';
-        
-        controls.appendChild(copyBtn);
-        controls.appendChild(fullscreenBtn);
-        
-        return controls;
+    initializeSectionFontControls(wrapper) {
+        const increaseBtn = wrapper.querySelector('.font-size-increase');
+        const decreaseBtn = wrapper.querySelector('.font-size-decrease');
+        const codeElement = wrapper.querySelector('pre code');
+
+        if (increaseBtn && codeElement) {
+            increaseBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (this.currentFontSize < 24) {
+                    this.currentFontSize += 2;
+                    this.updateAllCodeFontSizes();
+                }
+            };
+        }
+
+        if (decreaseBtn && codeElement) {
+            decreaseBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (this.currentFontSize > 12) {
+                    this.currentFontSize -= 2;
+                    this.updateAllCodeFontSizes();
+                }
+            };
+        }
+
+        // تعيين الحجم الأولي
+        if (codeElement) {
+            codeElement.style.fontSize = `${this.currentFontSize}px`;
+        }
+    }
+
+    initializeModalFontControls(modal) {
+        const increaseBtn = modal.querySelector('.font-size-increase');
+        const decreaseBtn = modal.querySelector('.font-size-decrease');
+        const fontSizeDisplay = modal.querySelector('.font-size-display');
+        const codeElement = modal.querySelector('pre code');
+
+        if (increaseBtn) {
+            increaseBtn.onclick = (e) => {
+                e.preventDefault();
+                if (this.currentFontSize < 24) {
+                    this.currentFontSize += 2;
+                    this.updateAllCodeFontSizes();
+                }
+            };
+        }
+
+        if (decreaseBtn) {
+            decreaseBtn.onclick = (e) => {
+                e.preventDefault();
+                if (this.currentFontSize > 12) {
+                    this.currentFontSize -= 2;
+                    this.updateAllCodeFontSizes();
+                }
+            };
+        }
+
+        // تحديث العرض الأولي
+        this.updateFontSize(codeElement, fontSizeDisplay);
+    }
+
+    updateAllCodeFontSizes() {
+        // تحديث حجم الخط في جميع أقسام الكود
+        document.querySelectorAll('.code-wrapper pre code').forEach(codeElement => {
+            this.updateFontSize(codeElement);
+        });
+
+        // تحديث حجم الخط في الموديول إذا كان مفتوحاً
+        const modal = document.getElementById('codeModal');
+        if (modal) {
+            const modalCode = modal.querySelector('pre code');
+            const fontSizeDisplay = modal.querySelector('.font-size-display');
+            this.updateFontSize(modalCode, fontSizeDisplay);
+        }
+    }
+
+    updateFontSize(codeElement, fontSizeDisplay = null) {
+        if (codeElement) {
+            codeElement.style.fontSize = `${this.currentFontSize}px`;
+        }
+        if (fontSizeDisplay) {
+            fontSizeDisplay.textContent = `${this.currentFontSize}px`;
+        }
     }
 
     initializeFullscreenButtons() {
@@ -158,7 +225,7 @@ class CodeControls {
     openCodeInModal(wrapper) {
         const modal = document.getElementById('codeModal');
         const codeElement = wrapper.querySelector('code');
-        const noteTitle = wrapper.closest('.note-card').querySelector('.card-header h5').textContent;
+        const noteTitle = wrapper.closest('.note-card')?.querySelector('.card-header h5')?.textContent || 'عرض الكود';
 
         // تحديث عنوان الموديول
         modal.querySelector('.modal-title').textContent = noteTitle;
@@ -166,42 +233,14 @@ class CodeControls {
         // نسخ محتوى الكود ولغة البرمجة
         const modalCode = modal.querySelector('code');
         modalCode.className = codeElement.className;
-        modalCode.textContent = codeElement.textContent;
+        modalCode.innerHTML = codeElement.innerHTML;
+        modalCode.style.fontSize = `${this.currentFontSize}px`;
 
         // إعادة تطبيق تنسيق Prism
         Prism.highlightElement(modalCode);
 
         // فتح الموديول
         this.modal.show();
-    }
-
-    initializeFontSizeControls() {
-        const modal = document.getElementById('codeModal');
-        
-        // زر تكبير الخط
-        modal.querySelector('.font-size-increase').addEventListener('click', () => {
-            if (this.currentFontSize < 24) {
-                this.currentFontSize += 2;
-                this.updateFontSize();
-            }
-        });
-
-        // زر تصغير الخط
-        modal.querySelector('.font-size-decrease').addEventListener('click', () => {
-            if (this.currentFontSize > 12) {
-                this.currentFontSize -= 2;
-                this.updateFontSize();
-            }
-        });
-    }
-
-    updateFontSize() {
-        const modal = document.getElementById('codeModal');
-        const codeElement = modal.querySelector('code');
-        const fontSizeDisplay = modal.querySelector('.font-size-display');
-        
-        codeElement.style.fontSize = `${this.currentFontSize}px`;
-        fontSizeDisplay.textContent = `${this.currentFontSize}px`;
     }
 
     setupRelatedLessonsToggle() {

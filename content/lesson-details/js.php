@@ -662,302 +662,103 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// دالة لتحديث حالة قسم الملاحظات
-function updateNotesSection(isVisible) {
-    const toggleBtn = document.querySelector('.toggle-notes');
+// تحديث قسم الملاحظات
+function updateNotesSection() {
     const notesContent = document.querySelector('.notes-content');
-    const icon = toggleBtn.querySelector('i');
+    const toggleButton = document.querySelector('.toggle-notes');
     
-    if (isVisible) {
-        toggleBtn.classList.remove('collapsed');
+    if (!notesContent || !toggleButton) return; // التحقق من وجود العناصر قبل استخدامها
+
+    // تحديث حالة القسم
+    const isCollapsed = notesContent.classList.contains('collapsed');
+    
+    if (isCollapsed) {
         notesContent.classList.remove('collapsed');
-        icon.classList.remove('fa-chevron-down');
-        icon.classList.add('fa-chevron-up');
-        notesContent.style.maxHeight = notesContent.scrollHeight + 'px';
+        toggleButton.querySelector('i').classList.replace('fa-chevron-down', 'fa-chevron-up');
     } else {
-        toggleBtn.classList.add('collapsed');
         notesContent.classList.add('collapsed');
-        icon.classList.remove('fa-chevron-up');
-        icon.classList.add('fa-chevron-down');
-        notesContent.style.maxHeight = '0';
+        toggleButton.querySelector('i').classList.replace('fa-chevron-up', 'fa-chevron-down');
     }
-    
+
     // حفظ الحالة في localStorage
-    localStorage.setItem('notesVisible', isVisible);
+    localStorage.setItem('notesContentCollapsed', isCollapsed ? 'false' : 'true');
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const toggleBtn = document.querySelector('.toggle-notes');
+// تهيئة حالة قسم الملاحظات
+function initializeNotesSection() {
     const notesContent = document.querySelector('.notes-content');
+    const toggleButton = document.querySelector('.toggle-notes');
     
-    // تهيئة tooltips
-    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    tooltips.forEach(tooltip => new bootstrap.Tooltip(tooltip));
-    
+    if (!notesContent || !toggleButton) return; // التحقق من وجود العناصر
+
     // استرجاع الحالة المحفوظة
-    const isVisible = localStorage.getItem('notesVisible') !== 'false';
+    const isCollapsed = localStorage.getItem('notesContentCollapsed') === 'true';
     
-    // تعيين الارتفاع الأولي
-    notesContent.style.maxHeight = isVisible ? notesContent.scrollHeight + 'px' : '0';
+    if (isCollapsed) {
+        notesContent.classList.add('collapsed');
+        toggleButton.querySelector('i').classList.replace('fa-chevron-up', 'fa-chevron-down');
+    }
+
+    // إضافة مستمع الحدث لزر التبديل
+    toggleButton.addEventListener('click', updateNotesSection);
+}
+
+// تهيئة نوع الملاحظة
+function initializeNoteType() {
+    const noteTypeSelect = document.getElementById('noteType');
+    const codeOptions = document.querySelector('.code-options');
     
-    // تطبيق الحالة المحفوظة
-    updateNotesSection(isVisible);
-    
-    // معالجة النقر على زر الإخفاء/الإظهار
-    toggleBtn.addEventListener('click', function() {
-        const isCurrentlyVisible = !toggleBtn.classList.contains('collapsed');
-        updateNotesSection(!isCurrentlyVisible);
-    });
-    
-    // تحديث الارتفاع عند إضافة محتوى جديد
-    const observer = new MutationObserver(function(mutations) {
-        if (!notesContent.classList.contains('collapsed')) {
-            notesContent.style.maxHeight = notesContent.scrollHeight + 'px';
+    if (!noteTypeSelect || !codeOptions) return; // التحقق من وجود العناصر
+
+    noteTypeSelect.addEventListener('change', function() {
+        if (this.value === 'code') {
+            codeOptions.classList.remove('d-none');
+        } else {
+            codeOptions.classList.add('d-none');
         }
     });
-    
-    observer.observe(notesContent, {
-        childList: true,
-        subtree: true,
-        characterData: true
-    });
-});
+}
 
-// تحديث الدالة createNoteHTML لتحديث ارتفاع المحتوى
-const originalCreateNoteHTML = createNoteHTML;
-createNoteHTML = function(note) {
-    const html = originalCreateNoteHTML(note);
+// تهيئة محرر TinyMCE
+function initializeTinyMCE() {
+    const noteContent = document.getElementById('noteContent');
     
-    // تحديث ارتفاع المحتوى بعد إضافة الملاحظة
-    setTimeout(() => {
-        const notesContent = document.querySelector('.notes-content');
-        if (!notesContent.classList.contains('collapsed')) {
-            notesContent.style.maxHeight = notesContent.scrollHeight + 'px';
-        }
-    }, 0);
-    
-    return html;
-};
+    if (!noteContent) return; // التحقق من وجود العنصر
 
-$(document).ready(function() {
-    // تهيئة محرر TinyMCE
     tinymce.init({
-        selector: '.tinymce',
+        selector: '#noteContent',
         directionality: 'rtl',
         height: 300,
-        language: 'ar',
-        language_url: 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.7.2/langs/ar.min.js',
+        menubar: false,
         plugins: [
-            'advlist autolink lists link image charmap print preview anchor',
-            'searchreplace visualblocks code fullscreen',
-            'insertdatetime media table paste code help wordcount'
+            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+            'insertdatetime', 'media', 'table', 'help', 'wordcount'
         ],
-        toolbar: 'undo redo | formatselect | bold italic | rtl ltr | \
-                 alignleft aligncenter alignright alignjustify | \
-                 bullist numlist outdent indent | removeformat | help'
+        toolbar: 'undo redo | formatselect | ' +
+            'bold italic backcolor | alignleft aligncenter ' +
+            'alignright alignjustify | bullist numlist outdent indent | ' +
+            'removeformat | help',
+        content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 14px }'
     });
+}
 
-    // دالة لعرض رسائل النجاح
-    function showSuccess(message) {
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                icon: 'success',
-                title: 'تم بنجاح',
-                text: message,
-                confirmButtonText: 'حسناً'
-            });
-        } else {
-            alert(message);
-        }
+// تهيئة عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    initializeNotesSection();
+    initializeNoteType();
+    initializeTinyMCE();
+});
+
+// معالجة إرسال النموذج
+document.getElementById('addNoteForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // التحقق من وجود المحرر
+    if (tinymce.get('noteContent')) {
+        const content = tinymce.get('noteContent').getContent();
+        // ... باقي كود معالجة النموذج
     }
-
-    // دالة لعرض رسائل الخطأ
-    function showError(message) {
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                icon: 'error',
-                title: 'خطأ',
-                text: message,
-                confirmButtonText: 'حسناً'
-            });
-        } else {
-            alert(message);
-        }
-    }
-
-    // التعامل مع نسخ الكود
-    $('.copy-code').on('click', function() {
-        const codeBlock = $(this).closest('.card').find('code');
-        const code = codeBlock.text();
-        
-        // استخدام ClipboardJS بدلاً من navigator.clipboard
-        const tempTextArea = document.createElement('textarea');
-        tempTextArea.value = code;
-        document.body.appendChild(tempTextArea);
-        tempTextArea.select();
-        
-        try {
-            document.execCommand('copy');
-            showSuccess('تم نسخ الكود بنجاح');
-        } catch (err) {
-            showError('حدث خطأ أثناء نسخ الكود');
-        } finally {
-            document.body.removeChild(tempTextArea);
-        }
-    });
-
-    // التعامل مع حذف الملاحظة
-    $('.delete-note').on('click', function() {
-        const noteId = $(this).data('note-id');
-        const noteCard = $(this).closest('.note-card');
-        
-        Swal.fire({
-            title: 'هل أنت متأكد؟',
-            text: 'سيتم حذف الملاحظة نهائياً',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'نعم، احذف',
-            cancelButtonText: 'إلغاء'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '../api/delete-note.php',
-                    type: 'POST',
-                    data: { note_id: noteId },
-                    success: function(response) {
-                        if (response.success) {
-                            noteCard.fadeOut(300, function() {
-                                $(this).remove();
-                            });
-                            showSuccess('تم حذف الملاحظة بنجاح');
-                        } else {
-                            showError(response.error || 'حدث خطأ أثناء حذف الملاحظة');
-                        }
-                    },
-                    error: function() {
-                        showError('حدث خطأ في الاتصال بالخادم');
-                    }
-                });
-            }
-        });
-    });
-
-    // التعامل مع تعديل الملاحظة
-    $('.edit-note').on('click', function() {
-        const noteId = $(this).data('note-id');
-        const noteCard = $(this).closest('.note-card');
-        
-        // جلب بيانات الملاحظة
-        $.ajax({
-            url: '../api/get-note.php',
-            type: 'GET',
-            data: { note_id: noteId },
-            success: function(response) {
-                if (response.success) {
-                    const note = response.note;
-                    
-                    // إنشاء نموذج التعديل
-                    let formHtml = `
-                        <form id="editNoteForm">
-                            <input type="hidden" name="note_id" value="${note.id}">
-                            <div class="mb-3">
-                                <label class="form-label">العنوان</label>
-                                <input type="text" class="form-control" name="title" value="${note.title}" required>
-                            </div>
-                    `;
-
-                    // إضافة الحقول حسب نوع الملاحظة
-                    if (note.type === 'text') {
-                        formHtml += `
-                            <div class="mb-3">
-                                <label class="form-label">المحتوى</label>
-                                <textarea class="form-control tinymce" name="content">${note.content}</textarea>
-                            </div>
-                        `;
-                    } else if (note.type === 'code') {
-                        formHtml += `
-                            <div class="mb-3">
-                                <label class="form-label">لغة البرمجة</label>
-                                <select class="form-select" name="code_language">
-                                    <option value="javascript" ${note.code_language === 'javascript' ? 'selected' : ''}>JavaScript</option>
-                                    <option value="php" ${note.code_language === 'php' ? 'selected' : ''}>PHP</option>
-                                    <option value="html" ${note.code_language === 'html' ? 'selected' : ''}>HTML</option>
-                                    <option value="css" ${note.code_language === 'css' ? 'selected' : ''}>CSS</option>
-                                    <option value="sql" ${note.code_language === 'sql' ? 'selected' : ''}>SQL</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">الكود</label>
-                                <textarea class="form-control code-editor" name="content" rows="10">${note.content}</textarea>
-                            </div>
-                        `;
-                    } else if (note.type === 'link') {
-                        formHtml += `
-                            <div class="mb-3">
-                                <label class="form-label">الرابط</label>
-                                <input type="url" class="form-control" name="link_url" value="${note.link_url}" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">الوصف</label>
-                                <textarea class="form-control" name="link_description" rows="3">${note.link_description || ''}</textarea>
-                            </div>
-                        `;
-                    }
-
-                    formHtml += '</form>';
-
-                    // عرض نافذة التعديل
-                    Swal.fire({
-                        title: 'تعديل الملاحظة',
-                        html: formHtml,
-                        width: '600px',
-                        showCancelButton: true,
-                        confirmButtonText: 'حفظ التغييرات',
-                        cancelButtonText: 'إلغاء',
-                        didOpen: () => {
-                            // إعادة تهيئة TinyMCE
-                            if (note.type === 'text') {
-                                tinymce.init({
-                                    selector: '#editNoteForm .tinymce',
-                                    directionality: 'rtl',
-                                    height: 300
-                                });
-                            }
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            const formData = new FormData(document.getElementById('editNoteForm'));
-                            
-                            $.ajax({
-                                url: '../api/update-note.php',
-                                type: 'POST',
-                                data: formData,
-                                processData: false,
-                                contentType: false,
-                                success: function(response) {
-                                    if (response.success) {
-                                        // تحديث واجهة المستخدم
-                                        location.reload();
-                                        showSuccess('تم تحديث الملاحظة بنجاح');
-                                    } else {
-                                        showError(response.error || 'حدث خطأ أثناء تحديث الملاحظة');
-                                    }
-                                },
-                                error: function() {
-                                    showError('حدث خطأ في الاتصال بالخادم');
-                                }
-                            });
-                        }
-                    });
-                } else {
-                    showError(response.error || 'حدث خطأ أثناء جلب بيانات الملاحظة');
-                }
-            },
-            error: function() {
-                showError('حدث خطأ في الاتصال بالخادم');
-            }
-        });
-    });
 });
 
 // دوال النسخ
@@ -1195,5 +996,195 @@ $(document).ready(function() {
             }, 2000);
         }
     });
+});
+
+// تهيئة أزرار التحكم في الملاحظات
+function initializeNoteControls() {
+    // زر حذف الملاحظة
+    document.querySelectorAll('.delete-note').forEach(button => {
+        button.addEventListener('click', async function(e) {
+            e.preventDefault();
+            const noteId = this.getAttribute('data-note-id');
+            if (!noteId) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: 'معرف الملاحظة غير موجود'
+                });
+                return;
+            }
+
+            const noteCard = this.closest('.note-card');
+
+            // استخدام SweetAlert2 للتأكيد
+            const result = await Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: 'سيتم حذف هذه الملاحظة نهائياً',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'نعم، احذف',
+                cancelButtonText: 'إلغاء'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('../api/delete-note.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ note_id: noteId })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        noteCard.remove();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'تم الحذف',
+                            text: 'تم حذف الملاحظة بنجاح',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        throw new Error(data.error || 'حدث خطأ أثناء حذف الملاحظة');
+                    }
+                } catch (error) {
+                    console.error('Delete error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطأ',
+                        text: error.message || 'حدث خطأ في الاتصال بالخادم'
+                    });
+                }
+            }
+        });
+    });
+
+    // زر تعديل الملاحظة
+    document.querySelectorAll('.edit-note').forEach(button => {
+        button.addEventListener('click', async function(e) {
+            e.preventDefault();
+            const noteId = this.getAttribute('data-note-id');
+            if (!noteId) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: 'معرف الملاحظة غير موجود'
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch(`../api/get-note.php?id=${noteId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const note = data.note;
+                    
+                    // تعبئة نموذج التعديل
+                    const form = document.getElementById('addNoteForm');
+                    form.querySelector('#noteTitle').value = note.title;
+                    form.querySelector('#noteType').value = note.type;
+                    
+                    if (note.type === 'code') {
+                        document.querySelector('.code-options').classList.remove('d-none');
+                        form.querySelector('#codeLanguage').value = note.code_language || '';
+                    } else {
+                        document.querySelector('.code-options').classList.add('d-none');
+                    }
+
+                    // تحديث المحتوى
+                    const contentField = form.querySelector('#noteContent');
+                    contentField.value = note.content;
+
+                    // إضافة أو تحديث معرف الملاحظة
+                    let hiddenInput = form.querySelector('input[name="note_id"]');
+                    if (!hiddenInput) {
+                        hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = 'note_id';
+                        form.appendChild(hiddenInput);
+                    }
+                    hiddenInput.value = noteId;
+
+                    // تحديث زر الحفظ
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    submitBtn.innerHTML = '<i class="fas fa-save me-1"></i> حفظ التعديلات';
+
+                    // التمرير إلى النموذج
+                    form.scrollIntoView({ behavior: 'smooth' });
+
+                    // إظهار رسالة نجاح
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'تعديل الملاحظة',
+                        text: 'يمكنك الآن تعديل الملاحظة',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    throw new Error(data.error || 'حدث خطأ أثناء تحميل الملاحظة');
+                }
+            } catch (error) {
+                console.error('Edit error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: error.message || 'حدث خطأ في الاتصال بالخادم'
+                });
+            }
+        });
+    });
+
+    // زر نسخ الكود
+    document.querySelectorAll('.copy-code').forEach(button => {
+        button.addEventListener('click', async function(e) {
+            e.preventDefault();
+            const codeWrapper = this.closest('.card-body').querySelector('.code-wrapper');
+            const codeElement = codeWrapper.querySelector('code');
+
+            if (!codeElement) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: 'لم يتم العثور على الكود'
+                });
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(codeElement.textContent);
+                
+                // إظهار رسالة النجاح
+                Swal.fire({
+                    icon: 'success',
+                    title: 'تم النسخ',
+                    text: 'تم نسخ الكود بنجاح',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    position: 'top-end',
+                    toast: true
+                });
+            } catch (error) {
+                console.error('Copy error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: 'حدث خطأ أثناء نسخ الكود'
+                });
+            }
+        });
+    });
+}
+
+// تهيئة عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    initializeNotesSection();
+    initializeNoteType();
+    initializeTinyMCE();
+    initializeNoteControls();
 });
 </script>

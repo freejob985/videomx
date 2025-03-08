@@ -337,4 +337,25 @@
         margin: 10px 0;
     }
 }
+
+button.copy-to-clipboard-button {
+    display: none;
+}
+
+button.copy-to-clipboard-button {
+    display: none;
+}
+h5.mb-0 {
+    color: white;
+}
+.code-note .card-header {
+    background-color: #f3e5f5;
+    color: #ffffff;
+}
+
+.code-note .card-header {
+    background-color: #f3e5f5;
+    color: #ffffff !important;
+}
+
 </style>
