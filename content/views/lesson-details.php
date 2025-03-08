@@ -91,6 +91,47 @@ include'../lesson-details/css.php';
     </div>
 </div>
 
+<!-- إضافة بعد شريط التنقل -->
+<div class="course-stats">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-12">
+                <h4 class="mb-3">إحصائيات الكورس</h4>
+                <div class="progress">
+                    <div id="courseProgress" 
+                         class="progress-bar" 
+                         role="progressbar" 
+                         aria-valuenow="0" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100"></div>
+                </div>
+                <div class="stats-counters">
+                    <div class="stat-item">
+                        <div class="number" id="lessonCount">0</div>
+                        <div class="label">إجمالي الدروس</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number" id="completedCount">0</div>
+                        <div class="label">الدروس المكتملة</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number" id="remainingCount">0</div>
+                        <div class="label">الدروس المتبقية</div>
+                    </div>
+                    <div class="stat-item duration">
+                        <div class="number" id="totalDuration">0:00:00</div>
+                        <div class="label">وقت الدراسة الكلي</div>
+                    </div>
+                    <div class="stat-item duration">
+                        <div class="number" id="remainingDuration">0:00:00</div>
+                        <div class="label">وقت الدراسة المتبقي</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- بعد قسم التنقل العلوي -->
 <div class="lesson-title-header">
     <div class="container">
@@ -737,6 +778,25 @@ include'../lesson-details/css.php';
         </div>
     </div>
 </div>
+
+<!-- إضافة القائمة الجانبية -->
+<div class="lessons-sidebar">
+    <div class="lessons-sidebar-header">
+        <h3 class="lessons-sidebar-title">قائمة الدروس</h3>
+        <button id="toggleCompleted" class="btn">
+            <i class="fas fa-eye-slash"></i>
+            <span>إخفاء المكتمل</span>
+        </button>
+    </div>
+    <div class="lessons-list" id="lessonsList">
+        <!-- سيتم تحديث القائمة عبر JavaScript -->
+    </div>
+</div>
+
+<button id="sidebarToggle" class="sidebar-toggle">
+    <i class="fas fa-chevron-right"></i>
+</button>
+
 <?php require_once '../includes/footer.php'; ?>
 
 <!-- JavaScript Libraries (load only once) -->
@@ -777,6 +837,20 @@ include'../lesson-details/css.php';
 
 <!-- في قسم head -->
 <link rel="stylesheet" href="/content/assets/css/lesson-details.css">
+
+<!-- إضافة بعد شريط التنقل -->
+<link rel="stylesheet" href="/content/assets/css/course-stats.css">
+<script src="/content/assets/js/course-stats.js"></script>
+
+<!-- قبل نهاية body -->
+<script>
+// تعريف المتغيرات العامة
+window.COURSE_ID = <?php echo json_encode($lesson['course_id']); ?>;
+window.LESSON_ID = <?php echo json_encode($lesson['id']); ?>;
+</script>
+
+<!-- تعديل body tag لإضافة الحالة الافتراضية للقائمة -->
+<body data-course-id="<?php echo htmlspecialchars($lesson['course_id']); ?>" class="sidebar-collapsed">
 
 </body>
 </html>
