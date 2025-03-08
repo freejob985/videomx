@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/lesson-functions.php';
 require_once __DIR__ . '/../lesson-details/image-section.php';
 
 // التحقق من معرف الدرس
@@ -137,6 +138,48 @@ include'../lesson-details/css.php';
                             <i class="fas fa-chevron-left ms-2"></i>
                         </a>
                     <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add after the navigation bar section -->
+        <div class="lesson-actions mb-4">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex gap-2">
+                        <!-- Completion Toggle Button -->
+                        <button id="toggleCompletion" 
+                                class="btn <?php echo $lesson['completed'] ? 'btn-success' : 'btn-outline-secondary'; ?>"
+                                data-lesson-id="<?php echo $lesson['id']; ?>"
+                                data-bs-toggle="tooltip"
+                                title="<?php echo $lesson['completed'] ? 'تحديد كغير مكتمل' : 'تحديد كمكتمل'; ?>">
+                            <i class="fas <?php echo $lesson['completed'] ? 'fa-check-circle' : 'fa-circle'; ?>"></i>
+                            <span class="button-text d-none d-md-inline ms-1">
+                                <?php echo $lesson['completed'] ? 'مكتمل' : 'غير مكتمل'; ?>
+                            </span>
+                        </button>
+
+                        <!-- Review Toggle Button -->
+                        <button id="toggleReview" 
+                                class="btn <?php echo $lesson['is_reviewed'] ? 'btn-info' : 'btn-outline-secondary'; ?>"
+                                data-lesson-id="<?php echo $lesson['id']; ?>"
+                                data-bs-toggle="tooltip"
+                                title="<?php echo $lesson['is_reviewed'] ? 'إزالة من المراجعة' : 'إضافة للمراجعة'; ?>">
+                            <i class="fas <?php echo $lesson['is_reviewed'] ? 'fa-bookmark' : 'fa-bookmark-o'; ?>"></i>
+                            <span class="button-text d-none d-md-inline ms-1">
+                                <?php echo $lesson['is_reviewed'] ? 'في المراجعة' : 'إضافة للمراجعة'; ?>
+                            </span>
+                        </button>
+
+                        <!-- ChatGPT Button -->
+                        <button class="btn btn-outline-primary chatgpt-link"
+                                data-question="<?php echo htmlspecialchars(formatChatGPTQuery($lesson['title'])); ?>"
+                                data-bs-toggle="tooltip"
+                                title="فتح في ChatGPT">
+                            <i class="fas fa-robot"></i>
+                            <span class="d-none d-md-inline ms-1">ChatGPT</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -714,6 +757,14 @@ include'../lesson-details/css.php';
 
 <!-- قبل نهاية body، نضيف -->
 <script src="/content/assets/js/lessons-header.js"></script>
+
+<!-- Add before closing body tag -->
+<script src="/content/assets/js/lesson-actions.js"></script>
+<script src="/content/assets/js/chatgpt.js"></script>
+
+<!-- Add in the head section -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 </body>
 </html>
