@@ -662,6 +662,11 @@
                                 <i class="fas fa-graduation-cap me-2"></i>الدورات
                             </a>
                         </li>
+                        <li class="mb-2">
+                            <a href="http://videomx.com/review/" class="text-white text-decoration-none">
+                                <i class="fas fa-star me-2"></i>المراجعة
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 

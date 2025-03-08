@@ -61,54 +61,121 @@ require_once 'includes/header.php';
 </div>
 
 <div class="container py-5">
-    <!-- إحصائيات اللغة -->
-    <div class="stats-header mb-5">
-        <div class="row">
-            <div class="col-md-6">
-                <h1 class="mb-4">
-                    <i class="fas fa-book me-2"></i>
-                    دورات <?php echo htmlspecialchars($language['name']); ?>
-                </h1>
+    <!-- قسم الإحصائيات الرئيسية -->
+    <div class="statistics-section py-4 mb-5">
+        <div class="container">
+            <!-- العنوان الرئيسي -->
+            <div class="section-header text-center mb-5">
+                <h2 class="display-6 fw-bold text-primary">
+                    <i class="fas fa-chart-line me-2"></i>
+                    إحصائيات <?php echo htmlspecialchars($language['name']); ?>
+                </h2>
+                <div class="divider mx-auto my-3"></div>
             </div>
-            <div class="col-md-6">
-                <div class="row g-3">
-                    <div class="col-6">
-                        <div class="card bg-primary text-white">
-                            <div class="card-body text-center">
-                                <h3><?php echo number_format($stats['general_stats']['total_courses']); ?></h3>
-                                <p class="mb-0">الدورات</p>
+
+            <!-- الإحصائيات الرئيسية -->
+            <div class="main-stats mb-5">
+                <div class="row g-4">
+                    <!-- إجمالي الدورات -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat-card primary-gradient h-100">
+                            <div class="stat-icon">
+                                <i class="fas fa-books fa-2x"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 class="stat-value"><?php echo number_format($stats['general_stats']['total_courses']); ?></h3>
+                                <p class="stat-label">إجمالي الدورات</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col-6">
-                        <div class="card bg-success text-white">
-                            <div class="card-body text-center">
-                                <h3><?php echo number_format($stats['general_stats']['total_lessons']); ?></h3>
-                                <p class="mb-0">الدروس</p>
+
+                    <!-- إجمالي الدروس -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat-card success-gradient h-100">
+                            <div class="stat-icon">
+                                <i class="fas fa-graduation-cap fa-2x"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 class="stat-value"><?php echo number_format($stats['general_stats']['total_lessons']); ?></h3>
+                                <p class="stat-label">إجمالي الدروس</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- الدروس المكتملة -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat-card info-gradient h-100">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 class="stat-value"><?php echo number_format($stats['general_stats']['completed_lessons']); ?></h3>
+                                <p class="stat-label">الدروس المكتملة</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- الدروس المتبقية -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat-card warning-gradient h-100">
+                            <div class="stat-icon">
+                                <i class="fas fa-hourglass-half fa-2x"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 class="stat-value"><?php echo number_format($stats['general_stats']['remaining_lessons']); ?></h3>
+                                <p class="stat-label">الدروس المتبقية</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- إحصائيات الحالات -->
-        <div class="status-stats mt-4">
-            <h5 class="mb-3">إحصائيات الدروس حسب الحالة</h5>
-            <div class="row g-3">
-                <?php foreach ($stats['status_stats'] as $status): ?>
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <h6 class="card-title"><?php echo htmlspecialchars($status['status_name']); ?></h6>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-info"><?php echo number_format($status['lessons_count']); ?> درس</span>
-                                    <span class="text-muted"><?php echo formatDuration($status['total_duration']); ?></span>
+            <!-- إحصائيات الوقت -->
+            <div class="time-stats mb-5">
+                <h3 class="section-title mb-4">
+                    <i class="fas fa-clock text-primary me-2"></i>
+                    إحصائيات الوقت
+                </h3>
+                <div class="row g-4">
+                    <!-- الوقت الكلي -->
+                    <div class="col-lg-4">
+                        <div class="time-card total-time h-100">
+                            <div class="time-info">
+                                <div class="time-icon">
+                                    <i class="fas fa-clock"></i>
                                 </div>
+                                <h4 class="time-value"><?php echo formatDuration($stats['general_stats']['total_duration']); ?></h4>
+                                <p class="time-label">الوقت الكلي</p>
                             </div>
                         </div>
                     </div>
-                <?php endforeach; ?>
+
+                    <!-- الوقت المكتمل -->
+                    <div class="col-lg-4">
+                        <div class="time-card completed-time h-100">
+                            <div class="time-info">
+                                <div class="time-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <h4 class="time-value"><?php echo formatDuration($stats['general_stats']['completed_duration']); ?></h4>
+                                <p class="time-label">الوقت المكتمل</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- الوقت المتبقي -->
+                    <div class="col-lg-4">
+                        <div class="time-card remaining-time h-100">
+                            <div class="time-info">
+                                <div class="time-icon">
+                                    <i class="fas fa-hourglass-half"></i>
+                                </div>
+                                <h4 class="time-value"><?php echo formatDuration($stats['general_stats']['remaining_duration']); ?></h4>
+                                <p class="time-label">الوقت المتبقي</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -160,6 +227,45 @@ require_once 'includes/header.php';
     </div>
 </div>
 
+    <!-- إحصائيات الحالات -->
+    <div class="status-stats mb-5">
+        <div class="container">
+            <h3 class="section-title mb-4">
+                <i class="fas fa-tasks text-primary me-2"></i>
+                إحصائيات الدروس حسب الحالة
+            </h3>
+            <div class="row g-4">
+                <?php foreach ($stats['status_stats'] as $status): ?>
+                    <div class="col-md-4">
+                        <div class="status-card h-100">
+                            <div class="status-header" style="background-color: <?php echo $status['color'] ?? '#6c757d'; ?>">
+                                <h5 class="status-title">
+                                    <?php echo htmlspecialchars($status['status_name']); ?>
+                                </h5>
+                            </div>
+                            <div class="status-body">
+                                <div class="status-item">
+                                    <i class="fas fa-book-open"></i>
+                                    <div class="status-details">
+                                        <span class="status-value"><?php echo number_format($status['lessons_count']); ?></span>
+                                        <span class="status-label">درس</span>
+                                    </div>
+                                </div>
+                                <div class="status-item">
+                                    <i class="fas fa-clock"></i>
+                                    <div class="status-details">
+                                        <span class="status-value"><?php echo formatDuration($status['total_duration']); ?></span>
+                                        <span class="status-label">المدة الزمنية</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+
 <script>
 // التبديل بين الوصف المختصر والكامل
 document.querySelectorAll('.toggle-desc').forEach(link => {
@@ -184,5 +290,249 @@ document.querySelectorAll('.toggle-desc').forEach(link => {
     });
 });
 </script>
+
+<!-- إضافة CSS مخصص -->
+<style>
+/* التنسيقات العامة */
+.statistics-section {
+    background-color: #f8f9fa;
+    border-radius: 15px;
+    padding: 2rem 0;
+}
+
+.divider {
+    height: 4px;
+    width: 60px;
+    background: linear-gradient(90deg, #007bff, #6610f2);
+    border-radius: 2px;
+}
+
+/* تنسيقات البطاقات الإحصائية */
+.stat-card {
+    padding: 1.5rem;
+    border-radius: 15px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.stat-icon {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    opacity: 0.2;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+    transform: scale(1.2);
+    opacity: 0.3;
+}
+
+.stat-info {
+    position: relative;
+    z-index: 1;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #fff;
+}
+
+.stat-label {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+}
+
+/* التدرجات اللونية */
+.primary-gradient {
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+}
+
+.success-gradient {
+    background: linear-gradient(135deg, #4CAF50, #388E3C);
+}
+
+.info-gradient {
+    background: linear-gradient(135deg, #00BCD4, #0097A7);
+}
+
+.warning-gradient {
+    background: linear-gradient(135deg, #FFC107, #FFA000);
+}
+
+/* تنسيقات بطاقات الوقت */
+.time-card {
+    padding: 2rem;
+    border-radius: 15px;
+    text-align: center;
+    background: #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.time-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.time-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.time-value {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.time-label {
+    color: #6c757d;
+    margin: 0;
+}
+
+/* تنسيقات خاصة لكل نوع وقت */
+.total-time .time-icon {
+    color: #2196F3;
+}
+
+.completed-time .time-icon {
+    color: #4CAF50;
+}
+
+.remaining-time .time-icon {
+    color: #FFC107;
+}
+
+/* تحسينات للتجاوب */
+@media (max-width: 768px) {
+    .stat-value {
+        font-size: 2rem;
+    }
+    
+    .time-value {
+        font-size: 1.5rem;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+    }
+}
+
+/* تنسيقات بطاقات الحالة */
+.status-card {
+    background: #fff;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.status-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.status-header {
+    padding: 1.5rem;
+    color: white;
+    text-align: center;
+}
+
+.status-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.status-body {
+    padding: 1.5rem;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.status-item:last-child {
+    margin-bottom: 0;
+}
+
+.status-item i {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f8f9fa;
+    color: #6c757d;
+    margin-left: 1rem;
+}
+
+.status-details {
+    flex: 1;
+}
+
+.status-value {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.status-label {
+    display: block;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* تحسين العنوان */
+.section-title {
+    position: relative;
+    padding-bottom: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.section-title:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, #007bff, #6610f2);
+    border-radius: 2px;
+}
+
+/* تحسينات للتجاوب */
+@media (max-width: 768px) {
+    .status-card {
+        margin-bottom: 1rem;
+    }
+    
+    .status-value {
+        font-size: 1.1rem;
+    }
+    
+    .status-item i {
+        font-size: 1.2rem;
+        width: 35px;
+        height: 35px;
+    }
+}
+</style>
 
 <?php require_once 'includes/footer.php'; ?> 

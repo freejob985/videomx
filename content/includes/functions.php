@@ -435,39 +435,47 @@ function formatDurationStats($seconds) {
  * @return array إحصائيات الكورس والحالات
  */
 function getCourseStats($language_id) {
-    $db = connectDB();
+    $db = connectDB(); // استخدام دالة الاتصال بقاعدة البيانات
     
-    // جلب إحصائيات الحالات
-    $stmt = $db->prepare("
+    // الإحصائيات العامة
+    $general_stats_query = "
+        SELECT 
+            COUNT(DISTINCT c.id) as total_courses,
+            COUNT(l.id) as total_lessons,
+            SUM(CASE WHEN l.completed = 1 THEN 1 ELSE 0 END) as completed_lessons,
+            SUM(CASE WHEN l.completed = 0 OR l.completed IS NULL THEN 1 ELSE 0 END) as remaining_lessons,
+            SUM(CASE WHEN l.completed = 1 THEN l.duration ELSE 0 END) as completed_duration,
+            SUM(CASE WHEN l.completed = 0 OR l.completed IS NULL THEN l.duration ELSE 0 END) as remaining_duration,
+            SUM(l.duration) as total_duration
+        FROM courses c
+        LEFT JOIN lessons l ON c.id = l.course_id
+        WHERE c.language_id = ?
+    ";
+    
+    $stmt = $db->prepare($general_stats_query);
+    $stmt->execute([$language_id]);
+    $general_stats = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // إحصائيات حسب الحالة
+    $status_stats_query = "
         SELECT 
             s.name as status_name,
             COUNT(l.id) as lessons_count,
             SUM(l.duration) as total_duration
-        FROM statuses s
-        LEFT JOIN lessons l ON l.status_id = s.id
-        LEFT JOIN courses c ON l.course_id = c.id
+        FROM lessons l
+        JOIN courses c ON l.course_id = c.id
+        JOIN statuses s ON l.status_id = s.id
         WHERE c.language_id = ?
         GROUP BY s.id, s.name
-    ");
-    $stmt->execute([$language_id]);
-    $statusStats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    ";
     
-    // جلب إحصائيات عامة
-    $stmt = $db->prepare("
-        SELECT 
-            COUNT(DISTINCT c.id) as total_courses,
-            COUNT(l.id) as total_lessons,
-            SUM(l.duration) as total_duration
-        FROM courses c
-        LEFT JOIN lessons l ON l.course_id = c.id
-        WHERE c.language_id = ?
-    ");
+    $stmt = $db->prepare($status_stats_query);
     $stmt->execute([$language_id]);
-    $generalStats = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+    $status_stats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
     return [
-        'status_stats' => $statusStats,
-        'general_stats' => $generalStats
+        'general_stats' => $general_stats,
+        'status_stats' => $status_stats
     ];
 }
 

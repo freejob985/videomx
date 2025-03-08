@@ -138,6 +138,12 @@ $(document).ready(function() {
                                 الإعدادات
                             </a>
                         </li>
+                        <li class="mb-2">
+                            <a href="http://videomx.com/review/" class="review-link">
+                                <i class="fas fa-star me-2"></i>
+                                المراجعة
+                            </a>
+                        </li>
                         <li>
                             <a href="http://videomx.com/GBT/" class="ai-link">
                                 <i class="fas fa-robot me-2"></i>
@@ -499,4 +505,4 @@ function getCorrectPath($path) {
 $conn->close();
 ?>
 </body>
-</html> 
+</html>
