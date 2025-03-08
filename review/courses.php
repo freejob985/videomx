@@ -1,6 +1,29 @@
 <?php
 // التأكد من اتصال قاعدة البيانات
 require_once 'config/database.php';
+require_once 'includes/functions.php';
+
+// جلب اللغات المتاحة مع عدد الدروس والكورسات
+$languages_query = "SELECT 
+    l.*,
+    COUNT(DISTINCT les.id) as lessons_count,
+    COUNT(DISTINCT c.id) as courses_count
+    FROM languages l
+    LEFT JOIN courses c ON c.language_id = l.id
+    LEFT JOIN lessons les ON les.course_id = c.id AND les.status_id = 1
+    GROUP BY l.id
+    ORDER BY l.name ASC";
+
+$languages_result = $conn->query($languages_query);
+$available_languages = [];
+$selected_language_id = isset($_GET['language_id']) ? (int)$_GET['language_id'] : 0;
+
+if ($languages_result) {
+    while ($row = $languages_result->fetch_assoc()) {
+        $available_languages[] = $row;
+    }
+    $languages_result->close();
+}
 
 /**
  * جلب الكورسات التي تحتوي على دروس مراجعة
@@ -119,6 +142,7 @@ function formatDuration($minutes) {
             </div>
         </div>
 
+
         <h2 class="mb-4">الكورسات المراجعة</h2>
         
         <div class="row">
@@ -168,5 +192,198 @@ function formatDuration($minutes) {
     <!-- المكتبات JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
+
+    <style>
+    /* تنسيقات قسم اللغات */
+    .languages-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 30px 0;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        margin-bottom: 3rem;
+    }
+
+    .languages-container {
+        transition: all 0.3s ease;
+        max-height: 2000px; /* زيادة القيمة */
+        opacity: 1;
+        overflow: hidden;
+        padding: 15px;
+        transform-origin: top;
+        transform: scaleY(1);
+    }
+
+    .languages-container.collapsed {
+        max-height: 0;
+        opacity: 0;
+        padding: 0;
+        margin: 0;
+        transform: scaleY(0);
+    }
+
+    .btn-toggle-languages {
+        width: 35px;
+        height: 35px;
+        border: none;
+        border-radius: 50%;
+        background: #0d6efd;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-toggle-languages i {
+        transition: transform 0.3s ease;
+    }
+
+    .btn-toggle-languages.collapsed i {
+        transform: rotate(180deg);
+    }
+
+    /* تنسيقات حاوية اللغات */
+    .languages-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+        padding: 10px 0;
+    }
+
+    .language-card {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        text-decoration: none;
+        color: #2c3e50;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .language-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        text-decoration: none;
+        color: #0d6efd;
+    }
+
+    .language-card.active {
+        background: #0d6efd;
+        color: white;
+    }
+
+    .language-icon {
+        width: 50px;
+        height: 50px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5em;
+        transition: all 0.3s ease;
+    }
+
+    .language-card.active .language-icon {
+        background: rgba(255,255,255,0.2);
+        color: white;
+    }
+
+    .language-info {
+        flex: 1;
+    }
+
+    .language-info h6 {
+        margin: 0 0 5px 0;
+        font-weight: 600;
+    }
+
+    .language-stats {
+        display: flex;
+        gap: 15px;
+        font-size: 0.85em;
+        color: #6c757d;
+    }
+
+    .language-card.active .language-stats {
+        color: rgba(255,255,255,0.9);
+    }
+
+    /* تحسين التجاوب */
+    @media (max-width: 768px) {
+        .languages-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+        
+        .language-card {
+            padding: 12px;
+        }
+        
+        .language-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2em;
+        }
+        
+        .language-stats {
+            flex-direction: column;
+            gap: 5px;
+        }
+    }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.getElementById('toggleLanguages');
+        const container = document.getElementById('languagesContainer');
+        const section = document.getElementById('languagesSection');
+        const storageKey = 'coursesLanguagesSectionCollapsed';
+        
+        // تحقق من وجود العناصر
+        if (!toggleBtn || !container || !section) {
+            console.error('لم يتم العثور على أحد العناصر المطلوبة');
+            return;
+        }
+
+        function toggleSection(collapse) {
+            if (collapse) {
+                container.classList.add('collapsed');
+                toggleBtn.classList.add('collapsed');
+                section.style.marginBottom = '0';
+            } else {
+                container.classList.remove('collapsed');
+                toggleBtn.classList.remove('collapsed');
+                section.style.marginBottom = '3rem';
+            }
+        }
+        
+        // استرجاع الحالة المحفوظة
+        const isCollapsed = localStorage.getItem(storageKey) === 'true';
+        toggleSection(isCollapsed);
+        
+        // معالجة النقر على زر الإخفاء/الإظهار
+        toggleBtn.addEventListener('click', function() {
+            const willCollapse = !container.classList.contains('collapsed');
+            toggleSection(willCollapse);
+            localStorage.setItem(storageKey, willCollapse);
+            
+            // تأثير حركي للزر
+            this.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+    </script>
+
+    <?php
+    // إضافة الفوتر
+    require_once 'includes/footer.php';
+    ?>
 </body>
 </html> 

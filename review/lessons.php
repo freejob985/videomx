@@ -907,10 +907,50 @@ $statistics = getLessonsStatistics($courseId);
             document.querySelector('.lesson-title').textContent = lessonData.title || '';
             document.querySelector('.lesson-description').textContent = lessonData.description || '';
             
-            // تحديث رابط تفاصيل الدرس
-            const detailsLink = document.querySelector('.btn-details');
-            if (detailsLink) {
-                detailsLink.href = `http://videomx.com/content/views/lesson-details.php?id=${lessonData.id}`;
+            // تحديث أزرار الحالات
+            const statusesToggle = document.querySelector('#statuses_toggle');
+            if (statusesToggle) {
+                statusesToggle.innerHTML = statuses.map(status => `
+                    <button type="button" 
+                            class="status-btn ${lessonData.status_id == status.id ? 'active' : ''}"
+                            data-status-id="${status.id}"
+                            onclick="selectStatus(${status.id})"
+                            style="background-color: ${status.color}; color: ${status.text_color}; border-color: ${lessonData.status_id == status.id ? status.color : '#e0e0e0'}">
+                        <i class="fas fa-tag"></i>
+                        ${status.name}
+                    </button>
+                `).join('');
+            }
+
+            // تحديث أزرار الأقسام
+            const sectionsToggle = document.querySelector('#sections_toggle');
+            if (sectionsToggle) {
+                sectionsToggle.innerHTML = sections.map(section => `
+                    <button type="button" 
+                            class="section-btn ${lessonData.section_id == section.id ? 'active' : ''}"
+                            data-section-id="${section.id}"
+                            onclick="selectSection(${section.id})"
+                            style="border-color: ${lessonData.section_id == section.id ? '#2196F3' : '#e0e0e0'}">
+                        <i class="fas fa-layer-group"></i>
+                        ${section.name}
+                    </button>
+                `).join('');
+            }
+            
+            // تحديث حالة الإخفاء
+            const hideCompleted = localStorage.getItem('hideCompletedLessons') === 'true';
+            if (hideCompleted && lessonData.completed == 1) {
+                // إخفاء البطاقة
+                const cardElement = document.querySelector(`.col-md-6 .card[data-lesson-id="${lessonData.id}"]`);
+                if (cardElement) {
+                    cardElement.closest('.col-md-6').classList.add('completed');
+                }
+                
+                // إخفاء الصف
+                const rowElement = document.querySelector(`tr[data-lesson-id="${lessonData.id}"]`);
+                if (rowElement) {
+                    rowElement.classList.add('completed');
+                }
             }
             
             // تحديث حالة أزرار التنقل
@@ -947,7 +987,7 @@ $statistics = getLessonsStatistics($courseId);
                             class="status-btn ${currentLessonData.status_id == status.id ? 'active' : ''}"
                             data-status-id="${status.id}"
                             onclick="selectStatus(${status.id})"
-                            style="background-color: ${status.color}; color: ${status.text_color}; border-color: ${status.color}">
+                            style="background-color: ${status.color}; color: ${status.text_color}; border-color: ${lessonData.status_id == status.id ? status.color : '#e0e0e0'}">
                         <i class="fas fa-tag"></i>
                         ${status.name}
                     </button>
@@ -961,7 +1001,8 @@ $statistics = getLessonsStatistics($courseId);
                     <button type="button" 
                             class="section-btn ${currentLessonData.section_id == section.id ? 'active' : ''}"
                             data-section-id="${section.id}"
-                            onclick="selectSection(${section.id})">
+                            onclick="selectSection(${section.id})"
+                            style="border-color: ${currentLessonData.section_id == section.id ? '#2196F3' : '#e0e0e0'}">
                         <i class="fas fa-layer-group"></i>
                         ${section.name}
                     </button>
@@ -1427,4 +1468,9 @@ $statistics = getLessonsStatistics($courseId);
     }
     </script>
 </body>
-</html> 
+</html>
+
+<?php
+// إضافة الفوتر
+include 'includes/footer.php';
+?> 

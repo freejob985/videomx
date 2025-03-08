@@ -23,8 +23,8 @@ $platformStats = getPlatformStats();
 $totalLanguages = getTotalLanguagesCount();
 $totalPages = ceil($totalLanguages / $perPage);
 
-// جلب اللغات للصفحة الحالية
-$languages = getLanguagesPaginated($page, $perPage);
+// جلب اللغات للصفحة الحالية مع الترتيب حسب عدد الدروس
+$languages = getLanguagesPaginated($page, $perPage, true);
 
 // الحصول على إحصائيات الدروس
 $statistics = get_lessons_statistics();
@@ -296,6 +296,87 @@ header.position-relative.overflow-hidden.py-16 {
 .badge {
     padding: 5px 10px;
 }
+
+/* إضافة تأثيرات حركية للبطاقات */
+.language-card {
+    transition: all 0.3s ease;
+}
+
+.language-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* تحسين مظهر الروابط */
+.card-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.card-link:hover {
+    color: inherit;
+}
+
+/* تحسين مظهر البطاقات */
+.language-card {
+    border: none;
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.language-card .card-header {
+    background: linear-gradient(45deg, #2196F3, #1976D2);
+    color: white;
+    border-bottom: none;
+    padding: 1rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.stat-item {
+    padding: 0.5rem;
+    background: rgba(0,0,0,0.02);
+    border-radius: 8px;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2196F3;
+}
+
+.progress {
+    height: 6px;
+    border-radius: 3px;
+    background-color: rgba(0,0,0,0.05);
+}
+
+.additional-info {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.badge {
+    padding: 0.5rem 0.8rem;
+    font-weight: 500;
+}
+
+@media (min-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
 </style>
 
 <div class="container py-5">
@@ -319,12 +400,18 @@ header.position-relative.overflow-hidden.py-16 {
     </div>
 
     <?php
-    // معالجة البحث
+    // معالجة البحث والترتيب
     $search = $_GET['search'] ?? '';
-    $searchResults = searchLanguages($search, $page, $perPage);
-    $languages = $searchResults['results'];
-    $totalLanguages = $searchResults['total'];
-    $totalPages = ceil($totalLanguages / $perPage);
+    if (!empty($search)) {
+        // إذا كان هناك بحث، استخدم نتائج البحث
+        $searchResults = searchLanguages($search, $page, $perPage);
+        $languages = $searchResults['results'];
+        $totalLanguages = $searchResults['total'];
+        $totalPages = ceil($totalLanguages / $perPage);
+    } else {
+        // إذا لم يكن هناك بحث، استخدم الترتيب حسب عدد الدروس
+        $languages = getLanguagesPaginated($page, $perPage, true);
+    }
     
     if (empty($languages) && !empty($search)): ?>
         <div class="alert alert-info text-center">
@@ -336,72 +423,88 @@ header.position-relative.overflow-hidden.py-16 {
     <div class="row g-4">
         <?php foreach ($languages as $language): ?>
             <div class="col-md-6 col-lg-4">
-                <div class="card language-card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-code me-2"></i>
-                            <?php echo htmlspecialchars($language['name']); ?>
-                        </h5>
-                        <div class="dropdown">
-                            <button class="btn btn-link text-white" data-bs-toggle="dropdown">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <button class="dropdown-item" onclick="showStats(<?php echo $language['id']; ?>)">
-                                        <i class="fas fa-chart-bar me-2"></i>
-                                        الإحصائيات
-                                    </button>
-                                </li>
-                                <li>
-                                    <button class="dropdown-item" onclick="loadCourses(<?php echo $language['id']; ?>)">
-                                        <i class="fas fa-book me-2"></i>
-                                        عرض الدورات
-                                    </button>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذه اللغة وجميع الدورات والدروس المرتبطة بها؟');">
-                                        <input type="hidden" name="language_id" value="<?php echo $language['id']; ?>">
-                                        <button type="submit" name="delete_language" class="dropdown-item text-danger">
-                                            <i class="fas fa-trash-alt me-2"></i>
-                                            حذف اللغة
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
+                <a href="/content/courses.php?language_id=<?php echo $language['id']; ?>" 
+                   class="text-decoration-none">
+                    <div class="card language-card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-code me-2"></i>
+                                <?php echo htmlspecialchars($language['name']); ?>
+                            </h5>
+                            <span class="badge bg-primary rounded-pill">
+                                <?php echo number_format($language['lessons_count']); ?> درس
+                            </span>
                         </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="stats">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>الدورات:</span>
-                                <span class="badge bg-primary"><?php echo number_format($language['courses_count']); ?></span>
-                            </div>
-                            <div class="progress mb-3">
-                                <div class="progress-bar bg-primary" style="width: <?php echo min(100, ($language['courses_count'] / 10) * 100); ?>%"></div>
+                        <div class="card-body">
+                            <!-- إحصائيات الدروس -->
+                            <div class="stats-grid mb-3">
+                                <div class="stat-item">
+                                    <div class="stat-label">الدورات</div>
+                                    <div class="stat-value"><?php echo number_format($language['courses_count']); ?></div>
+                                    <div class="progress mt-2">
+                                        <div class="progress-bar bg-primary" 
+                                             style="width: <?php echo min(100, ($language['courses_count'] / 10) * 100); ?>%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="stat-item">
+                                    <div class="stat-label">الدروس المكتملة</div>
+                                    <div class="stat-value">
+                                        <?php 
+                                        $completionRate = $language['lessons_count'] > 0 
+                                            ? round(($language['completed_lessons'] ?? 0) / $language['lessons_count'] * 100) 
+                                            : 0;
+                                        echo $completionRate . '%';
+                                        ?>
+                                    </div>
+                                    <div class="progress mt-2">
+                                        <div class="progress-bar bg-success" style="width: <?php echo $completionRate; ?>%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="stat-item">
+                                    <div class="stat-label">دروس مهمة</div>
+                                    <div class="stat-value">
+                                        <?php echo number_format($language['important_lessons'] ?? 0); ?>
+                                    </div>
+                                    <div class="progress mt-2">
+                                        <div class="progress-bar bg-warning" 
+                                             style="width: <?php 
+                                                 $importantPercentage = $language['lessons_count'] > 0 
+                                                     ? min(100, (($language['important_lessons'] ?? 0) / $language['lessons_count']) * 100)
+                                                     : 0;
+                                                 echo $importantPercentage;
+                                             ?>%">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>الدروس:</span>
-                                <span class="badge bg-success"><?php echo number_format($language['lessons_count']); ?></span>
-                            </div>
-                            <div class="progress mb-3">
-                                <div class="progress-bar bg-success" style="width: <?php echo min(100, ($language['lessons_count'] / 50) * 100); ?>%"></div>
-                            </div>
-                            
-                            <div class="d-flex justify-content-between">
-                                <span>المدة:</span>
-                                <span class="badge bg-info">
-                                    <?php 
-                                    require_once 'includes/time_formatter.php';
-                                    echo format_time(intval($language['total_duration'])); 
-                                    ?>
-                                </span>
+                            <!-- معلومات إضافية -->
+                            <div class="additional-info">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>المدة الإجمالية:</span>
+                                    <span class="badge bg-info">
+                                        <?php echo format_time(intval($language['total_duration'])); ?>
+                                    </span>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>آخر تحديث:</span>
+                                    <span class="text-muted small">
+                                        <?php 
+                                        if (!empty($language['last_update'])) {
+                                            echo date('Y-m-d', strtotime($language['last_update']));
+                                        } else {
+                                            echo 'لا يوجد';
+                                        }
+                                        ?>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         <?php endforeach; ?>
     </div>
