@@ -1279,6 +1279,92 @@ function handleFullscreenChange() {
     });
 }
 
+// تهيئة موديول الكود
+function initializeCodeModal() {
+    const codeModal = document.getElementById('codeModal');
+    if (!codeModal) return;
+
+    const modal = new bootstrap.Modal(codeModal);
+    
+    // معالجة إغلاق الموديول
+    codeModal.addEventListener('hidden.bs.modal', function () {
+        const codeContent = this.querySelector('.code-content');
+        if (codeContent) {
+            codeContent.innerHTML = '';
+        }
+        
+        // إعادة تعيين حجم الخط
+        const fontSizeDisplay = this.querySelector('.font-size-display');
+        if (fontSizeDisplay) {
+            fontSizeDisplay.textContent = '14px';
+        }
+        
+        // إخفاء الموديول وإزالة الخلفية السوداء
+        document.body.classList.remove('modal-open');
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+    });
+
+    // معالجة فتح الموديول
+    codeModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        if (!button) return;
+
+        const codeWrapper = button.closest('.code-wrapper');
+        if (!codeWrapper) return;
+
+        const code = codeWrapper.querySelector('code');
+        if (!code) return;
+
+        const modalTitle = this.querySelector('.modal-title');
+        const modalCode = this.querySelector('.code-content code');
+        
+        if (modalTitle) {
+            const noteTitle = codeWrapper.closest('.note-card').querySelector('.card-title');
+            modalTitle.textContent = noteTitle ? noteTitle.textContent : 'عرض الكود';
+        }
+        
+        if (modalCode) {
+            modalCode.className = code.className;
+            modalCode.textContent = code.textContent;
+            Prism.highlightElement(modalCode);
+        }
+    });
+
+    // معالجة أزرار تغيير حجم الخط
+    const decreaseBtn = codeModal.querySelector('.font-size-decrease');
+    const increaseBtn = codeModal.querySelector('.font-size-increase');
+    const fontSizeDisplay = codeModal.querySelector('.font-size-display');
+    
+    if (decreaseBtn && increaseBtn && fontSizeDisplay) {
+        let fontSize = 14;
+        
+        decreaseBtn.addEventListener('click', () => {
+            if (fontSize > 8) {
+                fontSize -= 2;
+                updateFontSize();
+            }
+        });
+        
+        increaseBtn.addEventListener('click', () => {
+            if (fontSize < 24) {
+                fontSize += 2;
+                updateFontSize();
+            }
+        });
+        
+        function updateFontSize() {
+            const codeElement = codeModal.querySelector('.code-content code');
+            if (codeElement) {
+                codeElement.style.fontSize = `${fontSize}px`;
+                fontSizeDisplay.textContent = `${fontSize}px`;
+            }
+        }
+    }
+}
+
 // تحديث تهيئة الصفحة لتشمل تهيئة أزرار ملء الشاشة
 document.addEventListener('DOMContentLoaded', function() {
     initializeNotesSection();
@@ -1286,5 +1372,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeTinyMCE();
     initializeNoteControls();
     initializeFullscreenControls(); // إضافة تهيئة أزرار ملء الشاشة
+    initializeCodeModal(); // إضافة تهيئة الموديول
 });
 </script>

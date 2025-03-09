@@ -48,48 +48,55 @@
 
 /* تنسيق محتوى الكود */
 .code-wrapper {
-    direction: ltr;
-    text-align: left;
-    background: #282c34;
-    border-radius: 8px;
     position: relative;
     margin: 1rem 0;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease-in-out;
 }
 
-.code-wrapper pre {
+.code-wrapper .code-controls {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.25rem;
+    border-radius: 4px;
+}
+
+.code-wrapper .font-size-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.code-wrapper .font-size-display {
+    min-width: 45px;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.code-wrapper pre.code-block {
     margin: 0;
-    padding: 1.5rem;
-    max-height: 400px;
-    overflow: auto;
-    background: transparent;
-}
-
-.code-wrapper pre::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-.code-wrapper pre::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
+    background: #f8f9fa;
 }
 
-.code-wrapper pre::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
+.code-wrapper pre.code-block code {
+    font-family: 'Fira Code', monospace;
+    transition: font-size 0.2s ease;
 }
 
-.code-wrapper pre::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+/* تحسين أزرار التحكم */
+.code-controls button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1;
+    border-radius: 3px;
 }
 
-.code-wrapper code {
-    font-family: 'Fira Code', 'Consolas', monospace;
-    font-size: 14px;
-    line-height: 1.6;
-    color: #abb2bf;
+.code-controls button:hover {
+    background-color: #e9ecef;
 }
 
 /* تنسيقات Prism.js المخصصة */
@@ -179,46 +186,6 @@
     margin: 0 -1.5rem;
     padding: 0 1.5rem;
     border-left: 2px solid #528bff;
-}
-
-/* تنسيق أزرار التحكم في الكود */
-.code-controls {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    display: flex;
-    gap: 0.5rem;
-    z-index: 2;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.code-wrapper:hover .code-controls {
-    opacity: 1;
-}
-
-.code-controls button {
-    background-color: rgba(255, 255, 255, 0.1);
-    border: none;
-    padding: 0.5rem;
-    border-radius: 4px;
-    color: #abb2bf;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-}
-
-.code-controls button:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-1px);
-}
-
-.code-controls button i {
-    font-size: 14px;
 }
 
 /* تنسيق النسخ */
@@ -369,17 +336,6 @@ body.fullscreen-active {
 
 .search-highlight.active {
     background-color: rgba(255, 165, 0, 0.4);
-}
-
-/* تنسيق أزرار التحكم في حجم الخط */
-.font-size-display {
-    color: #fff;
-    font-size: 12px;
-    padding: 0.25rem 0.5rem;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-    min-width: 40px;
-    text-align: center;
 }
 
 /* تنسيق زر المشاركة */

@@ -663,17 +663,20 @@ include'../lesson-details/css.php';
                                         <?php elseif ($note['type'] === 'code'): ?>
                                             <div class="code-wrapper" data-note-id="<?php echo $note['id']; ?>">
                                                 <div class="code-controls">
-                                                    <button type="button" class="font-size-decrease" title="تصغير الخط">
-                                                        <i class="fas fa-minus"></i>
-                                                    </button>
-                                                    <button type="button" class="font-size-increase" title="تكبير الخط">
-                                                        <i class="fas fa-plus"></i>
-                                                    </button>
-                                                    <button type="button" class="fullscreen-toggle" title="ملء الشاشة">
+                                                    <div class="font-size-controls">
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary font-size-decrease" title="تصغير الخط">
+                                                            <i class="fas fa-minus"></i>
+                                                        </button>
+                                                        <span class="font-size-display">14px</span>
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary font-size-increase" title="تكبير الخط">
+                                                            <i class="fas fa-plus"></i>
+                                                        </button>
+                                                    </div>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary fullscreen-toggle" title="ملء الشاشة">
                                                         <i class="fas fa-expand"></i>
                                                     </button>
                                                 </div>
-                                                <pre><code class="language-<?php echo htmlspecialchars($note['code_language']); ?>"><?php echo htmlspecialchars($note['content']); ?></code></pre>
+                                                <pre class="code-block"><code class="language-<?php echo htmlspecialchars($note['code_language']); ?>"><?php echo htmlspecialchars($note['content']); ?></code></pre>
                                             </div>
                                         <?php else: ?>
                                             <div class="note-content">

@@ -419,4 +419,89 @@ h5.mb-0 {
     color: #ffffff !important;
 }
 
+/* تنسيقات موديول الكود */
+.code-modal {
+    background: rgba(0, 0, 0, 0.75);
+}
+
+.code-modal .modal-dialog {
+    max-width: 90%;
+    margin: 1.75rem auto;
+}
+
+.code-modal .modal-content {
+    background-color: #1e1e1e;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.code-modal .modal-header {
+    background-color: #252526;
+    border-bottom: 1px solid #333;
+    padding: 1rem 1.5rem;
+}
+
+.code-modal .modal-title {
+    color: #fff;
+    font-size: 1.25rem;
+}
+
+.code-modal .btn-close {
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    opacity: 0.7;
+    padding: 1rem;
+    margin: -1rem;
+}
+
+.code-modal .btn-close:hover {
+    opacity: 1;
+}
+
+.code-modal .modal-body {
+    padding: 0;
+    background-color: #1e1e1e;
+}
+
+.code-modal .code-content {
+    padding: 1.5rem;
+    max-height: calc(100vh - 200px);
+    overflow: auto;
+}
+
+.code-modal .code-content pre {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+}
+
+.code-modal .code-content code {
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #d4d4d4;
+}
+
+/* تحسين مظهر السكرول */
+.code-modal .code-content::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+.code-modal .code-content::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+
+.code-modal .code-content::-webkit-scrollbar-thumb {
+    background-color: #424242;
+    border-radius: 6px;
+    border: 3px solid #1e1e1e;
+}
+
+.code-modal .code-content::-webkit-scrollbar-thumb:hover {
+    background-color: #4f4f4f;
+}
+
 </style>
