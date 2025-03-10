@@ -552,15 +552,8 @@ include'../lesson-details/css.php';
                 </div>
                 <div class="card-body notes-content">
                     <!-- نموذج إضافة الملاحظات -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0" style="color: black;">
-                                <i class="fas fa-plus-circle me-2"></i>
-                                إضافة ملاحظة جديدة
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <form id="addNoteForm">
+                    <div class="note-form-wrapper text-type">
+                    <form id="addNoteForm">
                                 <div class="mb-3">
                                     <label for="noteTitle" class="form-label">عنوان الملاحظة</label>
                                     <input type="text" 
@@ -620,7 +613,6 @@ include'../lesson-details/css.php';
                                     حفظ الملاحظة
                                 </button>
                             </form>
-                        </div>
                     </div>
                     
                     <!-- عرض الملاحظات -->
@@ -864,28 +856,15 @@ window.LESSON_ID = <?php echo json_encode($lesson['id']); ?>;
 <!-- تعديل body tag لإضافة الحالة الافتراضية للقائمة -->
 <body data-course-id="<?php echo htmlspecialchars($lesson['course_id']); ?>" class="sidebar-collapsed">
 
-<!-- Modal للكود -->
-<div class="modal fade code-modal" id="codeModal" tabindex="-1" aria-labelledby="codeModalLabel" aria-hidden="true">
+<!-- إضافة الموديول -->
+<div class="modal code-modal fade" id="codeModal" tabindex="-1">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="codeModalLabel"></h5>
-                <div class="code-controls-group me-auto ms-3">
-                    <button type="button" class="btn btn-sm btn-outline-secondary font-size-decrease" title="تصغير الخط">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                    <span class="font-size-display mx-2">14px</span>
-                    <button type="button" class="btn btn-sm btn-outline-secondary font-size-increase" title="تكبير الخط">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-0">
-                <div class="code-content h-100">
-                    <pre><code></code></pre>
-                </div>
-            </div>
+            <div class="modal-body"></div>
         </div>
     </div>
 </div>
@@ -910,6 +889,13 @@ document.addEventListener('keydown', function(event) {
     }
 });
 </script>
+
+<!-- في قسم head، نضيف -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fira-code@6.2.0/distr/fira_code.css">
+<link rel="stylesheet" href="/content/lesson-details/css/code-notes.css">
+
+<!-- قبل نهاية body، نضيف -->
+<script src="/content/lesson-details/js/code-controls.js"></script>
 
 </body>
 </html>

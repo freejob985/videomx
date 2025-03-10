@@ -1,0 +1,210 @@
+/* تنسيقات عامة للكود */
+.code-wrapper, .code-modal .modal-body {
+    background: #1e1e1e;
+    border-radius: 6px;
+    position: relative;
+}
+
+/* تنسيق حاوية الكود */
+.code-content {
+    position: relative;
+    padding: 1rem;
+}
+
+/* تنسيق عنصر pre و code */
+pre[class*="language-"],
+pre > code {
+    margin: 0 !important;
+    padding: 1rem !important;
+    background: #1e1e1e !important;
+    color: #d4d4d4 !important;
+    font-family: 'Fira Code', monospace !important;
+    font-size: 14px;
+    line-height: 1.5;
+    tab-size: 4;
+    border-radius: 6px;
+}
+
+/* تنسيق أزرار التحكم */
+.code-controls {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 100;
+    background: rgba(30, 30, 30, 0.8);
+    padding: 0.5rem;
+    border-radius: 6px;
+    backdrop-filter: blur(4px);
+}
+
+.btn-control {
+    background: #2d2d2d;
+    color: #d4d4d4;
+    border: 1px solid #3d3d3d;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.btn-control:hover {
+    background: #3d3d3d;
+    border-color: #4d4d4d;
+    color: #ffffff;
+}
+
+.font-size-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.font-size-display {
+    color: #d4d4d4;
+    min-width: 3.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+    padding: 0.4rem;
+    background: #2d2d2d;
+    border-radius: 4px;
+}
+
+/* تنسيقات الموديول */
+.code-modal .modal-content {
+    background: #1e1e1e;
+    border: none;
+}
+
+.code-modal .modal-header {
+    background: #2d2d2d;
+    border-bottom: 1px solid #3d3d3d;
+    padding: 1rem;
+}
+
+.code-modal .modal-title {
+    color: #d4d4d4;
+    font-size: 1.1rem;
+}
+
+.code-modal .btn-close {
+    color: #d4d4d4;
+    background: none;
+    opacity: 0.8;
+    padding: 1rem;
+}
+
+.code-modal .btn-close:hover {
+    opacity: 1;
+}
+
+/* تنسيقات وضع ملء الشاشة */
+.code-wrapper.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1050;
+    margin: 0;
+    padding: 1rem;
+    background: #1e1e1e;
+    overflow: auto;
+}
+
+.code-wrapper.fullscreen pre {
+    height: calc(100vh - 2rem);
+    margin: 0;
+}
+
+/* تنسيق scrollbar */
+.code-content pre::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+.code-content pre::-webkit-scrollbar-track {
+    background: #2d2d2d;
+    border-radius: 6px;
+}
+
+.code-content pre::-webkit-scrollbar-thumb {
+    background: #4d4d4d;
+    border-radius: 6px;
+    border: 3px solid #2d2d2d;
+}
+
+.code-content pre::-webkit-scrollbar-thumb:hover {
+    background: #5d5d5d;
+}
+
+/* تنسيقات جديدة لأنواع الملاحظات المختلفة */
+.note-type-text .code-content {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 6px;
+}
+
+.note-type-code .code-content {
+    background: #1e1e1e;
+}
+
+.note-type-link .code-content {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 6px;
+}
+
+/* تحسين مظهر النموذج */
+.note-form-wrapper {
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+/* نوع النص */
+.note-form-wrapper.text-type {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+}
+
+/* نوع الكود */
+.note-form-wrapper.code-type {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border: 1px solid #2d2d2d;
+}
+
+.note-form-wrapper.code-type input,
+.note-form-wrapper.code-type select,
+.note-form-wrapper.code-type textarea {
+    background: #2d2d2d;
+    color: #d4d4d4;
+    border-color: #3d3d3d;
+}
+
+.note-form-wrapper.code-type label {
+    color: #d4d4d4;
+}
+
+/* نوع الرابط */
+.note-form-wrapper.link-type {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+/* تنسيق الموديول */
+.code-modal .code-content {
+    direction: ltr;
+}
+
+/* تنسيق عرض الكود */
+.code-wrapper {
+    direction: ltr;
+    text-align: left;
+} 
