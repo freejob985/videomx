@@ -579,7 +579,7 @@ include'../lesson-details/css.php';
                                                 <?php echo html_entity_decode($note['content']); ?>
                                             </div>
                                         <?php elseif ($note['type'] === 'code'): ?>
-                                            <div class="code-wrapper" data-note-id="<?php echo $note['id']; ?>">
+                                            <div class="code-wrapper">
                                                 <div class="code-controls">
                                                     <div class="control-group">
                                                         <button type="button" class="code-btn font-size-decrease" title="تصغير الخط">
@@ -851,6 +851,72 @@ document.addEventListener('keydown', function(event) {
 
 <!-- قبل نهاية body -->
 <script src="/content/assets/js/notes.js"></script>
+
+<!-- إضافة قبل نهاية body -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // تهيئة عناصر التحكم في الكود
+    document.querySelectorAll('.code-wrapper').forEach(wrapper => {
+        // تهيئة حجم الخط الافتراضي
+        const codeBlock = wrapper.querySelector('pre code');
+        const fontDisplay = wrapper.querySelector('.font-size-display');
+        if (codeBlock && fontDisplay) {
+            const savedSize = localStorage.getItem('codeFontSize') || '14';
+            codeBlock.style.fontSize = `${savedSize}px`;
+            fontDisplay.textContent = `${savedSize}px`;
+        }
+
+        // أزرار تغيير حجم الخط
+        const decreaseBtn = wrapper.querySelector('.font-size-decrease');
+        const increaseBtn = wrapper.querySelector('.font-size-increase');
+        
+        if (decreaseBtn && increaseBtn) {
+            decreaseBtn.addEventListener('click', () => {
+                const currentSize = parseInt(codeBlock.style.fontSize);
+                if (currentSize > 10) {
+                    const newSize = currentSize - 2;
+                    codeBlock.style.fontSize = `${newSize}px`;
+                    fontDisplay.textContent = `${newSize}px`;
+                    localStorage.setItem('codeFontSize', newSize);
+                }
+            });
+
+            increaseBtn.addEventListener('click', () => {
+                const currentSize = parseInt(codeBlock.style.fontSize);
+                if (currentSize < 24) {
+                    const newSize = currentSize + 2;
+                    codeBlock.style.fontSize = `${newSize}px`;
+                    fontDisplay.textContent = `${newSize}px`;
+                    localStorage.setItem('codeFontSize', newSize);
+                }
+            });
+        }
+    });
+
+    // مراقبة إضافة عناصر كود جديدة
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+                if (node.nodeType === 1 && node.classList.contains('code-wrapper')) {
+                    const codeBlock = node.querySelector('pre code');
+                    const fontDisplay = node.querySelector('.font-size-display');
+                    const savedSize = localStorage.getItem('codeFontSize') || '14';
+                    
+                    if (codeBlock && fontDisplay) {
+                        codeBlock.style.fontSize = `${savedSize}px`;
+                        fontDisplay.textContent = `${savedSize}px`;
+                    }
+                }
+            });
+        });
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+});
+</script>
 
 </body>
 </html>

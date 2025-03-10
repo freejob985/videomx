@@ -11,6 +11,7 @@
     border-radius: 6px;
     overflow: hidden;
     margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
 }
 
 /* تنسيق عنصر pre و code */
@@ -96,12 +97,13 @@ pre > code {
 }
 
 .font-size-display {
+    user-select: none;
+    min-width: 50px;
+    text-align: center;
     background: #2d2d2d;
-    color: #b3b3b3;
     padding: 4px 8px;
     border-radius: 4px;
-    min-width: 45px;
-    text-align: center;
+    color: #b3b3b3;
 }
 
 /* تنسيقات الموديول */
@@ -253,10 +255,7 @@ pre > code {
 .code-controls .control-group {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 4px;
-    background: #363636;
-    border-radius: 6px;
+    gap: 0.5rem;
 }
 
 .code-controls button {
@@ -281,10 +280,32 @@ pre > code {
 }
 
 .code-controls .font-size-display {
-    color: #b3b3b3;
-    padding: 0 8px;
     min-width: 45px;
     text-align: center;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.code-controls .code-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #495057;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.code-controls .code-btn:hover {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+
+.code-controls .code-btn:active {
+    background-color: #dee2e6;
+    border-color: #ced4da;
 }
 
 /* تصميم النافذة المنفصلة */
@@ -324,6 +345,10 @@ pre > code {
 .code-block {
     margin: 0;
     border-radius: 0 0 4px 4px;
+    transition: font-size 0.2s ease-in-out;
+    font-family: 'Fira Code', monospace;
+    line-height: 1.5;
+    padding: 1rem;
 }
 
 /* تأثيرات حركية */
@@ -358,10 +383,10 @@ pre > code {
 
 .code-wrapper pre code {
     font-family: 'Fira Code', monospace;
-    font-size: 16px !important;
     line-height: 1.6;
     direction: ltr;
     text-align: left;
+    transition: font-size 0.2s ease-in-out;
 }
 
 /* تحسينات إضافية */
@@ -434,4 +459,63 @@ pre > code {
 
 .code-popup-content code {
     font-size: 18px !important;
+}
+
+/* تحسين أزرار التحكم في حجم الخط */
+.code-controls .font-size-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.code-controls .font-size-display {
+    background: #2d2d2d;
+    color: #b3b3b3;
+    padding: 4px 8px;
+    border-radius: 4px;
+    min-width: 45px;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.code-controls .code-btn {
+    background: transparent;
+    border: none;
+    color: #b3b3b3;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.code-controls .code-btn:hover {
+    background: #454545;
+    color: #fff;
+}
+
+.code-controls .code-btn:active {
+    transform: scale(0.95);
+}
+
+/* تحسين عرض الكود */
+.code-block {
+    transition: font-size 0.2s ease-in-out;
+    font-family: 'Fira Code', monospace;
+    line-height: 1.5;
+    margin: 0;
+    padding: 1rem;
+}
+
+/* تحسين النافذة المنفصلة */
+.code-popup.active .code-block {
+    font-size: inherit;
+}
+
+/* تأكيد أن التنسيقات تنطبق على جميع حالات عرض الكود */
+.code-popup-content pre code,
+.code-wrapper.fullscreen pre code {
+    font-size: inherit;
 } 

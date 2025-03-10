@@ -6,41 +6,57 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeCodeControls() {
     document.querySelectorAll('.code-wrapper').forEach(wrapper => {
-        const controls = wrapper.querySelector('.code-controls');
-        if (!controls) return;
+        const codeBlock = wrapper.querySelector('pre code');
+        const fontDisplay = wrapper.querySelector('.font-size-display');
+        const decreaseBtn = wrapper.querySelector('.font-size-decrease');
+        const increaseBtn = wrapper.querySelector('.font-size-increase');
 
-        // تهيئة الأحداث
-        initializeControlEvents(wrapper);
-        
-        // تهيئة حجم الخط الأولي
-        updateFontSize(wrapper, 14);
+        if (!codeBlock || !fontDisplay) return;
+
+        // تعيين الحجم الأولي
+        const initialSize = parseInt(localStorage.getItem('codeFontSize')) || 14;
+        updateFontSize(codeBlock, fontDisplay, initialSize);
+
+        // زر تصغير الخط
+        if (decreaseBtn) {
+            decreaseBtn.addEventListener('click', () => {
+                const currentSize = parseInt(getComputedStyle(codeBlock).fontSize);
+                if (currentSize > 10) {
+                    updateFontSize(codeBlock, fontDisplay, currentSize - 2);
+                }
+            });
+        }
+
+        // زر تكبير الخط
+        if (increaseBtn) {
+            increaseBtn.addEventListener('click', () => {
+                const currentSize = parseInt(getComputedStyle(codeBlock).fontSize);
+                if (currentSize < 24) {
+                    updateFontSize(codeBlock, fontDisplay, currentSize + 2);
+                }
+            });
+        }
     });
 }
 
-function initializeControlEvents(wrapper) {
-    // أزرار تغيير حجم الخط
-    wrapper.querySelector('.font-size-decrease').addEventListener('click', () => changeFontSize(wrapper, -1));
-    wrapper.querySelector('.font-size-increase').addEventListener('click', () => changeFontSize(wrapper, 1));
-    
-    // زر النسخ
-    wrapper.querySelector('.copy-code').addEventListener('click', () => copyCode(wrapper));
-    
-    // زر فتح النافذة المنفصلة
-    wrapper.querySelector('.open-popup').addEventListener('click', () => openInNewWindow(wrapper));
-    
-    // زر ملء الشاشة
-    wrapper.querySelector('.fullscreen-toggle').addEventListener('click', () => toggleFullscreen(wrapper));
-}
-
-function changeFontSize(wrapper, delta) {
-    const codeBlock = wrapper.querySelector('pre code');
-    const display = wrapper.querySelector('.font-size-display');
-    
-    const currentSize = parseInt(window.getComputedStyle(codeBlock).fontSize);
-    const newSize = Math.min(Math.max(currentSize + delta, 10), 24);
-    
+function updateFontSize(codeBlock, display, newSize) {
+    // تطبيق الحجم الجديد على عنصر الكود
     codeBlock.style.fontSize = `${newSize}px`;
+    
+    // تحديث عرض الحجم في الواجهة
     display.textContent = `${newSize}px`;
+    
+    // حفظ الحجم في التخزين المحلي
+    localStorage.setItem('codeFontSize', newSize);
+
+    // تحديث حجم الخط في النافذة المنفصلة إذا كانت مفتوحة
+    const popup = document.querySelector('.code-popup.active');
+    if (popup) {
+        const popupCode = popup.querySelector('pre code');
+        if (popupCode) {
+            popupCode.style.fontSize = `${newSize}px`;
+        }
+    }
 }
 
 function copyCode(wrapper) {
@@ -185,7 +201,7 @@ function handleNoteTypeChange() {
         
         // إخفاء جميع الخيارات الإضافية
         if (codeOptions) codeOptions.style.display = 'none';
-        if (linkOptions) linkOptions.style.display = 'none';
+        if (linkOptions) linkOptions.style.display.display = 'none';
         
         // إضافة الصنف الجديد وإظهار الخيارات المناسبة
         switch(this.value) {
@@ -457,5 +473,140 @@ class CodeControls {
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.code-wrapper').forEach(wrapper => {
         new CodeControls(wrapper);
+    });
+});
+
+/**
+ * Font Size Control Module
+ * Handles increasing and decreasing font size for code blocks
+ */
+const FontSizeControl = {
+    // Default font size in pixels
+    DEFAULT_SIZE: 14,
+    // Minimum font size allowed
+    MIN_SIZE: 10,
+    // Maximum font size allowed
+    MAX_SIZE: 24,
+    // Step size for font size changes
+    STEP_SIZE: 2,
+
+    /**
+     * Initialize font size controls for a code wrapper
+     * @param {HTMLElement} wrapper - The code wrapper element
+     */
+    init(wrapper) {
+        const decreaseBtn = wrapper.querySelector('.font-size-decrease');
+        const increaseBtn = wrapper.querySelector('.font-size-increase');
+        const display = wrapper.querySelector('.font-size-display');
+        const codeBlock = wrapper.querySelector('.code-block');
+
+        // Set initial font size
+        if (codeBlock) {
+            codeBlock.style.fontSize = `${this.DEFAULT_SIZE}px`;
+            if (display) {
+                display.textContent = `${this.DEFAULT_SIZE}px`;
+            }
+        }
+
+        // Decrease font size handler
+        if (decreaseBtn) {
+            decreaseBtn.addEventListener('click', () => {
+                this.changeFontSize(wrapper, 'decrease');
+            });
+        }
+
+        // Increase font size handler
+        if (increaseBtn) {
+            increaseBtn.addEventListener('click', () => {
+                this.changeFontSize(wrapper, 'increase');
+            });
+        }
+    },
+
+    /**
+     * Change font size of code block
+     * @param {HTMLElement} wrapper - The code wrapper element
+     * @param {string} action - Either 'increase' or 'decrease'
+     */
+    changeFontSize(wrapper, action) {
+        const codeBlock = wrapper.querySelector('.code-block');
+        const display = wrapper.querySelector('.font-size-display');
+        
+        if (!codeBlock) return;
+
+        // Get current font size
+        const currentSize = parseInt(window.getComputedStyle(codeBlock).fontSize);
+        let newSize = currentSize;
+
+        // Calculate new size based on action
+        if (action === 'increase' && currentSize < this.MAX_SIZE) {
+            newSize = currentSize + this.STEP_SIZE;
+        } else if (action === 'decrease' && currentSize > this.MIN_SIZE) {
+            newSize = currentSize - this.STEP_SIZE;
+        }
+
+        // Apply new font size
+        codeBlock.style.fontSize = `${newSize}px`;
+        
+        // Update display
+        if (display) {
+            display.textContent = `${newSize}px`;
+        }
+
+        // Save preference to localStorage
+        this.saveFontSizePreference(newSize);
+    },
+
+    /**
+     * Save font size preference to localStorage
+     * @param {number} size - Font size in pixels
+     */
+    saveFontSizePreference(size) {
+        try {
+            localStorage.setItem('codeFontSize', size.toString());
+        } catch (e) {
+            console.warn('Could not save font size preference:', e);
+        }
+    },
+
+    /**
+     * Get saved font size preference
+     * @returns {number} Font size in pixels
+     */
+    getSavedFontSize() {
+        try {
+            const saved = localStorage.getItem('codeFontSize');
+            return saved ? parseInt(saved) : this.DEFAULT_SIZE;
+        } catch (e) {
+            console.warn('Could not get saved font size:', e);
+            return this.DEFAULT_SIZE;
+        }
+    }
+};
+
+/**
+ * Initialize all code controls when document is ready
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize existing code wrappers
+    document.querySelectorAll('.code-wrapper').forEach(wrapper => {
+        FontSizeControl.init(wrapper);
+    });
+
+    // Initialize code controls for dynamically added code wrappers
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+                if (node.nodeType === 1 && node.classList.contains('code-wrapper')) {
+                    FontSizeControl.init(node);
+                }
+            });
+        });
+    });
+
+    // Start observing the document for added code wrappers
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
     });
 }); 
