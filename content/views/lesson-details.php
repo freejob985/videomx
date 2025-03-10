@@ -890,5 +890,26 @@ window.LESSON_ID = <?php echo json_encode($lesson['id']); ?>;
     </div>
 </div>
 
+<!-- إضافة سكريبت للتعامل مع زر ESC -->
+<script>
+// استمع لحدث الضغط على المفاتيح في النافذة
+document.addEventListener('keydown', function(event) {
+    // تحقق مما إذا كان المفتاح المضغوط هو ESC
+    if (event.key === 'Escape') {
+        // احصل على مثيل المودال
+        const codeModal = document.getElementById('codeModal');
+        // تحقق من أن المودال موجود
+        if (codeModal) {
+            // احصل على كائن مودال Bootstrap
+            const bsModal = bootstrap.Modal.getInstance(codeModal);
+            // إذا كان المودال مفتوحاً، قم بإغلاقه
+            if (bsModal) {
+                bsModal.hide();
+            }
+        }
+    }
+});
+</script>
+
 </body>
 </html>
