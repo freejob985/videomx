@@ -3,69 +3,46 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once '../config/database.php';
 
+if (!isset($_GET['lesson_id'])) {
+    http_response_code(400);
+    echo json_encode(['error' => 'معرف الدرس مطلوب']);
+    exit;
+}
+
 try {
-    $lesson_id = isset($_GET['lesson_id']) ? (int)$_GET['lesson_id'] : 0;
+    $lesson_id = intval($_GET['lesson_id']);
     
-    if ($lesson_id <= 0) {
-        throw new Exception("معرف الدرس غير صالح");
-    }
-
-    // Get lesson details
-    $query = "SELECT 
-        l.*,
-        c.title as course_title,
-        s.name as section_name,
-        st.name as status_name,
-        st.color as status_color
-    FROM lessons l
-    LEFT JOIN courses c ON l.course_id = c.id
-    LEFT JOIN sections s ON l.section_id = s.id
-    LEFT JOIN statuses st ON l.status_id = st.id
-    WHERE l.id = ?";
-
+    // استعلام للحصول على تفاصيل الدرس مع معرف اللغة
+    $query = "SELECT l.*, c.language_id 
+              FROM lessons l 
+              LEFT JOIN courses c ON l.course_id = c.id 
+              WHERE l.id = ?";
+              
     $stmt = $conn->prepare($query);
-    $stmt->bind_param('i', $lesson_id);
+    $stmt->bind_param("i", $lesson_id);
     $stmt->execute();
     $result = $stmt->get_result();
-    $lesson = $result->fetch_assoc();
-
-    if (!$lesson) {
-        throw new Exception("الدرس غير موجود");
-    }
-
-    // Format lesson data
-    $lesson['duration_formatted'] = formatDuration($lesson['duration']);
-    $lesson['is_important'] = (bool)$lesson['is_important'];
-    $lesson['is_theory'] = (bool)$lesson['is_theory'];
-    $lesson['completed'] = (bool)$lesson['completed'];
-
-    // Get lesson notes
-    $notes_query = "SELECT * FROM notes WHERE lesson_id = ? ORDER BY created_at DESC";
-    $stmt = $conn->prepare($notes_query);
-    $stmt->bind_param('i', $lesson_id);
-    $stmt->execute();
-    $notes_result = $stmt->get_result();
     
-    $notes = [];
-    while ($note = $notes_result->fetch_assoc()) {
-        $notes[] = $note;
+    if ($row = $result->fetch_assoc()) {
+        // تحويل البيانات النصية إلى مصفوفات إذا كانت موجودة
+        if ($row['tags']) {
+            $row['tags'] = explode(',', $row['tags']);
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'lesson' => $row
+        ]);
+    } else {
+        throw new Exception('الدرس غير موجود');
     }
-
-    echo json_encode([
-        'success' => true,
-        'lesson' => $lesson,
-        'notes' => $notes
-    ]);
 
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'حدث خطأ أثناء جلب تفاصيل الدرس',
-        'error' => $e->getMessage()
-    ]);
+    echo json_encode(['error' => $e->getMessage()]);
 }
 
+$stmt->close();
 $conn->close();
 
 /**

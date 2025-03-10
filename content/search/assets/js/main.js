@@ -182,6 +182,7 @@ let currentLesson = null;
 let currentPage = 1;
 let currentLessonIndex = -1;
 let lessonsList = [];
+let currentLessonLanguageId = null;
 
 function loadFilters() {
     // Load languages
@@ -215,11 +216,11 @@ function loadFilters() {
 
 function loadSections() {
     const languageId = $('#languageFilter').val();
-    const url = 'api/get_filters.php?type=sections' + (languageId ? `&language_id=${languageId}` : '');
+    const url = 'api/get_sections.php?language_id=' + (languageId ? languageId : '');
     
     $.get(url, function(data) {
         $('#sectionFilter').html('<option value="">اختر القسم</option>');
-        data.forEach(section => {
+        data.sections.forEach(section => {
             $('#sectionFilter').append(`<option value="${section.id}">${section.name}</option>`);
         });
     });
@@ -656,28 +657,44 @@ function updateNavigationButtons() {
 
 function loadLessonDetails(lessonId) {
     $.get(`api/get_lesson_details.php?lesson_id=${lessonId}`, function(response) {
-        currentLesson = response.lesson;
-        currentLessonId = lessonId;
-        currentLessonIndex = lessonsList.findIndex(lesson => lesson.id === lessonId);
-        
-        // Update modal title
-        $('#videoModalLabel').text(currentLesson.title);
-        
-        // Update video URL
-        let videoUrl = currentLesson.video_url;
-        if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
-            const videoId = extractYouTubeId(videoUrl);
-            videoUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+        if (response.success) {
+            currentLesson = response.lesson;
+            currentLessonId = lessonId;
+            currentLessonLanguageId = response.lesson.language_id;
+            currentLessonIndex = lessonsList.findIndex(lesson => lesson.id === lessonId);
+            
+            // Update modal title
+            $('#videoModalLabel').text(currentLesson.title);
+            
+            // Update video URL
+            let videoUrl = currentLesson.video_url;
+            if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+                const videoId = extractYouTubeId(videoUrl);
+                videoUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            }
+            $('#videoFrame').attr('src', videoUrl);
+            
+            // إضافة زر تحديث القسم في شريط العنوان
+            const modalHeader = $('#videoModal .modal-header .ms-auto');
+            if (!modalHeader.find('#editSectionBtn').length) {
+                const sectionEditBtn = $(`
+                    <button id="editSectionBtn" class="btn btn-outline-primary btn-sm me-2">
+                        <i class="fas fa-folder-open"></i> تعديل القسم
+                    </button>
+                `);
+                sectionEditBtn.on('click', () => openSectionEditModal(currentLessonLanguageId));
+                modalHeader.prepend(sectionEditBtn);
+            }
+            
+            // Update other elements
+            updateNavigationButtons();
+            updateLessonStatusButtons();
+            displayNotes(response.notes);
+            displayTags(currentLesson.tags);
+            displayTranscript(currentLesson.transcript);
+        } else {
+            toastr.error(response.error || 'حدث خطأ أثناء تحميل تفاصيل الدرس');
         }
-        $('#videoFrame').attr('src', videoUrl);
-        
-        // Update other elements
-        updateNavigationButtons();
-        updateLessonStatusButtons();
-        displayNotes(response.notes);
-        displayTags(currentLesson.tags);
-        displayTranscript(currentLesson.transcript);
-        
     }).fail(function() {
         toastr.error('حدث خطأ أثناء تحميل تفاصيل الدرس');
     });
@@ -1076,4 +1093,132 @@ function updateLanguagesPagination(currentPage, totalPages) {
             </a>
         </li>
     `);
+}
+
+// تحديث دالة فتح النافذة المنبثقة للفيديو لتشمل معالجة القسم
+function openVideoModal(lessonData) {
+    currentLessonId = lessonData.id;
+    currentLessonLanguageId = lessonData.language_id;
+    
+    // ... existing video modal code ...
+    
+    // إضافة زر تعديل القسم
+    const modalHeader = document.querySelector('#videoModal .modal-header .ms-auto');
+    const sectionEditBtn = document.createElement('button');
+    sectionEditBtn.className = 'btn btn-outline-primary btn-sm me-2';
+    sectionEditBtn.innerHTML = '<i class="fas fa-folder-open"></i> تعديل القسم';
+    sectionEditBtn.onclick = openSectionEditModal;
+    modalHeader.insertBefore(sectionEditBtn, modalHeader.firstChild);
+}
+
+// تحديث دالة openSectionEditModal لتحديد القسم الحالي
+async function openSectionEditModal(languageId) {
+    try {
+        if (!languageId) {
+            throw new Error('معرف اللغة غير متوفر');
+        }
+
+        // جلب الأقسام الخاصة باللغة
+        const response = await fetch(`api/get_sections.php?language_id=${languageId}`);
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'حدث خطأ أثناء جلب الأقسام');
+        }
+        
+        if (!data.sections || data.sections.length === 0) {
+            toastr.warning('لا توجد أقسام متاحة لهذه اللغة');
+            return;
+        }
+        
+        // إنشاء محتوى النافذة المنبثقة
+        const modalContent = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">تعديل القسم</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">اختر القسم</label>
+                            <select class="form-select" id="sectionSelect">
+                                <option value="">اختر القسم...</option>
+                                ${data.sections.map(section => 
+                                    `<option value="${section.id}" ${currentLesson.section_id == section.id ? 'selected' : ''}>
+                                        ${section.name}
+                                    </option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="button" class="btn btn-primary" onclick="updateSection()">حفظ</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // إنشاء وعرض النافذة المنبثقة
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'sectionEditModal';
+        modal.innerHTML = modalContent;
+        document.body.appendChild(modal);
+        
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+        
+        // تنظيف النافذة المنبثقة عند إغلاقها
+        modal.addEventListener('hidden.bs.modal', () => {
+            modal.remove();
+        });
+        
+    } catch (error) {
+        toastr.error(error.message || 'حدث خطأ أثناء جلب الأقسام');
+        console.error(error);
+    }
+}
+
+// تحديث دالة updateSection لتحديث واجهة المستخدم بعد التحديث
+async function updateSection() {
+    try {
+        const sectionId = document.getElementById('sectionSelect').value;
+        
+        if (!sectionId) {
+            toastr.error('الرجاء اختيار قسم');
+            return;
+        }
+        
+        const response = await fetch('api/update_section.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                lesson_id: currentLessonId,
+                section_id: sectionId
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            toastr.success('تم تحديث القسم بنجاح');
+            bootstrap.Modal.getInstance(document.getElementById('sectionEditModal')).hide();
+            
+            // تحديث القسم في الدرس الحالي
+            currentLesson.section_id = sectionId;
+            
+            // تحديث القائمة وإعادة تحميل الدروس
+            loadLessons(currentPage);
+        } else {
+            throw new Error(data.error || 'حدث خطأ أثناء تحديث القسم');
+        }
+        
+    } catch (error) {
+        toastr.error(error.message || 'حدث خطأ أثناء تحديث القسم');
+        console.error(error);
+    }
 } 
