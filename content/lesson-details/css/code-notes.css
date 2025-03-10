@@ -547,4 +547,27 @@ pre > code {
     background: #2d2d2d !important;
     padding: 8px 16px !important;
     border-bottom: 1px solid #3d3d3d !important;
+}
+
+/* منع الاسكرول في وضع ملء الشاشة */
+body.code-fullscreen {
+    overflow: hidden !important;
+}
+
+.code-modal.fullscreen {
+    overflow: hidden !important;
+}
+
+.code-modal.fullscreen .modal-body {
+    overflow: hidden !important;
+}
+
+.code-modal.fullscreen .code-wrapper {
+    height: 100vh;
+    overflow: hidden;
+}
+
+.code-modal.fullscreen .code-content {
+    height: calc(100vh - 60px); /* 60px للهيدر */
+    overflow: auto;
 } 

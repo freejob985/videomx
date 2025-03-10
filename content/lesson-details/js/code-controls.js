@@ -180,30 +180,31 @@ function openInNewWindow(wrapper) {
 }
 
 function toggleFullscreen(wrapper) {
-    if (!document.fullscreenElement) {
-        wrapper.requestFullscreen().then(() => {
-            wrapper.classList.add('fullscreen');
-            wrapper.querySelector('.fullscreen-toggle i').classList.replace('fa-expand', 'fa-compress');
-            
-            // تعديل حجم الكود ليملأ الشاشة
-            const codeContent = wrapper.querySelector('.code-content');
-            if (codeContent) {
-                codeContent.style.height = '100vh';
-                codeContent.style.maxHeight = '100vh';
-            }
-        });
+    const modal = document.getElementById('codeModal');
+    const modalInstance = bootstrap.Modal.getInstance(modal);
+    const codeContent = wrapper.querySelector('.code-content');
+    const codeBlock = wrapper.querySelector('pre code');
+
+    if (!modalInstance) {
+        // فتح المودال
+        const newModal = new bootstrap.Modal(modal);
+        modal.querySelector('.modal-body').innerHTML = wrapper.outerHTML;
+        modal.querySelector('.modal-title').textContent = 'عرض الكود';
+        newModal.show();
+        
+        // إضافة الكلاسات لمنع الاسكرول
+        document.body.classList.add('code-fullscreen');
+        modal.classList.add('fullscreen');
+        
+        // تحديث Prism
+        Prism.highlightAll();
     } else {
-        document.exitFullscreen().then(() => {
-            wrapper.classList.remove('fullscreen');
-            wrapper.querySelector('.fullscreen-toggle i').classList.replace('fa-compress', 'fa-expand');
-            
-            // إعادة الحجم الطبيعي
-            const codeContent = wrapper.querySelector('.code-content');
-            if (codeContent) {
-                codeContent.style.height = '';
-                codeContent.style.maxHeight = '';
-            }
-        });
+        // إغلاق المودال
+        modalInstance.hide();
+        
+        // إزالة الكلاسات
+        document.body.classList.remove('code-fullscreen');
+        modal.classList.remove('fullscreen');
     }
 }
 
@@ -223,6 +224,12 @@ function initializeModals() {
                 bsModal.hide();
             }
         }
+    });
+
+    // إضافة مستمع لحدث إغلاق المودال
+    document.getElementById('codeModal').addEventListener('hidden.bs.modal', function () {
+        document.body.classList.remove('code-fullscreen');
+        this.classList.remove('fullscreen');
     });
 }
 

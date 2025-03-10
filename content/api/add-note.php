@@ -47,14 +47,14 @@ $missingFields = array_filter($requiredFields, function($field) use ($data) {
     return empty($data[$field]);
 });
 
-if (!empty($missingFields)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false, 
-        'error' => 'Missing required fields: ' . implode(', ', $missingFields)
-    ]);
-    exit;
-}
+// if (!empty($missingFields)) {
+//     http_response_code(400);
+//     echo json_encode([
+//         'success' => false, 
+//         'error' => 'Missing required fields: ' . implode(', ', $missingFields)
+//     ]);
+//     exit;
+// }
 
 // التحقق من النوع والحقول الإضافية
 switch ($data['type']) {
