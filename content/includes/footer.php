@@ -102,7 +102,6 @@ $(document).ready(function() {
                         <?php endif; ?>
                     </ul>
                 </div>
-
                 <!-- القسم الثاني: روابط التنقل الرئيسية -->
                 <div class="col-md-6 mb-4">
                     <h5 class="text-white mb-4">روابط رئيسية</h5>
@@ -129,6 +128,12 @@ $(document).ready(function() {
                             <a href="http://videomx.com/" class="portal-link">
                                 <i class="fas fa-door-open me-2"></i>
                                 البوابة
+                            </a>
+                        </li>
+                        <li>
+                            <a href="http://videomx.com/content/search/" class="search-link">
+                                <i class="fas fa-search me-2"></i>
+                                البحث
                             </a>
                         </li>
                     </ul>

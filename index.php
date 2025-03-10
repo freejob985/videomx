@@ -541,6 +541,12 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 المراجعة
                             </a>
                         </li>
+                        <li>
+                            <a href="http://videomx.com/content/search/" class="text-white">
+                                <i class="fas fa-search me-2"></i>
+                                البحث
+                            </a>
+                        </li>
                     </ul>
                 </div>
 

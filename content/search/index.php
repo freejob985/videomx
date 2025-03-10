@@ -1100,10 +1100,16 @@
                                     المساعد الذكي
                                 </a>
                             </li>
-                            <li>
+                            <li class="mb-2">
                                 <a href="http://videomx.com/" target="_blank">
                                     <i class="fas fa-home me-2"></i>
                                     البوابة
+                                </a>
+                            </li>
+                            <li>
+                                <a href="http://videomx.com/review/" target="_blank">
+                                    <i class="fas fa-star me-2"></i>
+                                    المراجعة
                                 </a>
                             </li>
                         </ul>

@@ -667,6 +667,11 @@
                                 <i class="fas fa-star me-2"></i>المراجعة
                             </a>
                         </li>
+                        <li class="mb-2">
+                            <a href="http://videomx.com/content/search/" class="text-white text-decoration-none">
+                                <i class="fas fa-search me-2"></i>البحث
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 
