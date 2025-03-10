@@ -51,29 +51,97 @@ function copyCode(wrapper) {
 }
 
 function openInNewWindow(wrapper) {
+    // إنشاء عنصر النافذة المنفصلة إذا لم يكن موجوداً
+    let popup = document.querySelector('.code-popup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.className = 'code-popup';
+        document.body.appendChild(popup);
+    }
+
+    // الحصول على معلومات الكود
     const code = wrapper.querySelector('pre code').textContent;
     const language = wrapper.querySelector('pre code').className.split('-')[1] || 'plaintext';
-    
-    const newWindow = window.open('', '_blank', 'width=800,height=600');
-    newWindow.document.write(`
-        <!DOCTYPE html>
-        <html dir="ltr">
-        <head>
-            <title>Code View</title>
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
-            <style>
-                body { margin: 0; padding: 20px; background: #1e1e1e; }
-                pre { margin: 0; }
-                code { font-family: 'Fira Code', monospace; font-size: 14px; }
-            </style>
-        </head>
-        <body>
+    const title = wrapper.closest('.note-card')?.querySelector('.card-header h5')?.textContent || 'Code View';
+
+    // تحديث محتوى النافذة المنفصلة
+    popup.innerHTML = `
+        <div class="code-popup-header">
+            <h3 class="code-popup-title">${title}</h3>
+            <div class="code-popup-controls">
+                <div class="control-group">
+                    <button type="button" class="code-btn font-size-decrease" title="تصغير الخط">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span class="font-size-display">18px</span>
+                    <button type="button" class="code-btn font-size-increase" title="تكبير الخط">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="control-group">
+                    <button type="button" class="code-btn copy-code" title="نسخ الكود">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    <button type="button" class="code-btn close-popup" title="إغلاق">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="code-popup-content">
             <pre><code class="language-${language}">${code}</code></pre>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
-            <script>Prism.highlightAll();</script>
-        </body>
-        </html>
-    `);
+        </div>
+    `;
+
+    // تفعيل تمييز الكود
+    if (window.Prism) {
+        Prism.highlightElement(popup.querySelector('code'));
+    }
+
+    // إضافة الأحداث
+    const popupControls = {
+        fontSize: 18,
+        codeElement: popup.querySelector('code'),
+        fontDisplay: popup.querySelector('.font-size-display'),
+        
+        updateFontSize(delta) {
+            this.fontSize = Math.min(Math.max(this.fontSize + delta, 12), 32);
+            this.codeElement.style.fontSize = `${this.fontSize}px`;
+            this.fontDisplay.textContent = `${this.fontSize}px`;
+        }
+    };
+
+    // أزرار تغيير حجم الخط
+    popup.querySelector('.font-size-decrease').addEventListener('click', () => {
+        popupControls.updateFontSize(-2);
+    });
+
+    popup.querySelector('.font-size-increase').addEventListener('click', () => {
+        popupControls.updateFontSize(2);
+    });
+
+    // زر النسخ
+    popup.querySelector('.copy-code').addEventListener('click', () => {
+        navigator.clipboard.writeText(code).then(() => {
+            toastr.success('تم نسخ الكود بنجاح');
+        });
+    });
+
+    // زر الإغلاق
+    popup.querySelector('.close-popup').addEventListener('click', () => {
+        popup.classList.remove('active');
+    });
+
+    // مفتاح ESC للإغلاق
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && popup.classList.contains('active')) {
+            popup.classList.remove('active');
+        }
+    });
+
+    // عرض النافذة
+    popup.classList.add('active');
+    document.body.style.overflow = 'hidden'; // منع التمرير في الصفحة الرئيسية
 }
 
 function toggleFullscreen(wrapper) {

@@ -358,8 +358,10 @@ pre > code {
 
 .code-wrapper pre code {
     font-family: 'Fira Code', monospace;
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 16px !important;
+    line-height: 1.6;
+    direction: ltr;
+    text-align: left;
 }
 
 /* تحسينات إضافية */
@@ -370,4 +372,66 @@ pre > code {
 .note-card.code-note .code-wrapper {
     margin: 0;
     border-radius: 0;
+}
+
+/* تنسيق حاوية الكود */
+.code-content {
+    position: relative;
+    background: #1e1e1e;
+    padding: 1rem;
+    max-height: 500px;
+    overflow: auto;
+}
+
+/* تحسين عرض الكود في النافذة المنفصلة */
+.code-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #1e1e1e;
+    z-index: 9999;
+    display: none;
+    overflow: hidden;
+}
+
+.code-popup.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.code-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #2d2d2d;
+    border-bottom: 1px solid #3d3d3d;
+}
+
+.code-popup-title {
+    color: #fff;
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.code-popup-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.code-popup-content {
+    flex: 1;
+    overflow: auto;
+    padding: 1rem;
+}
+
+.code-popup-content pre {
+    margin: 0;
+    height: 100%;
+}
+
+.code-popup-content code {
+    font-size: 18px !important;
 } 
