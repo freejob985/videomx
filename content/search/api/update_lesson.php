@@ -1,66 +1,72 @@
 <?php
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
+
 require_once '../config/database.php';
 
-$database = new Database();
-$db = $database->getConnection();
-
 try {
-    // Check if it's a POST request
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Invalid request method');
-    }
-
     // Get POST data
     $data = json_decode(file_get_contents('php://input'), true);
     
     if (!isset($data['lesson_id'])) {
-        throw new Exception('Lesson ID is required');
+        throw new Exception('معرف الدرس مطلوب');
     }
-
-    $lesson_id = (int)$data['lesson_id'];
+    
+    $lesson_id = intval($data['lesson_id']);
     $updates = [];
-    $params = [':lesson_id' => $lesson_id];
-
-    // Handle different update types
+    $types = '';
+    $values = [];
+    
+    // Build update query based on provided fields
     if (isset($data['completed'])) {
-        $updates[] = "completed = :completed";
-        $params[':completed'] = (int)$data['completed'];
+        $updates[] = 'completed = ?';
+        $types .= 'i';
+        $values[] = $data['completed'] ? 1 : 0;
     }
-
-    if (isset($data['is_important'])) {
-        $updates[] = "is_important = :is_important";
-        $params[':is_important'] = (int)$data['is_important'];
-    }
-
-    if (isset($data['is_theory'])) {
-        $updates[] = "is_theory = :is_theory";
-        $params[':is_theory'] = (int)$data['is_theory'];
-    }
-
+    
     if (isset($data['tags'])) {
-        $updates[] = "tags = :tags";
-        $params[':tags'] = $data['tags'];
+        $updates[] = 'tags = ?';
+        $types .= 's';
+        $values[] = $data['tags'];
     }
-
+    
+    if (isset($data['section_id'])) {
+        $updates[] = 'section_id = ?';
+        $types .= 'i';
+        $values[] = intval($data['section_id']);
+    }
+    
     if (empty($updates)) {
-        throw new Exception('No updates provided');
-    }
-
-    // Build and execute update query
-    $query = "UPDATE lessons SET " . implode(', ', $updates) . " WHERE id = :lesson_id";
-    $stmt = $db->prepare($query);
-    
-    foreach ($params as $key => $value) {
-        $stmt->bindValue($key, $value);
+        throw new Exception('لا توجد بيانات للتحديث');
     }
     
-    $stmt->execute();
-
-    echo json_encode(['success' => true, 'message' => 'Lesson updated successfully']);
-
-} catch(Exception $e) {
-    http_response_code(400);
-    echo json_encode(['error' => $e->getMessage()]);
+    // Add lesson_id to values array
+    $values[] = $lesson_id;
+    $types .= 'i';
+    
+    // Prepare and execute update query
+    $query = "UPDATE lessons SET " . implode(', ', $updates) . " WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    
+    // Bind parameters dynamically
+    $stmt->bind_param($types, ...$values);
+    
+    if ($stmt->execute()) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'تم تحديث الدرس بنجاح'
+        ]);
+    } else {
+        throw new Exception('فشل تحديث الدرس');
+    }
+    
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'error' => $e->getMessage()
+    ]);
 }
+
+$stmt->close();
+$conn->close();
 ?> 

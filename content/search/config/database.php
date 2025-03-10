@@ -20,7 +20,10 @@ try {
     }
 
     // ضبط الترميز
-    $conn->set_charset("utf8");
+    $conn->set_charset("utf8mb4");
+
+    // Set timezone
+    date_default_timezone_set('Asia/Riyadh');
 
 } catch (Exception $e) {
     die("خطأ في الاتصال بقاعدة البيانات: " . $e->getMessage());

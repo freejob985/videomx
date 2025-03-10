@@ -12,11 +12,18 @@ if (!isset($_GET['lesson_id'])) {
 try {
     $lesson_id = intval($_GET['lesson_id']);
     
-    // استعلام للحصول على تفاصيل الدرس مع معرف اللغة
-    $query = "SELECT l.*, c.language_id 
-              FROM lessons l 
-              LEFT JOIN courses c ON l.course_id = c.id 
-              WHERE l.id = ?";
+    // استعلام للحصول على تفاصيل الدرس مع معرف اللغة والمعلومات الإضافية
+    $query = "SELECT 
+        l.*,
+        c.language_id,
+        c.title as course_title,
+        s.name as section_name,
+        st.name as status_name
+    FROM lessons l
+    LEFT JOIN courses c ON l.course_id = c.id
+    LEFT JOIN sections s ON l.section_id = s.id
+    LEFT JOIN statuses st ON l.status_id = st.id
+    WHERE l.id = ?";
               
     $stmt = $conn->prepare($query);
     $stmt->bind_param("i", $lesson_id);
@@ -29,6 +36,14 @@ try {
             $row['tags'] = explode(',', $row['tags']);
         }
         
+        // تنسيق المدة
+        $row['duration_formatted'] = formatDuration($row['duration']);
+        
+        // تحويل القيم المنطقية
+        $row['is_important'] = (bool)$row['is_important'];
+        $row['is_theory'] = (bool)$row['is_theory'];
+        $row['completed'] = (bool)$row['completed'];
+        
         echo json_encode([
             'success' => true,
             'lesson' => $row
@@ -39,7 +54,10 @@ try {
 
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    echo json_encode([
+        'success' => false,
+        'error' => $e->getMessage()
+    ]);
 }
 
 $stmt->close();
