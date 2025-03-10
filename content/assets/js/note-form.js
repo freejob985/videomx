@@ -20,7 +20,7 @@ class NoteForm {
         this.typeSelect.addEventListener('change', () => this.handleTypeChange());
         
         // مراقبة تقديم النموذج
-        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+    //    this.form.addEventListener('submit', (e) => this.handleSubmit(e));
         
         // تهيئة النوع الأولي
         this.handleTypeChange();

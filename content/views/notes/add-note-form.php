@@ -19,7 +19,7 @@
             <!-- عنوان الملاحظة -->
             <div class="mb-3">
                 <label for="noteTitle" class="form-label">عنوان الملاحظة</label>
-                <input type="text" class="form-control" id="noteTitle" name="title" required>
+                <input type="text" class="form-control" id="noteTitle" name="title"  value="<?php echo htmlspecialchars($lesson['title']); ?>" required>
             </div>
             
             <!-- نوع الملاحظة -->

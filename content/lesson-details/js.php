@@ -501,27 +501,27 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>جاري الإضافة...';
             
-            const response = await fetch('../api/add-note.php', {
-                method: 'POST',
-                body: formData
-            });
+            // const response = await fetch('../api/add-note.php', {
+            //     method: 'POST',
+            //     body: formData
+            // });
             
-            const data = await response.json();
+            // const data = await response.json();
             
-            if (data.success) {
-                const notesList = document.getElementById('notesList');
-                notesList.insertAdjacentHTML('afterbegin', createNoteHTML(data.note));
+            // if (data.success) {
+            //     const notesList = document.getElementById('notesList');
+            //     notesList.insertAdjacentHTML('afterbegin', createNoteHTML(data.note));
                 
-                // إعادة تعيين النموذج والمحرر
-                this.reset();
-                if (editor) {
-                    editor.setContent('');
-                }
+            //     // إعادة تعيين النموذج والمحرر
+            //     this.reset();
+            //     if (editor) {
+            //         editor.setContent('');
+            //     }
                 
-                toastr.success('تمت إضافة الملاحظة بنجاح');
-            } else {
-                toastr.error(data.message || 'حدث خطأ أثناء إضافة الملاحظة');
-            }
+            //     toastr.success('تمت إضافة الملاحظة بنجاح');
+            // } else {
+            // //    toastr.error(data.message || 'حدث خطأ أثناء إضافة الملاحظة');
+            // }
         } catch (error) {
             console.error('Error:', error);
             toastr.error('حدث خطأ في الاتصال بالخادم');

@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // معالجة إضافة ملاحظة جديدة
     const addNoteForm = document.getElementById('addNoteForm');
     if (addNoteForm) {
-        addNoteForm.addEventListener('submit', handleNoteSubmit);
+       // addNoteForm.addEventListener('submit', handleNoteSubmit);
     }
     
     // معالجة نسخ الكود

@@ -193,7 +193,7 @@ function initializeNoteForm() {
     });
 
     // معالجة تقديم النموذج
-    noteForm.addEventListener('submit', handleNoteSubmit);
+  //  noteForm.addEventListener('submit', handleNoteSubmit);
 }
 
 // تحديث نوع النموذج
