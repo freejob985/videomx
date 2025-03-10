@@ -33,13 +33,20 @@ pre > code {
     display: flex;
     gap: 0.5rem;
     z-index: 100;
-    background: rgba(30, 30, 30, 0.8);
+    background: rgba(30, 30, 30, 0.9);
     padding: 0.5rem;
     border-radius: 6px;
     backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-.btn-control {
+.code-wrapper:hover .code-controls {
+    opacity: 1;
+}
+
+/* تنسيق الأزرار */
+.code-btn {
     background: #2d2d2d;
     color: #d4d4d4;
     border: 1px solid #3d3d3d;
@@ -50,12 +57,33 @@ pre > code {
     align-items: center;
     gap: 0.5rem;
     transition: all 0.2s ease;
+    cursor: pointer;
 }
 
-.btn-control:hover {
+.code-btn:hover {
     background: #3d3d3d;
     border-color: #4d4d4d;
     color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.code-btn:active {
+    transform: translateY(0);
+}
+
+.code-btn i {
+    font-size: 1rem;
+}
+
+/* تأثير التحويم */
+.code-btn:hover i {
+    animation: pulse 0.3s ease;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
 }
 
 .font-size-controls {

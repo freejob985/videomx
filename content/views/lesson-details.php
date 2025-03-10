@@ -538,82 +538,15 @@ include'../lesson-details/css.php';
         <!-- قسم الملاحظات -->
         <div class="notes-section mt-5">
             <div class="card">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
                         <i class="fas fa-sticky-note me-2"></i>
-                        <h3 class="mb-0">الملاحظات</h3>
-                    </div>
-                    <button type="button" 
-                            class="btn btn-light btn-sm toggle-notes" 
-                            data-bs-toggle="tooltip" 
-                            title="إخفاء/إظهار الملاحظات">
-                        <i class="fas fa-chevron-up"></i>
-                    </button>
+                        الملاحظات
+                    </h3>
                 </div>
                 <div class="card-body notes-content">
                     <!-- نموذج إضافة الملاحظات -->
-                    <div class="note-form-wrapper text-type">
-                    <form id="addNoteForm">
-                                <div class="mb-3">
-                                    <label for="noteTitle" class="form-label">عنوان الملاحظة</label>
-                                    <input type="text" 
-                                           class="form-control" 
-                                           id="noteTitle" 
-                                           name="title" 
-                                           value="<?php echo htmlspecialchars($lesson['title']); ?>"
-                                           required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="noteType" class="form-label">نوع الملاحظة</label>
-                                    <select class="form-select" id="noteType" name="type" required>
-                                        <option value="text">نص</option>
-                                        <option value="code">كود</option>
-                                        <option value="link">رابط</option>
-                                    </select>
-                                </div>
-                                <!-- باقي حقول النموذج -->
-                                <div class="code-options d-none">
-                                    <div class="mb-3">
-                                        <label for="codeLanguage" class="form-label">لغة البرمجة</label>
-                                        <select class="form-select" id="codeLanguage" name="code_language">
-                                            <option value="javascript">JavaScript</option>
-                                            <option value="php">PHP</option>
-                                            <option value="html">HTML</option>
-                                            <option value="css">CSS</option>
-                                            <option value="sql">SQL</option>
-                                            <option value="python">Python</option>
-                                            <option value="java">Java</option>
-                                            <option value="csharp">C#</option>
-                                            <option value="cpp">C++</option>
-                                            <option value="typescript">TypeScript</option>
-                                            <option value="ruby">Ruby</option>
-                                            <option value="swift">Swift</option>
-                                            <option value="go">Go</option>
-                                            <option value="rust">Rust</option>
-                                            <option value="kotlin">Kotlin</option>
-                                            <option value="bash">Bash</option>
-                                            <option value="powershell">PowerShell</option>
-                                            <option value="json">JSON</option>
-                                            <option value="xml">XML</option>
-                                            <option value="yaml">YAML</option>
-                                            <option value="markdown">Markdown</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="noteContent" class="form-label">المحتوى</label>
-                                    <textarea class="form-control" 
-                                              id="noteContent" 
-                                              name="content" 
-                                              rows="5" 
-                                              required></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-1"></i>
-                                    حفظ الملاحظة
-                                </button>
-                            </form>
-                    </div>
+                    <?php include '../views/notes/add-note-form.php'; ?>
                     
                     <!-- عرض الملاحظات -->
                     <div id="notesList" class="notes-list">
@@ -896,6 +829,25 @@ document.addEventListener('keydown', function(event) {
 
 <!-- قبل نهاية body، نضيف -->
 <script src="/content/lesson-details/js/code-controls.js"></script>
+
+<!-- في قسم head -->
+<link rel="stylesheet" href="/content/assets/css/note-form.css">
+<script src="https://cdn.tiny.cloud/1/7e1mldkbut3yp4tyeob9lt5s57pb8wrb5fqbh11d6n782gm7/tinymce/5/tinymce.min.js"></script>
+
+<!-- قبل نهاية body -->
+<script src="/content/assets/js/note-form.js"></script>
+
+<!-- في قسم head -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/php/php.min.js"></script>
+
+<!-- قبل نهاية body -->
+<script src="/content/assets/js/notes.js"></script>
 
 </body>
 </html>

@@ -250,4 +250,226 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
-} 
+}
+
+/**
+ * إدارة نموذج الملاحظات
+ */
+class NotesManager {
+    constructor() {
+        this.form = document.getElementById('addNoteForm');
+        this.typeSelect = document.getElementById('noteType');
+        this.codeEditor = null;
+        this.textEditor = null;
+        
+        this.init();
+    }
+    
+    /**
+     * تهيئة النموذج والأحداث
+     */
+    init() {
+        if (!this.form || !this.typeSelect) return;
+        
+        // تهيئة المحررات
+        this.initEditors();
+        
+        // مراقبة تغيير النوع
+        this.typeSelect.addEventListener('change', () => this.handleTypeChange());
+        
+        // مراقبة تقديم النموذج
+        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+        
+        // تهيئة النوع الأولي
+        this.handleTypeChange();
+    }
+    
+    /**
+     * تهيئة محررات النصوص والأكواد
+     */
+    initEditors() {
+        // تهيئة محرر النصوص
+        tinymce.init({
+            selector: '#textContent',
+            directionality: 'rtl',
+            height: 300,
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+            ],
+            toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link | code'
+        });
+        
+        // تهيئة محرر الأكواد
+        const codeTextarea = document.getElementById('codeContent');
+        if (codeTextarea) {
+            this.codeEditor = CodeMirror.fromTextArea(codeTextarea, {
+                mode: 'javascript',
+                theme: 'monokai',
+                lineNumbers: true,
+                autoCloseBrackets: true,
+                matchBrackets: true,
+                indentUnit: 4,
+                tabSize: 4,
+                direction: 'ltr',
+                rtlMoveVisually: false
+            });
+        }
+    }
+    
+    /**
+     * معالجة تغيير نوع الملاحظة
+     */
+    handleTypeChange() {
+        const type = this.typeSelect.value;
+        const wrapper = this.form;
+        
+        // إخفاء جميع الخيارات
+        ['text-options', 'code-options', 'link-options'].forEach(className => {
+            const element = wrapper.querySelector(`.${className}`);
+            if (element) element.classList.add('d-none');
+        });
+        
+        // إظهار الخيارات المناسبة
+        const options = wrapper.querySelector(`.${type}-options`);
+        if (options) {
+            options.classList.remove('d-none');
+            
+            // تحديث المحرر المناسب
+            if (type === 'code' && this.codeEditor) {
+                setTimeout(() => this.codeEditor.refresh(), 10);
+            }
+        }
+        
+        // تحديث نوع النموذج
+        wrapper.className = `note-form-wrapper ${type}-type`;
+    }
+    
+    /**
+     * معالجة إرسال النموذج
+     */
+    async handleSubmit(e) {
+        e.preventDefault();
+        
+        try {
+            // تجميع البيانات
+            const data = {
+                lesson_id: this.form.querySelector('[name="lesson_id"]').value,
+                type: this.typeSelect.value,
+                title: this.form.querySelector('[name="title"]').value
+            };
+            
+            // إضافة البيانات حسب النوع
+            switch (data.type) {
+                case 'text':
+                    data.content = tinymce.get('textContent').getContent();
+                    break;
+                    
+                case 'code':
+                    data.content = this.codeEditor.getValue();
+                    data.code_language = this.form.querySelector('[name="code_language"]').value;
+                    break;
+                    
+                case 'link':
+                    data.content = this.form.querySelector('#linkContent').value;
+                    data.link_url = this.form.querySelector('[name="link_url"]').value;
+                    break;
+            }
+            
+            // إرسال البيانات
+            const response = await fetch('/content/api/add-note.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                toastr.success('تم إضافة الملاحظة بنجاح');
+                this.resetForm();
+                this.updateNotesList(result.note);
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            toastr.error(error.message || 'حدث خطأ أثناء إضافة الملاحظة');
+        }
+    }
+    
+    /**
+     * إعادة تعيين النموذج
+     */
+    resetForm() {
+        this.form.reset();
+        
+        // إعادة تعيين المحررات
+        if (tinymce.get('textContent')) {
+            tinymce.get('textContent').setContent('');
+        }
+        
+        if (this.codeEditor) {
+            this.codeEditor.setValue('');
+        }
+        
+        this.handleTypeChange();
+    }
+    
+    /**
+     * تحديث قائمة الملاحظات
+     */
+    updateNotesList(newNote) {
+        const notesList = document.getElementById('notesList');
+        if (!notesList) return;
+        
+        const noteElement = this.createNoteElement(newNote);
+        notesList.insertBefore(noteElement, notesList.firstChild);
+    }
+    
+    createNoteElement(note) {
+        const div = document.createElement('div');
+        div.className = `note-card ${note.type}-note`;
+        div.dataset.noteId = note.id;
+        
+        div.innerHTML = `
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">${note.title}</h5>
+                    <div class="note-actions">
+                        <button class="btn btn-sm btn-edit" title="تعديل">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-delete" title="حذف">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    ${this.formatNoteContent(note)}
+                </div>
+            </div>
+        `;
+        
+        return div;
+    }
+    
+    formatNoteContent(note) {
+        switch (note.type) {
+            case 'code':
+                return `<pre><code class="language-${note.code_language}">${note.content}</code></pre>`;
+            case 'link':
+                return `<a href="${note.link_url}" target="_blank">${note.content}</a>`;
+            default:
+                return note.content;
+        }
+    }
+}
+
+// تهيئة مدير الملاحظات عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', () => {
+    new NotesManager();
+}); 

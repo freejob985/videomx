@@ -1,94 +1,121 @@
 <?php
-require_once '../includes/functions.php';
+/**
+ * API لإضافة ملاحظة جديدة
+ * 
+ * المدخلات المطلوبة:
+ * - lesson_id: معرف الدرس
+ * - type: نوع الملاحظة (text/code/link)
+ * - title: عنوان الملاحظة
+ * - content: محتوى الملاحظة
+ * - code_language: لغة البرمجة (مطلوب فقط لنوع code)
+ * - link_url: الرابط (مطلوب فقط لنوع link)
+ */
 
-header('Content-Type: application/json');
+// تعريف المتغير للإشارة إلى أن هذا ملف API
+$isApi = true;
+
+// الاتصال المباشر بقاعدة البيانات
+$dsn = 'mysql:host=localhost;dbname=courses_db';
+$username = 'root';
+$password = '';
 
 try {
-    // التحقق من البيانات المطلوبة الأساسية
-    $required_fields = ['lesson_id', 'type', 'title'];
-    $missing_fields = [];
-    
-    foreach ($required_fields as $field) {
-        if (!isset($_POST[$field]) || empty($_POST[$field])) {
-            $missing_fields[] = $field;
-        }
-    }
-    
-    // التحقق من البيانات الإضافية حسب نوع الملاحظة
-    $type = $_POST['type'] ?? '';
-    
-    switch ($type) {
-        case 'text':
-            if (empty($_POST['content'])) {
-                $missing_fields[] = 'content';
-            }
-            break;
-            
-        case 'code':
-            if (empty($_POST['code_content'])) {
-                $missing_fields[] = 'code_content';
-            }
-            if (empty($_POST['code_language'])) {
-                $missing_fields[] = 'code_language';
-            }
-            break;
-            
-        case 'link':
-            if (empty($_POST['link_url'])) {
-                $missing_fields[] = 'link_url';
-            }
-            break;
-    }
-    
-    if (!empty($missing_fields)) {
-        throw new Exception('Missing required fields: ' . implode(', ', $missing_fields));
-    }
-    
-    // تحضير بيانات الملاحظة
-    $note = [
-        'lesson_id' => filter_input(INPUT_POST, 'lesson_id', FILTER_SANITIZE_NUMBER_INT),
-        'type' => $type,
-        'title' => filter_input(INPUT_POST, 'title', FILTER_SANITIZE_STRING)
-    ];
-    
-    // إضافة المحتوى حسب النوع
-    switch ($type) {
-        case 'text':
-            $note['content'] = $_POST['content']; // نحتفظ بالـ HTML للمحتوى المنسق
-            break;
-            
-        case 'code':
-            $note['content'] = $_POST['code_content'];
-            $note['code_language'] = filter_input(INPUT_POST, 'code_language', FILTER_SANITIZE_STRING);
-            break;
-            
-        case 'link':
-            $note['content'] = ''; // محتوى فارغ للروابط
-            $note['link_url'] = filter_input(INPUT_POST, 'link_url', FILTER_SANITIZE_URL);
-            $note['link_description'] = filter_input(INPUT_POST, 'link_description', FILTER_SANITIZE_STRING);
-            break;
-    }
-    
-    // إضافة الملاحظة إلى قاعدة البيانات
-    $note_id = addNote($note);
-    
-    if (!$note_id) {
-        throw new Exception('Failed to add note');
-    }
-    
-    // جلب الملاحظة المضافة
-    $added_note = getNoteById($note_id);
-    
-    echo json_encode([
-        'success' => true,
-        'message' => 'Note added successfully',
-        'note' => $added_note
-    ]);
-    
-} catch (Exception $e) {
-    http_response_code(400);
+    $pdo = new PDO($dsn, $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => $e->getMessage()
+        'error' => 'Database connection error: ' . $e->getMessage()
+    ]);
+    exit;
+}
+
+// التحقق من الطلب
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+    exit;
+}
+
+// استلام البيانات
+$data = json_decode(file_get_contents('php://input'), true);
+
+// التحقق من الحقول المطلوبة
+$requiredFields = ['lesson_id', 'type', 'title', 'content'];
+$missingFields = array_filter($requiredFields, function($field) use ($data) {
+    return empty($data[$field]);
+});
+
+if (!empty($missingFields)) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false, 
+        'error' => 'Missing required fields: ' . implode(', ', $missingFields)
+    ]);
+    exit;
+}
+
+// التحقق من النوع والحقول الإضافية
+switch ($data['type']) {
+    case 'code':
+        if (empty($data['code_language'])) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'error' => 'code_language is required for code notes'
+            ]);
+            exit;
+        }
+        break;
+    case 'link':
+        if (empty($data['link_url'])) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'error' => 'link_url is required for link notes'
+            ]);
+            exit;
+        }
+        break;
+}
+
+try {
+    // إعداد الاستعلام
+    $sql = "INSERT INTO notes (lesson_id, type, title, content, code_language, link_url, created_at) 
+            VALUES (:lesson_id, :type, :title, :content, :code_language, :link_url, NOW())";
+    
+    $stmt = $pdo->prepare($sql);
+    
+    // تنفيذ الاستعلام
+    $result = $stmt->execute([
+        'lesson_id' => $data['lesson_id'],
+        'type' => $data['type'],
+        'title' => $data['title'],
+        'content' => $data['content'],
+        'code_language' => $data['type'] === 'code' ? $data['code_language'] : null,
+        'link_url' => $data['type'] === 'link' ? $data['link_url'] : null
+    ]);
+    
+    if ($result) {
+        // جلب الملاحظة المضافة
+        $noteId = $pdo->lastInsertId();
+        $stmt = $pdo->prepare("SELECT * FROM notes WHERE id = ?");
+        $stmt->execute([$noteId]);
+        $note = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'Note added successfully',
+            'note' => $note
+        ]);
+    } else {
+        throw new Exception('Failed to add note');
+    }
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Database error: ' . $e->getMessage()
     ]);
 } 

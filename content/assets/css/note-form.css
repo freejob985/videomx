@@ -1,0 +1,58 @@
+/* تنسيقات نموذج الملاحظات */
+.note-form-card {
+    border: none;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.note-form-wrapper {
+    transition: all 0.3s ease;
+}
+
+/* تنسيقات حسب نوع الملاحظة */
+.note-form-wrapper.text-type .content-wrapper textarea {
+    min-height: 200px;
+}
+
+.note-form-wrapper.code-type {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.note-form-wrapper.code-type input,
+.note-form-wrapper.code-type select,
+.note-form-wrapper.code-type textarea {
+    background: #2d2d2d;
+    color: #d4d4d4;
+    border-color: #3d3d3d;
+}
+
+.note-form-wrapper.code-type label {
+    color: #d4d4d4;
+}
+
+.note-form-wrapper.link-type {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.note-form-wrapper.image-type {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+/* تنسيقات الأزرار */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* تحسينات للحقول */
+.form-control:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13,110,253,0.15);
+} 
