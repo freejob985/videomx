@@ -503,5 +503,14 @@ h5.mb-0 {
 .code-modal .code-content::-webkit-scrollbar-thumb:hover {
     background-color: #4f4f4f;
 }
+.code-content {
+    position: relative;
+    background: #1e1e1e;
+    padding: 1rem;
+    max-height: 100% !important;
+    height: 100% !important;
+    overflow: auto;
+}
+
 
 </style>

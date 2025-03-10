@@ -10,6 +10,8 @@ function initializeCodeControls() {
         const fontDisplay = wrapper.querySelector('.font-size-display');
         const decreaseBtn = wrapper.querySelector('.font-size-decrease');
         const increaseBtn = wrapper.querySelector('.font-size-increase');
+        const fullscreenBtn = wrapper.querySelector('.fullscreen-toggle');
+        const copyBtn = wrapper.querySelector('.copy-code');
 
         if (!codeBlock || !fontDisplay) return;
 
@@ -34,6 +36,23 @@ function initializeCodeControls() {
                 if (currentSize < 24) {
                     updateFontSize(codeBlock, fontDisplay, currentSize + 2);
                 }
+            });
+        }
+
+        // زر النسخ
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                const code = codeBlock.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    toastr.success('تم نسخ الكود بنجاح');
+                });
+            });
+        }
+
+        // زر ملء الشاشة
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', () => {
+                toggleFullscreen(wrapper);
             });
         }
     });
@@ -162,11 +181,29 @@ function openInNewWindow(wrapper) {
 
 function toggleFullscreen(wrapper) {
     if (!document.fullscreenElement) {
-        wrapper.requestFullscreen();
-        wrapper.querySelector('.fullscreen-toggle i').classList.replace('fa-expand', 'fa-compress');
+        wrapper.requestFullscreen().then(() => {
+            wrapper.classList.add('fullscreen');
+            wrapper.querySelector('.fullscreen-toggle i').classList.replace('fa-expand', 'fa-compress');
+            
+            // تعديل حجم الكود ليملأ الشاشة
+            const codeContent = wrapper.querySelector('.code-content');
+            if (codeContent) {
+                codeContent.style.height = '100vh';
+                codeContent.style.maxHeight = '100vh';
+            }
+        });
     } else {
-        document.exitFullscreen();
-        wrapper.querySelector('.fullscreen-toggle i').classList.replace('fa-compress', 'fa-expand');
+        document.exitFullscreen().then(() => {
+            wrapper.classList.remove('fullscreen');
+            wrapper.querySelector('.fullscreen-toggle i').classList.replace('fa-compress', 'fa-expand');
+            
+            // إعادة الحجم الطبيعي
+            const codeContent = wrapper.querySelector('.code-content');
+            if (codeContent) {
+                codeContent.style.height = '';
+                codeContent.style.maxHeight = '';
+            }
+        });
     }
 }
 

@@ -594,9 +594,6 @@ include'../lesson-details/css.php';
                                                         <button type="button" class="code-btn copy-code" title="نسخ الكود">
                                                             <i class="fas fa-copy"></i>
                                                         </button>
-                                                        <button type="button" class="code-btn open-popup" title="فتح في نافذة منفصلة">
-                                                            <i class="fas fa-external-link-alt"></i>
-                                                        </button>
                                                         <button type="button" class="code-btn fullscreen-toggle" title="ملء الشاشة">
                                                             <i class="fas fa-expand"></i>
                                                         </button>
