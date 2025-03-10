@@ -561,13 +561,6 @@ include'../lesson-details/css.php';
                                             <?php echo htmlspecialchars($note['title']); ?>
                                         </h5>
                                         <div class="note-actions">
-                                            <?php if ($note['type'] === 'code'): ?>
-                                                <button class="btn btn-sm copy-code" 
-                                                        title="نسخ الكود"
-                                                        data-note-id="<?php echo $note['id']; ?>">
-                                                    <i class="fas fa-copy"></i>
-                                                </button>
-                                            <?php endif; ?>
                                             <button class="btn btn-sm edit-note" 
                                                     title="تعديل"
                                                     data-note-id="<?php echo $note['id']; ?>">
@@ -588,20 +581,30 @@ include'../lesson-details/css.php';
                                         <?php elseif ($note['type'] === 'code'): ?>
                                             <div class="code-wrapper" data-note-id="<?php echo $note['id']; ?>">
                                                 <div class="code-controls">
-                                                    <div class="font-size-controls">
-                                                        <button type="button" class="btn btn-sm btn-outline-secondary font-size-decrease" title="تصغير الخط">
+                                                    <div class="control-group">
+                                                        <button type="button" class="code-btn font-size-decrease" title="تصغير الخط">
                                                             <i class="fas fa-minus"></i>
                                                         </button>
                                                         <span class="font-size-display">14px</span>
-                                                        <button type="button" class="btn btn-sm btn-outline-secondary font-size-increase" title="تكبير الخط">
+                                                        <button type="button" class="code-btn font-size-increase" title="تكبير الخط">
                                                             <i class="fas fa-plus"></i>
                                                         </button>
                                                     </div>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary fullscreen-toggle" title="ملء الشاشة">
-                                                        <i class="fas fa-expand"></i>
-                                                    </button>
+                                                    <div class="control-group">
+                                                        <button type="button" class="code-btn copy-code" title="نسخ الكود">
+                                                            <i class="fas fa-copy"></i>
+                                                        </button>
+                                                        <button type="button" class="code-btn open-popup" title="فتح في نافذة منفصلة">
+                                                            <i class="fas fa-external-link-alt"></i>
+                                                        </button>
+                                                        <button type="button" class="code-btn fullscreen-toggle" title="ملء الشاشة">
+                                                            <i class="fas fa-expand"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <pre class="code-block"><code class="language-<?php echo htmlspecialchars($note['code_language']); ?>"><?php echo htmlspecialchars($note['content']); ?></code></pre>
+                                                <div class="code-content">
+                                                    <pre class="code-block"><code class="language-<?php echo htmlspecialchars($note['code_language']); ?>"><?php echo htmlspecialchars($note['content']); ?></code></pre>
+                                                </div>
                                             </div>
                                         <?php else: ?>
                                             <div class="note-content">
@@ -612,7 +615,7 @@ include'../lesson-details/css.php';
                                                     <?php echo htmlspecialchars($note['link_url']); ?>
                                                 </a>
                                                 <?php if ($note['link_description']): ?>
-                                                    <p class="link-description">
+                                                    <p class="link-description mt-2">
                                                         <?php echo nl2br(htmlspecialchars($note['link_description'])); ?>
                                                     </p>
                                                 <?php endif; ?>

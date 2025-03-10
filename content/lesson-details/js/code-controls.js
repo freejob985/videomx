@@ -5,64 +5,31 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeCodeControls() {
-    const codeWrappers = document.querySelectorAll('.code-wrapper');
-    
-    codeWrappers.forEach(wrapper => {
-        const codeBlock = wrapper.querySelector('pre code');
-        if (!codeBlock) return;
+    document.querySelectorAll('.code-wrapper').forEach(wrapper => {
+        const controls = wrapper.querySelector('.code-controls');
+        if (!controls) return;
 
-        // إضافة أزرار التحكم
-        const controls = createCodeControls(wrapper);
-        wrapper.insertBefore(controls, wrapper.firstChild);
-
+        // تهيئة الأحداث
+        initializeControlEvents(wrapper);
+        
         // تهيئة حجم الخط الأولي
         updateFontSize(wrapper, 14);
     });
 }
 
-function createCodeControls(wrapper) {
-    const controls = document.createElement('div');
-    controls.className = 'code-controls';
+function initializeControlEvents(wrapper) {
+    // أزرار تغيير حجم الخط
+    wrapper.querySelector('.font-size-decrease').addEventListener('click', () => changeFontSize(wrapper, -1));
+    wrapper.querySelector('.font-size-increase').addEventListener('click', () => changeFontSize(wrapper, 1));
     
-    const buttons = [
-        {
-            title: 'نسخ الكود',
-            icon: 'fa-copy',
-            action: () => copyCode(wrapper)
-        },
-        {
-            title: 'فتح في نافذة جديدة',
-            icon: 'fa-external-link-alt',
-            action: () => openInNewWindow(wrapper)
-        },
-        {
-            title: 'تصغير الخط',
-            icon: 'fa-minus',
-            action: () => changeFontSize(wrapper, -1)
-        },
-        {
-            title: 'تكبير الخط',
-            icon: 'fa-plus',
-            action: () => changeFontSize(wrapper, 1)
-        },
-        {
-            title: 'ملء الشاشة',
-            icon: 'fa-expand',
-            action: () => toggleFullscreen(wrapper)
-        }
-    ];
-
-    buttons.forEach(btn => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'code-btn';
-        button.title = btn.title;
-        button.innerHTML = `<i class="fas ${btn.icon}"></i>`;
-        button.addEventListener('click', btn.action);
-        controls.appendChild(button);
-    });
+    // زر النسخ
+    wrapper.querySelector('.copy-code').addEventListener('click', () => copyCode(wrapper));
     
-    return controls;
+    // زر فتح النافذة المنفصلة
+    wrapper.querySelector('.open-popup').addEventListener('click', () => openInNewWindow(wrapper));
+    
+    // زر ملء الشاشة
+    wrapper.querySelector('.fullscreen-toggle').addEventListener('click', () => toggleFullscreen(wrapper));
 }
 
 function changeFontSize(wrapper, delta) {
@@ -72,61 +39,51 @@ function changeFontSize(wrapper, delta) {
     const currentSize = parseInt(window.getComputedStyle(codeBlock).fontSize);
     const newSize = Math.min(Math.max(currentSize + delta, 10), 24);
     
-    updateFontSize(wrapper, newSize);
+    codeBlock.style.fontSize = `${newSize}px`;
+    display.textContent = `${newSize}px`;
 }
 
-function updateFontSize(wrapper, size) {
-    const codeBlock = wrapper.querySelector('pre code');
-    const display = wrapper.querySelector('.font-size-display');
+function copyCode(wrapper) {
+    const code = wrapper.querySelector('pre code').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+        toastr.success('تم نسخ الكود بنجاح');
+    });
+}
+
+function openInNewWindow(wrapper) {
+    const code = wrapper.querySelector('pre code').textContent;
+    const language = wrapper.querySelector('pre code').className.split('-')[1] || 'plaintext';
     
-    codeBlock.style.fontSize = `${size}px`;
-    display.textContent = `${size}px`;
+    const newWindow = window.open('', '_blank', 'width=800,height=600');
+    newWindow.document.write(`
+        <!DOCTYPE html>
+        <html dir="ltr">
+        <head>
+            <title>Code View</title>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+            <style>
+                body { margin: 0; padding: 20px; background: #1e1e1e; }
+                pre { margin: 0; }
+                code { font-family: 'Fira Code', monospace; font-size: 14px; }
+            </style>
+        </head>
+        <body>
+            <pre><code class="language-${language}">${code}</code></pre>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+            <script>Prism.highlightAll();</script>
+        </body>
+        </html>
+    `);
 }
 
 function toggleFullscreen(wrapper) {
-    const isFullscreen = wrapper.classList.toggle('fullscreen');
-    const button = wrapper.querySelector('button:nth-last-child(2) i');
-    
-    button.classList.toggle('fa-expand', !isFullscreen);
-    button.classList.toggle('fa-compress', isFullscreen);
-    document.body.style.overflow = isFullscreen ? 'hidden' : '';
-}
-
-function openInModal(wrapper) {
-    const modal = document.getElementById('codeModal');
-    if (!modal) return;
-
-    const modalContent = modal.querySelector('.modal-content');
-    const modalBody = modal.querySelector('.modal-body');
-    const modalTitle = modal.querySelector('.modal-title');
-
-    // نسخ محتوى الكود
-    const codeContent = wrapper.cloneNode(true);
-    
-    // إزالة أزرار التحكم القديمة
-    const oldControls = codeContent.querySelector('.code-controls');
-    if (oldControls) oldControls.remove();
-
-    // إضافة أزرار تحكم جديدة
-    const controls = createCodeControls(wrapper);
-    codeContent.insertBefore(controls, codeContent.firstChild);
-
-    // تحديث العنوان
-    const noteTitle = wrapper.closest('.note-card')?.querySelector('.card-header h5')?.textContent;
-    modalTitle.textContent = noteTitle || 'عرض الكود';
-
-    // تحديث المحتوى
-    modalBody.innerHTML = '';
-    modalBody.appendChild(codeContent);
-
-    // تطبيق تنسيق Prism
-    if (window.Prism) {
-        Prism.highlightAllUnder(modalBody);
+    if (!document.fullscreenElement) {
+        wrapper.requestFullscreen();
+        wrapper.querySelector('.fullscreen-toggle i').classList.replace('fa-expand', 'fa-compress');
+    } else {
+        document.exitFullscreen();
+        wrapper.querySelector('.fullscreen-toggle i').classList.replace('fa-compress', 'fa-expand');
     }
-
-    // فتح الموديول
-    const bsModal = new bootstrap.Modal(modal);
-    bsModal.show();
 }
 
 function initializeModals() {
@@ -282,90 +239,155 @@ function updateNotesList(newNote) {
     }
 }
 
-// إضافة دالة نسخ الكود
-function copyCode(wrapper) {
-    const code = wrapper.querySelector('pre code').textContent;
-    navigator.clipboard.writeText(code).then(() => {
-        toastr.success('تم نسخ الكود بنجاح');
-    }).catch(() => {
-        toastr.error('فشل نسخ الكود');
-    });
+class CodeControls {
+    constructor(wrapper) {
+        this.wrapper = wrapper;
+        this.codeBlock = wrapper.querySelector('pre code');
+        this.fontSize = 14;
+        this.initControls();
+        this.initPopupWindow();
+    }
+
+    initControls() {
+        const controls = document.createElement('div');
+        controls.className = 'code-controls';
+        
+        // مجموعة التحكم في حجم الخط
+        const fontSizeGroup = document.createElement('div');
+        fontSizeGroup.className = 'control-group';
+        fontSizeGroup.innerHTML = `
+            <button type="button" class="font-size-decrease" title="تصغير الخط">
+                <i class="fas fa-minus"></i>
+            </button>
+            <span class="font-size-display">14px</span>
+            <button type="button" class="font-size-increase" title="تكبير الخط">
+                <i class="fas fa-plus"></i>
+            </button>
+        `;
+
+        // مجموعة الأدوات
+        const toolsGroup = document.createElement('div');
+        toolsGroup.className = 'control-group';
+        toolsGroup.innerHTML = `
+            <button type="button" class="copy-code" title="نسخ الكود">
+                <i class="fas fa-copy"></i>
+            </button>
+            <button type="button" class="open-popup" title="فتح في نافذة منفصلة">
+                <i class="fas fa-external-link-alt"></i>
+            </button>
+            <button type="button" class="fullscreen-toggle" title="ملء الشاشة">
+                <i class="fas fa-expand"></i>
+            </button>
+        `;
+
+        controls.appendChild(fontSizeGroup);
+        controls.appendChild(toolsGroup);
+        this.wrapper.insertBefore(controls, this.wrapper.firstChild);
+
+        this.bindEvents();
+    }
+
+    initPopupWindow() {
+        this.popup = document.createElement('div');
+        this.popup.className = 'code-popup-window';
+        this.popup.innerHTML = `
+            <div class="popup-header">
+                <div class="control-group">
+                    <button type="button" class="font-size-decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span class="font-size-display">14px</span>
+                    <button type="button" class="font-size-increase">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="control-group">
+                    <button type="button" class="copy-code">
+                        <i class="fas fa-copy"></i>
+                        نسخ
+                    </button>
+                    <button type="button" class="close-popup">
+                        <i class="fas fa-times"></i>
+                        إغلاق
+                    </button>
+                </div>
+            </div>
+            <div class="popup-content"></div>
+        `;
+        document.body.appendChild(this.popup);
+    }
+
+    bindEvents() {
+        // التحكم في حجم الخط
+        this.wrapper.querySelector('.font-size-decrease').addEventListener('click', () => this.changeFontSize(-1));
+        this.wrapper.querySelector('.font-size-increase').addEventListener('click', () => this.changeFontSize(1));
+
+        // نسخ الكود
+        this.wrapper.querySelector('.copy-code').addEventListener('click', () => this.copyCode());
+
+        // فتح في نافذة منفصلة
+        this.wrapper.querySelector('.open-popup').addEventListener('click', () => this.openPopup());
+
+        // ملء الشاشة
+        this.wrapper.querySelector('.fullscreen-toggle').addEventListener('click', () => this.toggleFullscreen());
+
+        // أحداث النافذة المنفصلة
+        this.popup.querySelector('.close-popup').addEventListener('click', () => this.closePopup());
+        this.popup.querySelector('.copy-code').addEventListener('click', () => this.copyCode(true));
+        this.popup.querySelector('.font-size-decrease').addEventListener('click', () => this.changeFontSize(-1, true));
+        this.popup.querySelector('.font-size-increase').addEventListener('click', () => this.changeFontSize(1, true));
+    }
+
+    changeFontSize(delta, inPopup = false) {
+        this.fontSize = Math.max(10, Math.min(24, this.fontSize + delta));
+        const target = inPopup ? this.popup : this.wrapper;
+        
+        target.querySelector('.font-size-display').textContent = `${this.fontSize}px`;
+        target.querySelector('pre code').style.fontSize = `${this.fontSize}px`;
+    }
+
+    copyCode(inPopup = false) {
+        const code = this.codeBlock.textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            toastr.success('تم نسخ الكود بنجاح');
+        });
+    }
+
+    openPopup() {
+        const popupContent = this.popup.querySelector('.popup-content');
+        popupContent.innerHTML = '';
+        const clonedCode = this.wrapper.querySelector('pre').cloneNode(true);
+        popupContent.appendChild(clonedCode);
+        
+        this.popup.classList.add('active');
+        this.updatePopupSize();
+    }
+
+    closePopup() {
+        this.popup.classList.remove('active');
+    }
+
+    toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            this.wrapper.requestFullscreen();
+            this.wrapper.querySelector('.fullscreen-toggle i').classList.replace('fa-expand', 'fa-compress');
+        } else {
+            document.exitFullscreen();
+            this.wrapper.querySelector('.fullscreen-toggle i').classList.replace('fa-compress', 'fa-expand');
+        }
+    }
+
+    updatePopupSize() {
+        const popupContent = this.popup.querySelector('.popup-content pre code');
+        if (popupContent) {
+            popupContent.style.fontSize = `${this.fontSize}px`;
+        }
+    }
 }
 
-// إضافة دالة فتح في نافذة جديدة
-function openInNewWindow(wrapper) {
-    const code = wrapper.querySelector('pre code').textContent;
-    const language = wrapper.querySelector('pre code').className.split('-')[1] || 'plaintext';
-    const title = wrapper.closest('.note-card')?.querySelector('.card-header h5')?.textContent || 'Code';
-    
-    // إنشاء محتوى HTML للنافذة الجديدة
-    const html = `
-        <!DOCTYPE html>
-        <html dir="ltr">
-        <head>
-            <title>${title}</title>
-            <meta charset="UTF-8">
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fira-code@6.2.0/distr/fira_code.css">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
-            <style>
-                body {
-                    margin: 0;
-                    padding: 20px;
-                    background: #1e1e1e;
-                    color: #d4d4d4;
-                    font-family: 'Fira Code', monospace;
-                }
-                pre {
-                    margin: 0;
-                    padding: 20px;
-                    border-radius: 6px;
-                    background: #2d2d2d !important;
-                }
-                code {
-                    font-family: 'Fira Code', monospace !important;
-                    font-size: 14px;
-                    line-height: 1.5;
-                }
-                .header {
-                    margin-bottom: 20px;
-                    padding: 10px;
-                    background: #2d2d2d;
-                    border-radius: 6px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
-                .title {
-                    margin: 0;
-                    color: #d4d4d4;
-                    font-size: 16px;
-                }
-                .language-badge {
-                    padding: 4px 8px;
-                    background: #3d3d3d;
-                    border-radius: 4px;
-                    color: #d4d4d4;
-                    font-size: 12px;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1 class="title">${title}</h1>
-                <span class="language-badge">${language}</span>
-            </div>
-            <pre><code class="language-${language}">${code}</code></pre>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-${language}.min.js"></script>
-            <script>
-                Prism.highlightAll();
-            </script>
-        </body>
-        </html>
-    `;
-
-    // فتح نافذة جديدة وكتابة المحتوى
-    const newWindow = window.open('', '_blank', 'width=800,height=600');
-    newWindow.document.write(html);
-    newWindow.document.close();
-} 
+// تهيئة عناصر التحكم لكل بلوك كود
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.code-wrapper').forEach(wrapper => {
+        new CodeControls(wrapper);
+    });
+}); 

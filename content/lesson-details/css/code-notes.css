@@ -6,9 +6,11 @@
 }
 
 /* تنسيق حاوية الكود */
-.code-content {
-    position: relative;
-    padding: 1rem;
+.code-wrapper {
+    background: #1e1e1e;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 1rem;
 }
 
 /* تنسيق عنصر pre و code */
@@ -27,52 +29,53 @@ pre > code {
 
 /* تنسيق أزرار التحكم */
 .code-controls {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
     display: flex;
-    gap: 0.5rem;
-    z-index: 100;
-    background: rgba(30, 30, 30, 0.9);
-    padding: 0.5rem;
-    border-radius: 6px;
-    backdrop-filter: blur(4px);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 8px;
+    background: #2d2d2d;
+    border-bottom: 1px solid #3d3d3d;
 }
 
 .code-wrapper:hover .code-controls {
     opacity: 1;
 }
 
-/* تنسيق الأزرار */
-.code-btn {
-    background: #2d2d2d;
-    color: #d4d4d4;
-    border: 1px solid #3d3d3d;
-    padding: 0.4rem 0.8rem;
-    border-radius: 4px;
-    font-size: 0.875rem;
+/* تنسيق مجموعات الأزرار */
+.control-group {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
+    gap: 8px;
+    background: #363636;
+    padding: 4px;
+    border-radius: 6px;
+}
+
+/* تنسيق الأزرار */
+.code-btn {
+    background: transparent;
+    border: none;
+    color: #b3b3b3;
+    padding: 6px 12px;
+    border-radius: 4px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
 }
 
 .code-btn:hover {
-    background: #3d3d3d;
-    border-color: #4d4d4d;
-    color: #ffffff;
-    transform: translateY(-1px);
+    background: #454545;
+    color: #fff;
 }
 
 .code-btn:active {
-    transform: translateY(0);
+    transform: scale(0.95);
 }
 
 .code-btn i {
-    font-size: 1rem;
+    font-size: 14px;
 }
 
 /* تأثير التحويم */
@@ -93,13 +96,12 @@ pre > code {
 }
 
 .font-size-display {
-    color: #d4d4d4;
-    min-width: 3.5rem;
-    text-align: center;
-    font-size: 0.875rem;
-    padding: 0.4rem;
     background: #2d2d2d;
+    color: #b3b3b3;
+    padding: 4px 8px;
     border-radius: 4px;
+    min-width: 45px;
+    text-align: center;
 }
 
 /* تنسيقات الموديول */
@@ -139,31 +141,32 @@ pre > code {
     bottom: 0;
     z-index: 1050;
     margin: 0;
-    padding: 1rem;
-    background: #1e1e1e;
+    display: flex;
+    flex-direction: column;
+}
+
+.code-wrapper.fullscreen .code-content {
+    flex: 1;
     overflow: auto;
 }
 
 .code-wrapper.fullscreen pre {
-    height: calc(100vh - 2rem);
-    margin: 0;
+    height: 100%;
 }
 
 /* تنسيق scrollbar */
 .code-content pre::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
+    width: 8px;
+    height: 8px;
 }
 
 .code-content pre::-webkit-scrollbar-track {
     background: #2d2d2d;
-    border-radius: 6px;
 }
 
 .code-content pre::-webkit-scrollbar-thumb {
     background: #4d4d4d;
-    border-radius: 6px;
-    border: 3px solid #2d2d2d;
+    border-radius: 4px;
 }
 
 .code-content pre::-webkit-scrollbar-thumb:hover {
@@ -235,4 +238,136 @@ pre > code {
 .code-wrapper {
     direction: ltr;
     text-align: left;
+}
+
+/* تحسين تصميم أزرار التحكم */
+.code-wrapper .code-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 8px;
+    background: #2d2d2d;
+    border-bottom: 1px solid #3d3d3d;
+}
+
+.code-controls .control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+    background: #363636;
+    border-radius: 6px;
+}
+
+.code-controls button {
+    background: transparent;
+    border: none;
+    color: #b3b3b3;
+    padding: 4px 8px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.code-controls button:hover {
+    background: #454545;
+    color: #fff;
+}
+
+.code-controls button i {
+    font-size: 14px;
+}
+
+.code-controls .font-size-display {
+    color: #b3b3b3;
+    padding: 0 8px;
+    min-width: 45px;
+    text-align: center;
+}
+
+/* تصميم النافذة المنفصلة */
+.code-popup-window {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 80%;
+    background: #1e1e1e;
+    z-index: 1000;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    display: none;
+}
+
+.code-popup-window.active {
+    display: block;
+}
+
+.code-popup-window .popup-header {
+    padding: 10px;
+    background: #2d2d2d;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.code-popup-window .popup-content {
+    height: calc(100% - 50px);
+    overflow: auto;
+}
+
+/* تحسين تصميم الكود */
+.code-block {
+    margin: 0;
+    border-radius: 0 0 4px 4px;
+}
+
+/* تأثيرات حركية */
+.code-controls button {
+    transform: scale(1);
+    transition: transform 0.2s ease;
+}
+
+.code-controls button:active {
+    transform: scale(0.95);
+}
+
+/* تصميم متجاوب */
+@media (max-width: 768px) {
+    .code-controls {
+        flex-wrap: wrap;
+    }
+    
+    .code-controls .control-group {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/* تنسيق عنصر pre و code */
+.code-wrapper pre {
+    margin: 0;
+    padding: 1rem;
+    background: #1e1e1e;
+    border-radius: 0 0 6px 6px;
+}
+
+.code-wrapper pre code {
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* تحسينات إضافية */
+.note-card.code-note .card-body {
+    padding: 0;
+}
+
+.note-card.code-note .code-wrapper {
+    margin: 0;
+    border-radius: 0;
 } 
