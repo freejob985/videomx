@@ -30,7 +30,7 @@ $languagesStmt = $pdo->prepare($languagesQuery);
 $languagesStmt->execute();
 $languages = $languagesStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// تعديل استعلام الكورسات ليدعم الفلترة
+// إضافة استعلام للتحقق من الكورسات المفضلة
 $query = "SELECT 
     c.*, 
     l.name as language_name,
@@ -41,13 +41,17 @@ $query = "SELECT
     SEC_TO_TIME(SUM(IFNULL(l2.duration, 0))) as total_duration,
     SEC_TO_TIME(SUM(CASE WHEN l2.completed = 1 THEN IFNULL(l2.duration, 0) ELSE 0 END)) as completed_duration,
     (SELECT COUNT(*) FROM lessons WHERE course_id = c.id AND status_id = 1) as status_1_count,
-    (SELECT COUNT(*) FROM lessons WHERE course_id = c.id AND status_id = 2) as status_2_count
+    (SELECT COUNT(*) FROM lessons WHERE course_id = c.id AND status_id = 2) as status_2_count,
+    CASE WHEN f.id IS NOT NULL THEN 1 ELSE 0 END as is_favorite
     FROM courses c 
     LEFT JOIN languages l ON c.language_id = l.id 
     LEFT JOIN lessons l2 ON c.id = l2.course_id
+    LEFT JOIN favorites f ON c.id = f.course_id
     WHERE 1=1 " . 
     (isset($_GET['language_id']) && !empty($_GET['language_id']) ? 
     "AND c.language_id = :language_id " : "") .
+    (isset($_GET['favorites']) && $_GET['favorites'] == '1' ? 
+    "AND f.id IS NOT NULL " : "") .
     "GROUP BY c.id, c.title, c.playlist_url, c.language_id, c.thumbnail, c.description, c.created_at, c.updated_at, c.processing_status, l.name
     ORDER BY c.created_at DESC";
 
@@ -369,6 +373,32 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 font-size: 0.8rem;
             }
         }
+
+        .btn-favorite {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-favorite:hover {
+            transform: scale(1.1);
+        }
+
+        .btn-favorite i {
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-favorite:hover i.text-secondary {
+            color: #dc3545 !important;
+        }
     </style>
 </head>
 <body>
@@ -387,12 +417,16 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="row">
             <div class="col-12">
                 <div class="language-filters">
-                    <a href="index.php" class="language-btn <?php echo !isset($_GET['language_id']) ? 'active' : ''; ?>">
-                        <span class="btn-label">جميع اللغات</span>
+                    <a href="index.php" class="language-btn <?php echo !isset($_GET['language_id']) && !isset($_GET['favorites']) ? 'active' : ''; ?>">
+                        <span class="btn-label">جميع الكورسات</span>
                         <span class="count-badge"><?php 
                             $totalLessons = array_sum(array_column($languages, 'lessons_count')); 
                             echo $totalLessons;
                         ?></span>
+                    </a>
+                    <a href="?favorites=1" class="language-btn <?php echo isset($_GET['favorites']) && $_GET['favorites'] == '1' ? 'active' : ''; ?>">
+                        <i class="fas fa-heart me-1"></i>
+                        <span class="btn-label">المفضلة</span>
                     </a>
                     <?php foreach($languages as $language): ?>
                         <a href="?language_id=<?php echo $language['id']; ?>" 
@@ -412,6 +446,12 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php foreach($courses as $course): ?>
                 <div class="col-md-4">
                     <div class="card h-100">
+                        <button class="btn btn-favorite position-absolute" 
+                                style="left: 10px; top: 10px; z-index: 2;"
+                                onclick="toggleFavorite(<?php echo $course['id']; ?>, this)"
+                                data-favorite="<?php echo $course['is_favorite']; ?>">
+                            <i class="fas fa-heart <?php echo $course['is_favorite'] ? 'text-danger' : 'text-secondary'; ?>"></i>
+                        </button>
                         <div class="lessons-count">
                             <i class="fas fa-book-open me-1"></i>
                             <?php echo htmlspecialchars($course['total_lessons']); ?> درس
@@ -624,6 +664,48 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     function formatDuration(duration) {
         if (!duration) return '00:00:00';
         return duration;
+    }
+
+    function toggleFavorite(courseId, button) {
+        fetch('toggle_favorite.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ course_id: courseId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const icon = button.querySelector('i');
+                if (data.is_favorite) {
+                    icon.classList.remove('text-secondary');
+                    icon.classList.add('text-danger');
+                    showToast('تمت إضافة الكورس إلى المفضلة');
+                } else {
+                    icon.classList.remove('text-danger');
+                    icon.classList.add('text-secondary');
+                    showToast('تمت إزالة الكورس من المفضلة');
+                }
+                button.dataset.favorite = data.is_favorite ? '1' : '0';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('حدث خطأ أثناء تحديث المفضلة');
+        });
+    }
+
+    function showToast(message) {
+        Toastify({
+            text: message,
+            duration: 3000,
+            gravity: "top",
+            position: "center",
+            style: {
+                background: "linear-gradient(to right, #3494E6, #EC6EAD)",
+            }
+        }).showToast();
     }
     </script>
 </body>
