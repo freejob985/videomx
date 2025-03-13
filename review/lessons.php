@@ -965,6 +965,12 @@ $statistics = getLessonsStatistics($courseId);
             document.querySelector('#modal_completed').checked = lessonData.completed == 1;
             document.querySelector('#modal_reviewed').checked = lessonData.is_reviewed == 1;
             
+            // تحديث رابط تفاصيل الدرس
+            const detailsLink = document.querySelector('.btn-details');
+            if (detailsLink) {
+                detailsLink.href = `http://videomx.com/content/views/lesson-details.php?id=${lessonData.id}`;
+            }
+            
             // عرض الموديول
             const modal = new bootstrap.Modal(document.getElementById('videoModal'));
             modal.show();
