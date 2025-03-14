@@ -87,6 +87,9 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <!-- Toastify -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     
+    <!-- إضافة ملف الإحصائيات -->
+    <script src="js/statistics.js" defer></script>
+    
     <style>
         body {
             font-family: 'Tajawal', sans-serif;
@@ -399,6 +402,113 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .btn-favorite:hover i.text-secondary {
             color: #dc3545 !important;
         }
+
+        .statistics-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .statistics-title {
+            color: #2c3e50;
+            font-weight: 700;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .stat-details {
+            flex: 1;
+        }
+
+        .stat-details h6 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        .stat-numbers {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        /* تلوين الأيقونات */
+        .stat-card.completed .stat-icon { background: #2ecc71; }
+        .stat-card.remaining .stat-icon { background: #e74c3c; }
+        .stat-card.duration .stat-icon { background: #3498db; }
+        .stat-card.total-time .stat-icon { background: #9b59b6; }
+        .stat-card.review .stat-icon { background: #f1c40f; }
+        .stat-card.theory .stat-icon { background: #1abc9c; }
+        .stat-card.important .stat-icon { background: #e67e22; }
+        .stat-card.remaining-time .stat-icon { background: #95a5a6; }
+
+        @media (max-width: 768px) {
+            .stat-card {
+                margin-bottom: 15px;
+            }
+            
+            .stat-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .stat-numbers {
+                font-size: 1rem;
+            }
+        }
+
+        /* أنماط حالة التحميل */
+        .stat-numbers.loading {
+            opacity: 0.5;
+            position: relative;
+        }
+
+        .stat-numbers.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -435,6 +545,116 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <span class="count-badge"><?php echo $language['lessons_count']; ?></span>
                         </a>
                     <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- بعد قسم language-filters مباشرة -->
+    <div class="container mb-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="statistics-container">
+                    <h4 class="statistics-title mb-3">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        إحصائيات الدروس
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="stat-card completed">
+                                <div class="stat-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <h6>الدروس المكتملة</h6>
+                                    <div class="stat-numbers">
+                                        <span id="completedLessons">0</span>
+                                        <span class="text-muted">/</span>
+                                        <span id="totalLessons">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="stat-card remaining">
+                                <div class="stat-icon">
+                                    <i class="fas fa-hourglass-half"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <h6>الدروس المتبقية</h6>
+                                    <div class="stat-numbers" id="remainingLessons">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="stat-card duration">
+                                <div class="stat-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <h6>الوقت المكتمل</h6>
+                                    <div class="stat-numbers" id="completedDuration">00:00:00</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="stat-card total-time">
+                                <div class="stat-icon">
+                                    <i class="fas fa-stopwatch"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <h6>الوقت الكلي</h6>
+                                    <div class="stat-numbers" id="totalDuration">00:00:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="stat-card review">
+                                <div class="stat-icon">
+                                    <i class="fas fa-sync-alt"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <h6>دروس المراجعة</h6>
+                                    <div class="stat-numbers" id="reviewLessons">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="stat-card theory">
+                                <div class="stat-icon">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <h6>دروس نظرية</h6>
+                                    <div class="stat-numbers" id="theoryLessons">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="stat-card important">
+                                <div class="stat-icon">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <h6>دروس مهمة</h6>
+                                    <div class="stat-numbers" id="importantLessons">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="stat-card remaining-time">
+                                <div class="stat-icon">
+                                    <i class="fas fa-hourglass-end"></i>
+                                </div>
+                                <div class="stat-details">
+                                    <h6>الوقت المتبقي</h6>
+                                    <div class="stat-numbers" id="remainingDuration">00:00:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
