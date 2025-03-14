@@ -2098,3 +2098,25 @@ function toggleReview(checkbox, lessonId) {
     });
 }
 </script> 
+
+<script>
+// التركيز على جدول الدروس عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    // التأكد من وجود العنصر
+    const lessonsTable = document.getElementById('lessonsTable');
+    if (lessonsTable) {
+        // حساب موضع العنصر مع إضافة offset
+        const offset = 800; // يمكن تعديل هذه القيمة حسب ارتفاع الهيدر
+        const elementPosition = lessonsTable.getBoundingClientRect().top + window.pageYOffset;
+        
+        // التمرير إلى الموضع المحسوب
+        window.scrollTo({
+            top: elementPosition - offset,
+            behavior: 'smooth'
+        });
+    }
+});
+</script>
+
+</body>
+</html>
