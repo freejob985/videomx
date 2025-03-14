@@ -300,7 +300,7 @@ include'../lesson-details/css.php';
 
                 <div class="col-lg-4">
                     <!-- معلومات إضافية -->
-                    <div class="lesson-sidebar">
+                    <div class="lesson-sidebar" id="lesson-sidebar">
                         <div class="card mb-4">
                             <div class="card-body">
                                 <h5 class="card-title mb-3">معلومات الدرس</h5>
@@ -784,6 +784,22 @@ include'../lesson-details/css.php';
 // تعريف المتغيرات العامة
 window.COURSE_ID = <?php echo json_encode($lesson['course_id']); ?>;
 window.LESSON_ID = <?php echo json_encode($lesson['id']); ?>;
+</script>
+
+<!-- إضافة في قسم head -->
+<link rel="stylesheet" href="/content/assets/css/context-menu.css">
+<link rel="stylesheet" href="/content/assets/css/video-controls.css">
+
+<!-- إضافة قبل نهاية body -->
+<script type="module">
+    import LessonContextMenu from '/content/assets/js/context-menu.js';
+    import VideoControls from '/content/assets/js/video-controls.js';
+
+    // تهيئة القائمة السياقية
+    const contextMenu = new LessonContextMenu();
+    
+    // تهيئة التحكم في عرض الفيديو
+    const videoControls = new VideoControls();
 </script>
 
 <!-- تعديل body tag لإضافة الحالة الافتراضية للقائمة -->

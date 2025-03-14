@@ -1,0 +1,236 @@
+/* تنسيقات التحكم في عرض الفيديو */
+.video-view-controls {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.video-wrapper {
+    transition: all 0.3s ease;
+    position: relative;
+    background: #000;
+}
+
+/* العرض العادي */
+.video-wrapper.video-normal {
+    max-width: 100%;
+    margin: 0;
+}
+
+/* العرض الموسع */
+.video-wrapper.video-wide {
+    background: #000;
+    margin-bottom: 2rem;
+}
+
+/* عرض ملء الشاشة */
+.video-wrapper.video-fullscreen {
+    background: #000;
+}
+
+/* تنسيقات زر التحكم */
+.view-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.view-toggle.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.view-toggle i {
+    font-size: 0.9em;
+}
+
+/* وضع ملء الشاشة */
+body.video-fullscreen-mode {
+    overflow: hidden;
+}
+
+.video-fullscreen {
+    background: #000 !important;
+}
+
+.video-fullscreen .ratio {
+    height: 100vh !important;
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .video-wrapper.video-wide {
+        margin-left: -15px;
+        margin-right: -15px;
+        width: calc(100% + 30px);
+    }
+    
+    .video-view-controls {
+        flex-wrap: wrap;
+    }
+}
+
+/* تأثيرات التحول */
+.video-wrapper {
+    transition: all 0.3s ease-in-out;
+}
+
+.video-wrapper.video-wide,
+.video-wrapper.video-fullscreen {
+    transition: all 0.3s ease-in-out;
+}
+
+/* تحسين نسبة العرض للفيديو */
+.video-wrapper .ratio {
+    background: #000;
+}
+
+/* تحسين مظهر الأزرار */
+.view-toggle:hover {
+    background-color: #e9ecef;
+}
+
+.view-toggle.active:hover {
+    background-color: #0056b3;
+}
+
+/* تحسينات عرض الفيديو */
+.video-wrapper.video-wide-active {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    background: #000;
+    transition: all 0.3s ease-in-out;
+    padding: 0 !important;
+    position: relative;
+    z-index: 1;
+    order: 0; /* ضمان أن الفيديو يظهر أولاً */
+}
+
+/* تنسيق الحاوية */
+.lesson-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* تحسينات معلومات الدرس */
+.lesson-info,
+.lesson-update {
+    transition: all 0.3s ease-in-out;
+}
+
+/* تنسيقات العرض الموسع */
+.video-wide-active ~ .lesson-info,
+.video-wide-active ~ .lesson-update {
+    width: 100%;
+    margin-top: 2rem;
+}
+
+/* تحسين نسبة الفيديو */
+.video-wrapper.video-wide-active .ratio {
+    margin: 0 auto;
+    width: 100%;
+    height: auto !important;
+    max-height: 70vh !important;
+    aspect-ratio: 16/9;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* تحسينات للشاشات المختلفة */
+@media (min-width: 992px) {
+    .video-wrapper.video-wide-active {
+        padding: 0 !important;
+    }
+}
+
+@media (max-width: 991px) {
+    .video-wrapper.video-wide-active {
+        margin: 0 -1rem !important;
+        width: calc(100% + 2rem) !important;
+    }
+}
+
+/* تأثير التحول */
+.video-wrapper.video-wide-active,
+.lesson-info,
+.lesson-update {
+    transition: all 0.3s ease-in-out;
+}
+
+/* تحسين الهوامش والمسافات */
+.video-wrapper.video-wide-active {
+    margin-bottom: 2rem !important;
+    padding: 0 var(--container-padding, 1rem) !important;
+}
+
+/* تحسين تأثير التحول */
+.video-wrapper.video-wide-active {
+    transform-origin: center top;
+    animation: videoExpand 0.3s ease-out forwards;
+}
+
+@keyframes videoExpand {
+    from {
+        transform: scale(0.98);
+        opacity: 0.8;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* إضافة ظل خفيف */
+.video-wrapper.video-wide-active {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* تحسينات للشاشات الكبيرة */
+@media (min-width: 2560px) {
+    .video-wrapper.video-wide-active .ratio {
+        max-width: 95vw;
+        max-height: 95vh !important;
+    }
+}
+
+/* تحسينات للشاشات المتوسطة */
+@media (min-width: 1200px) and (max-width: 2559px) {
+    .video-wrapper.video-wide-active .ratio {
+        max-width: 98vw;
+        max-height: 92vh !important;
+    }
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 1199px) {
+    .video-wrapper.video-wide-active .ratio {
+        max-width: 100vw;
+        max-height: 85vh !important;
+    }
+}
+
+/* تنسيقات تركيز السايدبار */
+.sidebar-focus {
+    animation: sidebarFocus 2s ease-out;
+}
+
+@keyframes sidebarFocus {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 20px 0 rgba(0, 123, 255, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4);
+    }
+}
+
+/* تحسين مظهر السايدبار */
+#lesson-sidebar {
+    transition: all 0.3s ease-in-out;
+    scroll-margin-top: 20px; /* مساحة إضافية عند التمرير */
+} 
