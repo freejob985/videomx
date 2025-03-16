@@ -1,62 +1,75 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الأسئلة والأجوبة</title>
+    <title>نظام المساعد الذكي</title>
     
     <!-- الخطوط -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Bootstrap & Material Design -->
+    <!-- المكتبات الخارجية -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.19.1/css/mdb.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.19.1/mdb.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     
-    <!-- Custom CSS -->
+    <!-- الستايل الخاص -->
     <link href="css/style.css" rel="stylesheet">
-    
-    <!-- إضافة Favicon -->
-    <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
 </head>
 <body>
-    <!-- Header with gradient -->
+    <!-- الهيدر -->
     <header class="main-header">
         <div class="header-content">
             <div class="logo">
-                <img src="icons/gemini-icon.svg" alt="Gemini Logo" class="logo-icon">
+                <img src="images/logo.png" alt="شعار المساعد الذكي" class="logo-icon">
                 <h1>المساعد الذكي</h1>
             </div>
             <div class="header-actions">
-                <button id="showHistoryBtn" class="action-btn" title="عرض المحادثات السابقة">
+                <button id="showHistoryBtn" class="action-btn">
                     <i class="fas fa-history"></i>
+                    السجل
                 </button>
-                <button id="clearHistoryBtn" class="action-btn" title="حذف جميع المحادثات">
-                    <i class="fas fa-trash-alt"></i>
+                <button id="clearHistoryBtn" class="action-btn">
+                    <i class="fas fa-trash"></i>
+                    مسح
                 </button>
             </div>
         </div>
     </header>
 
-    <div class="chat-container">
-        <div class="chat-messages" id="chatMessages">
-            <!-- الرسائل ستضاف هنا ديناميكياً -->
+    <!-- منطقة المحتوى الرئيسي -->
+    <main class="chat-container">
+        <!-- فلتر اللغات -->
+        <div class="language-filter-container">
+            <div class="filter-header">
+                <h4>تصفية حسب اللغة</h4>
+            </div>
+            <div id="languageFilters" class="language-filters">
+                <!-- سيتم إضافة فلاتر اللغات هنا ديناميكياً -->
+                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="visually-hidden">جاري التحميل...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- إضافة قسم الكورسات -->
+        <div id="coursesContainer" class="courses-container"></div>
+        
+        <!-- عنصر التحميل -->
+        <div id="loading" class="d-none">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">جاري التحميل...</span>
+            </div>
         </div>
         
-        <div class="chat-input">
-            <form id="questionForm" class="chat-form">
-                <textarea class="form-control" id="question" rows="3" placeholder="اكتب سؤالك هنا..."></textarea>
-                <button type="submit" class="btn">
-                    <span>إرسال</span>
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </form>
-        </div>
-    </div>
+        <!-- عنصر الخطأ -->
+        <div id="error" class="d-none"></div>
+    </main>
 
-    <!-- Footer with gradient -->
+    <!-- الفوتر -->
     <footer class="main-footer">
         <div class="footer-content">
             <div class="row py-4">
@@ -135,26 +148,35 @@
                     <a href="#" class="social-link" title="لينكد إن"><i class="fab fa-linkedin"></i></a>
                     <a href="#" class="social-link" title="جيت هب"><i class="fab fa-github"></i></a>
                 </div>
-                <p class="mb-0">جميع الحقوق محفوظة &copy; 2024 VideoMX</p>
+                <p class="mb-0">جميع الحقوق محفوظة © 2024 VideoMX</p>
             </div>
         </div>
     </footer>
 
-    <!-- Toast Container -->
-    <div class="position-fixed bottom-0 end-0 p-3">
+    <!-- نافذة Toast -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
         <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
-                <strong class="me-auto">إشعار</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                <strong class="me-auto">تنبيه</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
-            <div class="toast-body"></div>
+            <div class="toast-body">
+                <!-- سيتم إضافة محتوى التنبيه هنا ديناميكياً -->
+            </div>
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- المكتبات JavaScript -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked@4.0.0/marked.min.js"></script>
-    <script src="js/main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.19.1/mdb.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- الملفات JavaScript الخاصة -->
+    <script type="module" src="js/main.js"></script>
+
+    <!-- إضافة هذه الأسطر قبل نهاية body -->
+    <link href="css/courses.css" rel="stylesheet">
+    <script src="js/courses.js"></script>
 </body>
 </html> 
