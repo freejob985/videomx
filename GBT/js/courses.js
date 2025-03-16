@@ -246,9 +246,21 @@ class CoursesManager {
             button.addEventListener('click', (e) => {
                 const sectionId = e.currentTarget.dataset.sectionId;
                 const sectionName = e.currentTarget.dataset.sectionName;
-                const sectionDescription = e.currentTarget.dataset.sectionDescription;
+                const sectionDescription = this.unescapeHtml(e.currentTarget.dataset.sectionDescription);
                 
                 this.showSectionEditModal(sectionId, sectionName, sectionDescription);
+            });
+        });
+        
+        // إضافة معالجات الأحداث لأزرار الذكاء الاصطناعي
+        document.querySelectorAll('.dropdown-item[data-platform]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const sectionName = e.currentTarget.dataset.sectionName;
+                const languageName = e.currentTarget.dataset.languageName;
+                const sectionDescription = this.unescapeHtml(e.currentTarget.dataset.sectionDescription);
+                const platform = e.currentTarget.dataset.platform;
+                
+                this.openAIPlatformWithQuestion(sectionName, languageName, sectionDescription, platform);
             });
         });
     }
@@ -260,22 +272,57 @@ class CoursesManager {
      * @param {string} sectionDescription - وصف القسم الحالي
      */
     showSectionEditModal(sectionId, sectionName, sectionDescription) {
+        // إنشاء معرف فريد للمحرر
+        const editorId = `section-description-editor-${Date.now()}`;
+        
         Swal.fire({
             title: `تحرير وصف قسم "${sectionName}"`,
             html: `
-                <textarea id="section-description-input" 
-                          class="form-control" 
-                          rows="5" 
-                          placeholder="أدخل وصف القسم هنا..."
-                          dir="rtl">${sectionDescription}</textarea>
+                <div class="mb-3">
+                    <textarea id="${editorId}" 
+                              class="form-control advanced-editor" 
+                              rows="10">${sectionDescription || ''}</textarea>
+                </div>
             `,
+            width: '800px',
             showCancelButton: true,
             confirmButtonText: 'حفظ',
             cancelButtonText: 'إلغاء',
             showLoaderOnConfirm: true,
+            didOpen: () => {
+                // تهيئة محرر TinyMCE
+                tinymce.init({
+                    selector: `#${editorId}`,
+                    directionality: 'rtl',
+                    language: 'ar',
+                    height: 300,
+                    menubar: false,
+                    plugins: [
+                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount', 'directionality'
+                    ],
+                    toolbar: 'undo redo | blocks | ' +
+                        'bold italic forecolor | alignleft aligncenter ' +
+                        'alignright alignjustify | bullist numlist outdent indent | ' +
+                        'removeformat | ltr rtl | help',
+                    content_style: 'body { font-family: "Tajawal", sans-serif; font-size: 14px; }'
+                });
+            },
             preConfirm: () => {
-                const newDescription = document.getElementById('section-description-input').value;
+                // الحصول على المحتوى من المحرر
+                const newDescription = tinymce.get(editorId).getContent();
+                
+                // تنظيف المحرر
+                tinymce.remove(`#${editorId}`);
+                
                 return this.updateSectionDescription(sectionId, newDescription);
+            },
+            willClose: () => {
+                // تنظيف المحرر عند إغلاق النافذة
+                if (tinymce.get(editorId)) {
+                    tinymce.remove(`#${editorId}`);
+                }
             }
         }).then((result) => {
             if (result.isConfirmed) {
@@ -311,7 +358,7 @@ class CoursesManager {
                 // تحديث الوصف في الواجهة
                 const descriptionElement = document.getElementById(`section-description-${sectionId}`);
                 if (descriptionElement) {
-                    descriptionElement.textContent = description || 'لا يوجد وصف متاح';
+                    descriptionElement.innerHTML = description || 'لا يوجد وصف متاح';
                 }
                 
                 // تحديث البيانات المخزنة
@@ -371,16 +418,62 @@ class CoursesManager {
                         <div class="language-section-card">
                             <div class="section-header">
                                 <h4 class="section-title">${section.name}</h4>
-                                <button class="btn btn-sm btn-outline-primary edit-section-btn" 
-                                        data-section-id="${section.id}" 
-                                        data-section-name="${section.name}"
-                                        data-section-description="${section.description || ''}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
+                                <div class="section-actions">
+                                    <button class="btn btn-sm btn-outline-primary edit-section-btn" 
+                                            data-section-id="${section.id}" 
+                                            data-section-name="${section.name}"
+                                            data-section-description="${this.escapeHtml(section.description || '')}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <div class="dropdown ai-platforms-dropdown">
+                                        <button class="btn btn-sm btn-outline-success dropdown-toggle" 
+                                                type="button" 
+                                                data-bs-toggle="dropdown" 
+                                                aria-expanded="false">
+                                            <i class="fas fa-robot"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><h6 class="dropdown-header">اختر منصة الذكاء الاصطناعي</h6></li>
+                                            <li>
+                                                <button class="dropdown-item chatgpt-section-btn"
+                                                        data-section-id="${section.id}"
+                                                        data-section-name="${section.name}"
+                                                        data-language-name="${languageData.name}"
+                                                        data-section-description="${this.escapeHtml(section.description || '')}"
+                                                        data-platform="CHATGPT">
+                                                    <i class="fas fa-robot"></i>
+                                                    ChatGPT
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item claude-section-btn"
+                                                        data-section-id="${section.id}"
+                                                        data-section-name="${section.name}"
+                                                        data-language-name="${languageData.name}"
+                                                        data-section-description="${this.escapeHtml(section.description || '')}"
+                                                        data-platform="CLAUDE">
+                                                    <i class="fas fa-comment-dots"></i>
+                                                    Claude
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item bard-section-btn"
+                                                        data-section-id="${section.id}"
+                                                        data-section-name="${section.name}"
+                                                        data-language-name="${languageData.name}"
+                                                        data-section-description="${this.escapeHtml(section.description || '')}"
+                                                        data-platform="BARD">
+                                                    <i class="fas fa-comment"></i>
+                                                    Bard
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
-                            <p class="section-description" id="section-description-${section.id}">
+                            <div class="section-description" id="section-description-${section.id}">
                                 ${section.description || 'لا يوجد وصف متاح'}
-                            </p>
+                            </div>
                             <div class="section-courses">
                                 ${this.getCoursesForSection(section.id, languageData.id).map(course => `
                                     <a href="http://videomx.com/content/lessons.php?course_id=${course.id}" 
@@ -396,6 +489,21 @@ class CoursesManager {
                 </div>
             </div>
         `;
+    }
+
+    /**
+     * تهروب النص HTML لاستخدامه في السمات
+     * @param {string} html - النص HTML المراد تهروبه
+     * @returns {string} النص المهروب
+     */
+    escapeHtml(html) {
+        if (!html) return '';
+        return html
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
 
     /**
@@ -602,7 +710,8 @@ class CoursesManager {
             let sectionDescription = '';
             const section = course.sections.find(s => s.name === sectionName);
             if (section) {
-                sectionDescription = section.description || 'لا يوجد وصف متاح';
+                // إزالة أكواد HTML من وصف القسم
+                sectionDescription = this.stripHtml(section.description || 'لا يوجد وصف متاح');
             }
 
             const sectionLessons = course.lessons.filter(lesson => 
@@ -650,6 +759,22 @@ class CoursesManager {
     }
 
     /**
+     * إزالة أكواد HTML من النص
+     * @param {string} html - النص الذي يحتوي على HTML
+     * @returns {string} النص بدون HTML
+     */
+    stripHtml(html) {
+        if (!html) return '';
+        
+        // إنشاء عنصر div مؤقت
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        
+        // الحصول على النص فقط
+        return tempDiv.textContent || tempDiv.innerText || '';
+    }
+
+    /**
      * عرض إشعار
      * @param {string} message - نص الإشعار
      * @param {string} type - نوع الإشعار (success, error, warning, info)
@@ -691,6 +816,43 @@ class CoursesManager {
     showError(message) {
         this.errorElement.textContent = message;
         this.errorElement.classList.remove('d-none');
+    }
+
+    /**
+     * فتح منصة ذكاء اصطناعي مع سؤال منسق عن القسم
+     * @param {string} sectionName - اسم القسم
+     * @param {string} languageName - اسم اللغة
+     * @param {string} description - وصف القسم
+     * @param {string} platform - المنصة المستهدفة (CHATGPT, CLAUDE, BARD)
+     */
+    openAIPlatformWithQuestion(sectionName, languageName, description, platform = 'CHATGPT') {
+        // التأكد من وجود دالة formatSectionQuestion
+        if (typeof window.formatSectionQuestion !== 'function' || typeof window.directAILink !== 'function') {
+            console.error('لم يتم العثور على دوال الذكاء الاصطناعي المطلوبة');
+            this.showToast('حدث خطأ في فتح منصة الذكاء الاصطناعي', 'error');
+            return;
+        }
+        
+        // تنسيق السؤال
+        const question = window.formatSectionQuestion(sectionName, languageName, description);
+        
+        // توجيه المستخدم إلى منصة الذكاء الاصطناعي مع السؤال
+        window.directAILink(question, platform);
+    }
+
+    /**
+     * إلغاء تهروب النص HTML
+     * @param {string} escapedHtml - النص المهروب
+     * @returns {string} النص الأصلي
+     */
+    unescapeHtml(escapedHtml) {
+        if (!escapedHtml) return '';
+        return escapedHtml
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/&#039;/g, "'");
     }
 }
 

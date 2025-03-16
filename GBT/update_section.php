@@ -5,7 +5,7 @@
  * 
  * المدخلات:
  * - section_id: معرف القسم
- * - description: الوصف الجديد
+ * - description: الوصف الجديد (يمكن أن يحتوي على HTML)
  * 
  * المخرجات:
  * - JSON يحتوي على حالة العملية ورسالة
@@ -30,7 +30,11 @@ if (!isset($_POST['section_id']) || !is_numeric($_POST['section_id'])) {
 }
 
 $sectionId = (int)$_POST['section_id'];
-$description = isset($_POST['description']) ? trim($_POST['description']) : '';
+$description = isset($_POST['description']) ? $_POST['description'] : '';
+
+// تنظيف HTML للحماية من XSS مع السماح بعناصر HTML محددة
+$allowedTags = '<p><br><strong><em><u><h1><h2><h3><h4><h5><h6><blockquote><pre><code><ul><ol><li><table><thead><tbody><tr><th><td><a><img><div><span>';
+$description = strip_tags($description, $allowedTags);
 
 try {
     // إنشاء اتصال PDO

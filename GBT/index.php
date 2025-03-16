@@ -18,7 +18,10 @@
     
     <!-- الستايل الخاص -->
     <link href="css/style.css" rel="stylesheet">
-</head>
+
+    <!-- إضافة مكتبة TinyMCE قبل نهاية head -->
+    <script src="https://cdn.tiny.cloud/1/7e1mldkbut3yp4tyeob9lt5s57pb8wrb5fqbh11d6n782gm7/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+    </head>
 <body>
     <!-- الهيدر -->
     <header class="main-header">
@@ -177,6 +180,7 @@
 
     <!-- إضافة هذه الأسطر قبل نهاية body -->
     <link href="css/courses.css" rel="stylesheet">
+    <script src="js/chatgpt-link.js"></script>
     <script src="js/courses.js"></script>
 </body>
 </html> 

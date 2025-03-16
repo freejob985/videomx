@@ -469,6 +469,68 @@
     font-size: 0.9rem;
     margin-bottom: 15px;
     line-height: 1.5;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border-left: 3px solid #dee2e6;
+}
+
+.section-description p {
+    margin-bottom: 0.5rem;
+}
+
+.section-description ul, 
+.section-description ol {
+    padding-right: 20px;
+    margin-bottom: 0.5rem;
+}
+
+.section-description a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.section-description a:hover {
+    text-decoration: underline;
+}
+
+.section-description code {
+    background-color: #f1f1f1;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: Consolas, Monaco, 'Andale Mono', monospace;
+    font-size: 0.85em;
+}
+
+.section-description pre {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+}
+
+.section-description img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+.section-description table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+}
+
+.section-description table th,
+.section-description table td {
+    border: 1px solid #dee2e6;
+    padding: 8px;
+}
+
+.section-description table th {
+    background-color: #f8f9fa;
 }
 
 .section-courses {
@@ -541,4 +603,103 @@
 
 .swal2-actions {
     flex-direction: row-reverse;
+}
+
+/* تنسيق أزرار القسم */
+.section-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.edit-section-btn, .chatgpt-section-btn {
+    padding: 3px 8px;
+    font-size: 0.8rem;
+}
+
+.chatgpt-section-btn {
+    color: #28a745;
+    border-color: #28a745;
+}
+
+.chatgpt-section-btn:hover {
+    background-color: #28a745;
+    color: white;
+}
+
+.chatgpt-section-btn i {
+    font-size: 0.9rem;
+}
+
+/* تنسيق قائمة منصات الذكاء الاصطناعي */
+.ai-platforms-dropdown .dropdown-menu {
+    min-width: 200px;
+    padding: 8px 0;
+}
+
+.ai-platforms-dropdown .dropdown-header {
+    color: #6c757d;
+    font-size: 0.8rem;
+    padding: 8px 16px;
+}
+
+.ai-platforms-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+.ai-platforms-dropdown .dropdown-item i {
+    width: 16px;
+    text-align: center;
+}
+
+.ai-platforms-dropdown .dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* تنسيق أزرار المنصات */
+.chatgpt-section-btn i {
+    color: #10a37f;
+}
+
+.claude-section-btn i {
+    color: #6b46fe;
+}
+
+.bard-section-btn i {
+    color: #8e44ad;
+}
+
+/* تنسيق المحرر المتقدم */
+.advanced-editor {
+    min-height: 300px;
+}
+
+.tox-tinymce {
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+}
+
+.tox .tox-toolbar__group {
+    border-right: 1px solid #e9ecef;
+}
+
+.tox .tox-tbtn {
+    color: #495057;
+}
+
+.tox .tox-tbtn:hover {
+    background-color: #f8f9fa;
+}
+
+/* تنسيق نافذة SweetAlert للمحرر */
+.swal2-popup.swal2-modal {
+    width: 800px;
+    max-width: 90%;
+}
+
+.swal2-html-container {
+    margin: 1em 0;
 } 
