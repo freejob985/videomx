@@ -555,12 +555,17 @@ class CoursesManager {
             return 'لا توجد دروس متاحة';
         }
 
-        return lessons.map(lesson => 
-            `اسم الدرس: ${lesson.title || 'بدون عنوان'}\n` +
-            `القسم: ${lesson.section || 'بدون قسم'}\n` +
-            (lesson.note ? `الملاحظات: ${lesson.note}\n` : '') +
-            `=============\n`
-        ).join('\n');
+        return lessons.map(lesson => {
+            // إزالة أكواد HTML من عنوان الدرس والقسم والملاحظات
+            const cleanTitle = this.stripHtml(lesson.title || 'بدون عنوان');
+            const cleanSection = this.stripHtml(lesson.section || 'بدون قسم');
+            const cleanNote = lesson.note ? this.stripHtml(lesson.note) : '';
+            
+            return `اسم الدرس: ${cleanTitle}\n` +
+                   `القسم: ${cleanSection}\n` +
+                   (cleanNote ? `الملاحظات: ${cleanNote}\n` : '') +
+                   `=============\n`;
+        }).join('\n');
     }
 
     /**
@@ -592,12 +597,28 @@ class CoursesManager {
      */
     async copyLessons(courseId) {
         try {
-            const lessonsText = document.getElementById(`lessons-data-${courseId}`).textContent;
+            const course = this.coursesData.find(c => c.id == courseId);
+            if (!course) {
+                throw new Error('لم يتم العثور على الكورس');
+            }
             
-            if (!lessonsText || lessonsText === 'لا توجد دروس متاحة') {
+            if (!course.lessons.length) {
                 this.showToast('لا توجد دروس متاحة للنسخ', 'warning');
                 return;
             }
+            
+            // تنسيق الدروس مع إزالة أكواد HTML
+            const lessonsText = course.lessons.map(lesson => {
+                // إزالة أكواد HTML من عنوان الدرس والقسم والملاحظات
+                const cleanTitle = this.stripHtml(lesson.title || 'بدون عنوان');
+                const cleanSection = this.stripHtml(lesson.section || 'بدون قسم');
+                const cleanNote = lesson.note ? this.stripHtml(lesson.note) : '';
+                
+                return `اسم الدرس: ${cleanTitle}\n` +
+                       `القسم: ${cleanSection}\n` +
+                       (cleanNote ? `الملاحظات: ${cleanNote}\n` : '') +
+                       `=============\n`;
+            }).join('\n');
             
             // استخدام واجهة Clipboard API
             if (navigator.clipboard) {
@@ -728,12 +749,17 @@ class CoursesManager {
                 `القسم: ${sectionName}\n` +
                 `الوصف: ${sectionDescription}\n` +
                 `=============\n\n` +
-                sectionLessons.map(lesson => 
-                    `اسم الدرس: ${lesson.title || 'بدون عنوان'}\n` +
-                    `القسم: ${lesson.section || 'بدون قسم'}\n` +
-                    (lesson.note ? `الملاحظات: ${lesson.note}\n` : '') +
-                    `=============\n`
-                ).join('\n');
+                sectionLessons.map(lesson => {
+                    // إزالة أكواد HTML من عنوان الدرس والملاحظات
+                    const cleanTitle = this.stripHtml(lesson.title || 'بدون عنوان');
+                    const cleanSection = this.stripHtml(lesson.section || 'بدون قسم');
+                    const cleanNote = lesson.note ? this.stripHtml(lesson.note) : '';
+                    
+                    return `اسم الدرس: ${cleanTitle}\n` +
+                           `القسم: ${cleanSection}\n` +
+                           (cleanNote ? `الملاحظات: ${cleanNote}\n` : '') +
+                           `=============\n`;
+                }).join('\n');
 
             if (navigator.clipboard) {
                 await navigator.clipboard.writeText(lessonsText);
