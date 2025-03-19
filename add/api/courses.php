@@ -93,31 +93,47 @@ switch ($method) {
                 ':language_id' => $languageId
             ]);
             
-            if ($stmt->fetch()) {
-                throw new Exception('هذا الكورس موجود مسبقاً');
+            $existingCourse = $stmt->fetch();
+            $courseId = null;
+            
+            if ($existingCourse) {
+                // إذا كان الكورس موجود، استخدم معرفه
+                $courseId = $existingCourse['id'];
+                
+                // تحديث معلومات الكورس
+                $stmt = $db->prepare('
+                    UPDATE courses SET 
+                    processing_status = :processing_status,
+                    updated_at = CURRENT_TIMESTAMP
+                    WHERE id = :id
+                ');
+                $stmt->execute([
+                    ':processing_status' => 'pending',
+                    ':id' => $courseId
+                ]);
+            } else {
+                // إضافة الكورس الجديد
+                $stmt = $db->prepare('
+                    INSERT INTO courses (
+                        title, description, playlist_url, language_id,
+                        thumbnail, processing_status, created_at, updated_at
+                    ) VALUES (
+                        :title, :description, :playlist_url, :language_id,
+                        :thumbnail, :processing_status, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+                    )
+                ');
+
+                $stmt->execute([
+                    ':title' => $playlistDetails['title'],
+                    ':description' => $playlistDetails['description'],
+                    ':playlist_url' => $playlistUrl,
+                    ':language_id' => $languageId,
+                    ':thumbnail' => $playlistDetails['thumbnail'],
+                    ':processing_status' => 'pending'
+                ]);
+
+                $courseId = $db->lastInsertId();
             }
-
-            // إضافة الكورس
-            $stmt = $db->prepare('
-                INSERT INTO courses (
-                    title, description, playlist_url, language_id,
-                    thumbnail, processing_status, created_at, updated_at
-                ) VALUES (
-                    :title, :description, :playlist_url, :language_id,
-                    :thumbnail, :processing_status, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-                )
-            ');
-
-            $stmt->execute([
-                ':title' => $playlistDetails['title'],
-                ':description' => $playlistDetails['description'],
-                ':playlist_url' => $playlistUrl,
-                ':language_id' => $languageId,
-                ':thumbnail' => $playlistDetails['thumbnail'],
-                ':processing_status' => 'pending'
-            ]);
-
-            $courseId = $db->lastInsertId();
             
             // إنشاء ملف التقدم
             saveProgress($courseId, [
@@ -279,8 +295,16 @@ function processCourseVideos($courseId, $playlistUrl) {
             error_log("Warning: Expected {$expectedCount} videos but got {$totalVideos}");
         }
 
-        // حذف الدروس القديمة إن وجدت
-        $db->prepare('DELETE FROM lessons WHERE course_id = ?')->execute([$courseId]);
+        // جلب الدروس الموجودة مسبقاً للكورس
+        $existingLessons = [];
+        $stmt = $db->prepare('SELECT video_url FROM lessons WHERE course_id = ?');
+        $stmt->execute([$courseId]);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $videoId = getVideoIdFromUrl($row['video_url']);
+            if ($videoId) {
+                $existingLessons[$videoId] = true;
+            }
+        }
 
         // إضافة الدروس الجديدة
         $stmt = $db->prepare('
@@ -301,11 +325,17 @@ function processCourseVideos($courseId, $playlistUrl) {
             try {
                 $videoId = $item['snippet']['resourceId']['videoId'];
                 
-                // تخطي الفيديوهات المكررة
+                // تخطي الفيديوهات المكررة في نفس المعالجة
                 if (in_array($videoId, $addedVideoIds)) {
                     continue;
                 }
                 $addedVideoIds[] = $videoId;
+                
+                // تخطي الفيديوهات الموجودة مسبقاً في قاعدة البيانات
+                if (isset($existingLessons[$videoId])) {
+                    $processedVideos++;
+                    continue;
+                }
 
                 // جلب تفاصيل الفيديو
                 $videoDetails = getVideoDetails($videoId, YOUTUBE_API_KEY);
@@ -405,4 +435,17 @@ function deleteProgress($courseId) {
     if (file_exists($progressFile)) {
         unlink($progressFile);
     }
+}
+
+/**
+ * دالة لاستخراج معرف الفيديو من رابط YouTube
+ * @param string $url رابط الفيديو
+ * @return string|null معرف الفيديو أو null إذا لم يتم العثور عليه
+ */
+function getVideoIdFromUrl($url) {
+    $pattern = '/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i';
+    if (preg_match($pattern, $url, $matches)) {
+        return $matches[1];
+    }
+    return null;
 } 
