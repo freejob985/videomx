@@ -18,6 +18,45 @@ require_once 'includes/header.php';
 
 <!-- إضافة ملف CSS -->
 <link rel="stylesheet" href="assets/css/languages.css">
+<style>
+    /* تنسيقات شريط الحروف */
+    .letters-filter {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-bottom: 20px;
+        justify-content: center;
+    }
+
+    .letter-btn {
+        min-width: 35px;
+        height: 35px;
+        padding: 5px;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+        font-family: 'Arial', sans-serif;
+    }
+
+    .letter-btn:hover {
+        background: #f8f9fa;
+        border-color: #0d6efd;
+        color: #0d6efd;
+    }
+
+    .letter-btn.active {
+        background: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+    }
+
+    .letter-btn.all-btn {
+        min-width: 50px;
+    }
+</style>
 
 <!-- شريط التنقل العلوي -->
 <div class="navigation-bar bg-light py-3 mb-4 border-bottom">
@@ -53,6 +92,31 @@ require_once 'includes/header.php';
 </div>
 
 <div class="container py-4">
+    <!-- شريط الحروف -->
+    <div class="letters-filter">
+        <button class="letter-btn all-btn active" data-letter="all">All</button>
+        <!-- الحروف الإنجليزية المستخدمة فقط -->
+        <?php
+        // جمع الحروف الأولى من جميع اللغات
+        $used_letters = array();
+        foreach ($languages as $language) {
+            $first_letter = strtoupper(substr($language['name'], 0, 1));
+            if (ctype_alpha($first_letter)) { // التأكد من أن الحرف إنجليزي
+                $used_letters[] = $first_letter;
+            }
+        }
+        
+        // إزالة التكرار وترتيب الحروف
+        $used_letters = array_unique($used_letters);
+        sort($used_letters);
+        
+        // عرض الأزرار للحروف المستخدمة فقط
+        foreach ($used_letters as $letter) {
+            echo "<button class='letter-btn' data-letter='{$letter}'>{$letter}</button>";
+        }
+        ?>
+    </div>
+
     <!-- شبكة اللغات -->
     <div class="language-grid">
         <?php foreach ($languages as $language): ?>
@@ -206,6 +270,7 @@ require_once 'includes/header.php';
 <script>
 // تهيئة المتغيرات
 let currentLanguageId = null;
+let currentLetter = 'all';
 
 // إضافة قسم جديد
 document.querySelectorAll('.add-section-input').forEach(input => {
@@ -471,6 +536,37 @@ document.getElementById('saveLanguage').addEventListener('click', async function
         console.error('Error:', error);
         toastr.error(error.message || 'حدث خطأ أثناء إضافة اللغة');
     }
+});
+
+// دالة فلترة اللغات حسب الحرف
+function filterLanguagesByLetter(letter) {
+    const cards = document.querySelectorAll('.language-card');
+    
+    cards.forEach(card => {
+        const languageName = card.querySelector('.card-title').textContent.trim();
+        const firstLetter = languageName.charAt(0).toUpperCase();
+        
+        if (letter === 'all' || firstLetter === letter) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// إضافة مستمعات الأحداث لأزرار الحروف
+document.querySelectorAll('.letter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // إزالة الحالة النشطة من جميع الأزرار
+        document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('active'));
+        
+        // إضافة الحالة النشطة للزر المضغوط
+        this.classList.add('active');
+        
+        // تحديث الحرف الحالي وتطبيق الفلتر
+        currentLetter = this.dataset.letter;
+        filterLanguagesByLetter(currentLetter);
+    });
 });
 </script>
 
