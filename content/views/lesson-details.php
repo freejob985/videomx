@@ -123,6 +123,10 @@ include'../lesson-details/css.php';
                         <div class="label">وقت الدراسة الكلي</div>
                     </div>
                     <div class="stat-item duration">
+                        <div class="number" id="completedDuration">0:00:00</div>
+                        <div class="label">وقت الدراسة المكتمل</div>
+                    </div>
+                    <div class="stat-item duration">
                         <div class="number" id="remainingDuration">0:00:00</div>
                         <div class="label">وقت الدراسة المتبقي</div>
                     </div>

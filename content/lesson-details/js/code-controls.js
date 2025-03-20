@@ -367,158 +367,161 @@ function updateNotesList(newNote) {
     }
 }
 
-class CodeControls {
-    constructor(wrapper) {
-        this.wrapper = wrapper;
-        this.codeBlock = wrapper.querySelector('pre code');
-        this.fontSize = 14;
-        this.initControls();
-        this.initPopupWindow();
-    }
+// التحقق من وجود الفئة قبل تعريفها
+if (typeof CodeControls === 'undefined') {
+    class CodeControls {
+        constructor(wrapper) {
+            this.wrapper = wrapper;
+            this.codeBlock = wrapper.querySelector('pre code');
+            this.fontSize = 14;
+            this.initControls();
+            this.initPopupWindow();
+        }
 
-    initControls() {
-        const controls = document.createElement('div');
-        controls.className = 'code-controls';
-        
-        // مجموعة التحكم في حجم الخط
-        const fontSizeGroup = document.createElement('div');
-        fontSizeGroup.className = 'control-group';
-        fontSizeGroup.innerHTML = `
-            <button type="button" class="font-size-decrease" title="تصغير الخط">
-                <i class="fas fa-minus"></i>
-            </button>
-            <span class="font-size-display">14px</span>
-            <button type="button" class="font-size-increase" title="تكبير الخط">
-                <i class="fas fa-plus"></i>
-            </button>
-        `;
+        initControls() {
+            const controls = document.createElement('div');
+            controls.className = 'code-controls';
+            
+            // مجموعة التحكم في حجم الخط
+            const fontSizeGroup = document.createElement('div');
+            fontSizeGroup.className = 'control-group';
+            fontSizeGroup.innerHTML = `
+                <button type="button" class="font-size-decrease" title="تصغير الخط">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <span class="font-size-display">14px</span>
+                <button type="button" class="font-size-increase" title="تكبير الخط">
+                    <i class="fas fa-plus"></i>
+                </button>
+            `;
 
-        // مجموعة الأدوات
-        const toolsGroup = document.createElement('div');
-        toolsGroup.className = 'control-group';
-        toolsGroup.innerHTML = `
-            <button type="button" class="copy-code" title="نسخ الكود">
-                <i class="fas fa-copy"></i>
-            </button>
-            <button type="button" class="open-popup" title="فتح في نافذة منفصلة">
-                <i class="fas fa-external-link-alt"></i>
-            </button>
-            <button type="button" class="fullscreen-toggle" title="ملء الشاشة">
-                <i class="fas fa-expand"></i>
-            </button>
-        `;
+            // مجموعة الأدوات
+            const toolsGroup = document.createElement('div');
+            toolsGroup.className = 'control-group';
+            toolsGroup.innerHTML = `
+                <button type="button" class="copy-code" title="نسخ الكود">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <button type="button" class="open-popup" title="فتح في نافذة منفصلة">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+                <button type="button" class="fullscreen-toggle" title="ملء الشاشة">
+                    <i class="fas fa-expand"></i>
+                </button>
+            `;
 
-        controls.appendChild(fontSizeGroup);
-        controls.appendChild(toolsGroup);
-        this.wrapper.insertBefore(controls, this.wrapper.firstChild);
+            controls.appendChild(fontSizeGroup);
+            controls.appendChild(toolsGroup);
+            this.wrapper.insertBefore(controls, this.wrapper.firstChild);
 
-        this.bindEvents();
-    }
+            this.bindEvents();
+        }
 
-    initPopupWindow() {
-        this.popup = document.createElement('div');
-        this.popup.className = 'code-popup-window';
-        this.popup.innerHTML = `
-            <div class="popup-header">
-                <div class="control-group">
-                    <button type="button" class="font-size-decrease">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                    <span class="font-size-display">14px</span>
-                    <button type="button" class="font-size-increase">
-                        <i class="fas fa-plus"></i>
-                    </button>
+        initPopupWindow() {
+            this.popup = document.createElement('div');
+            this.popup.className = 'code-popup-window';
+            this.popup.innerHTML = `
+                <div class="popup-header">
+                    <div class="control-group">
+                        <button type="button" class="font-size-decrease">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span class="font-size-display">14px</span>
+                        <button type="button" class="font-size-increase">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="control-group">
+                        <button type="button" class="copy-code">
+                            <i class="fas fa-copy"></i>
+                            نسخ
+                        </button>
+                        <button type="button" class="close-popup">
+                            <i class="fas fa-times"></i>
+                            إغلاق
+                        </button>
+                    </div>
                 </div>
-                <div class="control-group">
-                    <button type="button" class="copy-code">
-                        <i class="fas fa-copy"></i>
-                        نسخ
-                    </button>
-                    <button type="button" class="close-popup">
-                        <i class="fas fa-times"></i>
-                        إغلاق
-                    </button>
-                </div>
-            </div>
-            <div class="popup-content"></div>
-        `;
-        document.body.appendChild(this.popup);
-    }
+                <div class="popup-content"></div>
+            `;
+            document.body.appendChild(this.popup);
+        }
 
-    bindEvents() {
-        // التحكم في حجم الخط
-        this.wrapper.querySelector('.font-size-decrease').addEventListener('click', () => this.changeFontSize(-1));
-        this.wrapper.querySelector('.font-size-increase').addEventListener('click', () => this.changeFontSize(1));
+        bindEvents() {
+            // التحكم في حجم الخط
+            this.wrapper.querySelector('.font-size-decrease').addEventListener('click', () => this.changeFontSize(-1));
+            this.wrapper.querySelector('.font-size-increase').addEventListener('click', () => this.changeFontSize(1));
 
-        // نسخ الكود
-        this.wrapper.querySelector('.copy-code').addEventListener('click', () => this.copyCode());
+            // نسخ الكود
+            this.wrapper.querySelector('.copy-code').addEventListener('click', () => this.copyCode());
 
-        // فتح في نافذة منفصلة
-        this.wrapper.querySelector('.open-popup').addEventListener('click', () => this.openPopup());
+            // فتح في نافذة منفصلة
+            this.wrapper.querySelector('.open-popup').addEventListener('click', () => this.openPopup());
 
-        // ملء الشاشة
-        this.wrapper.querySelector('.fullscreen-toggle').addEventListener('click', () => this.toggleFullscreen());
+            // ملء الشاشة
+            this.wrapper.querySelector('.fullscreen-toggle').addEventListener('click', () => this.toggleFullscreen());
 
-        // أحداث النافذة المنفصلة
-        this.popup.querySelector('.close-popup').addEventListener('click', () => this.closePopup());
-        this.popup.querySelector('.copy-code').addEventListener('click', () => this.copyCode(true));
-        this.popup.querySelector('.font-size-decrease').addEventListener('click', () => this.changeFontSize(-1, true));
-        this.popup.querySelector('.font-size-increase').addEventListener('click', () => this.changeFontSize(1, true));
-    }
+            // أحداث النافذة المنفصلة
+            this.popup.querySelector('.close-popup').addEventListener('click', () => this.closePopup());
+            this.popup.querySelector('.copy-code').addEventListener('click', () => this.copyCode(true));
+            this.popup.querySelector('.font-size-decrease').addEventListener('click', () => this.changeFontSize(-1, true));
+            this.popup.querySelector('.font-size-increase').addEventListener('click', () => this.changeFontSize(1, true));
+        }
 
-    changeFontSize(delta, inPopup = false) {
-        this.fontSize = Math.max(10, Math.min(24, this.fontSize + delta));
-        const target = inPopup ? this.popup : this.wrapper;
-        
-        target.querySelector('.font-size-display').textContent = `${this.fontSize}px`;
-        target.querySelector('pre code').style.fontSize = `${this.fontSize}px`;
-    }
+        changeFontSize(delta, inPopup = false) {
+            this.fontSize = Math.max(10, Math.min(24, this.fontSize + delta));
+            const target = inPopup ? this.popup : this.wrapper;
+            
+            target.querySelector('.font-size-display').textContent = `${this.fontSize}px`;
+            target.querySelector('pre code').style.fontSize = `${this.fontSize}px`;
+        }
 
-    copyCode(inPopup = false) {
-        const code = this.codeBlock.textContent;
-        navigator.clipboard.writeText(code).then(() => {
-            toastr.success('تم نسخ الكود بنجاح');
-        });
-    }
+        copyCode(inPopup = false) {
+            const code = this.codeBlock.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                toastr.success('تم نسخ الكود بنجاح');
+            });
+        }
 
-    openPopup() {
-        const popupContent = this.popup.querySelector('.popup-content');
-        popupContent.innerHTML = '';
-        const clonedCode = this.wrapper.querySelector('pre').cloneNode(true);
-        popupContent.appendChild(clonedCode);
-        
-        this.popup.classList.add('active');
-        this.updatePopupSize();
-    }
+        openPopup() {
+            const popupContent = this.popup.querySelector('.popup-content');
+            popupContent.innerHTML = '';
+            const clonedCode = this.wrapper.querySelector('pre').cloneNode(true);
+            popupContent.appendChild(clonedCode);
+            
+            this.popup.classList.add('active');
+            this.updatePopupSize();
+        }
 
-    closePopup() {
-        this.popup.classList.remove('active');
-    }
+        closePopup() {
+            this.popup.classList.remove('active');
+        }
 
-    toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            this.wrapper.requestFullscreen();
-            this.wrapper.querySelector('.fullscreen-toggle i').classList.replace('fa-expand', 'fa-compress');
-        } else {
-            document.exitFullscreen();
-            this.wrapper.querySelector('.fullscreen-toggle i').classList.replace('fa-compress', 'fa-expand');
+        toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                this.wrapper.requestFullscreen();
+                this.wrapper.querySelector('.fullscreen-toggle i').classList.replace('fa-expand', 'fa-compress');
+            } else {
+                document.exitFullscreen();
+                this.wrapper.querySelector('.fullscreen-toggle i').classList.replace('fa-compress', 'fa-expand');
+            }
+        }
+
+        updatePopupSize() {
+            const popupContent = this.popup.querySelector('.popup-content pre code');
+            if (popupContent) {
+                popupContent.style.fontSize = `${this.fontSize}px`;
+            }
         }
     }
-
-    updatePopupSize() {
-        const popupContent = this.popup.querySelector('.popup-content pre code');
-        if (popupContent) {
-            popupContent.style.fontSize = `${this.fontSize}px`;
-        }
+    
+    // تصدير الفئة إذا كنا في بيئة وحدات
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = CodeControls;
+    } else {
+        window.CodeControls = CodeControls;
     }
 }
-
-// تهيئة عناصر التحكم لكل بلوك كود
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.code-wrapper').forEach(wrapper => {
-        new CodeControls(wrapper);
-    });
-});
 
 /**
  * Font Size Control Module

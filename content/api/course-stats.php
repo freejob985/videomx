@@ -1,49 +1,167 @@
 <?php
 /**
- * API Endpoints for Course Stats
- * ============================
- * معالجة طلبات AJAX الخاصة بإحصائيات الكورس
+ * API لجلب إحصائيات الكورس
+ * 
+ * هذا الملف يقوم بجلب إحصائيات الكورس من قاعدة البيانات وإرجاعها بتنسيق JSON
+ * 
+ * المدخلات:
+ * - action: نوع العملية (get_stats, get_lessons)
+ * - course_id: معرف الكورس
+ * - show_completed: عرض الدروس المكتملة (للعملية get_lessons)
+ * 
+ * المخرجات:
+ * للعملية get_stats:
+ * - total_lessons: إجمالي عدد الدروس
+ * - completed_lessons: عدد الدروس المكتملة
+ * - total_duration: إجمالي وقت الدراسة (بالدقائق)
+ * - completed_duration: وقت الدراسة المكتمل (بالدقائق)
+ * - completion_percentage: نسبة التقدم (0-100)
+ * 
+ * للعملية get_lessons:
+ * - مصفوفة من الدروس مع معلوماتها
  */
 
-require_once '../includes/course-stats-functions.php';
-
+// تعيين نوع المحتوى إلى JSON
 header('Content-Type: application/json');
 
-// التحقق من نوع الطلب
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    exit(json_encode(['status' => 'error', 'message' => 'Method not allowed']));
+// اتصال مباشر بقاعدة البيانات
+$host = 'localhost';
+$dbname = 'courses_db';
+$username = 'root';
+$password = '';
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'خطأ في الاتصال بقاعدة البيانات: ' . $e->getMessage()]);
+    exit;
 }
 
-// التحقق من وجود معرف الكورس
-$course_id = isset($_POST['course_id']) ? (int)$_POST['course_id'] : 0;
-if (!$course_id) {
+// التحقق من وجود العملية ومعرف الكورس
+if (!isset($_POST['action']) || !isset($_POST['course_id']) || !is_numeric($_POST['course_id'])) {
     http_response_code(400);
-    exit(json_encode(['status' => 'error', 'message' => 'Course ID is required']));
+    echo json_encode(['error' => 'معلومات غير كاملة']);
+    exit;
 }
 
-// معالجة الطلبات
-$action = $_POST['action'] ?? '';
-$response = [];
+$action = $_POST['action'];
+$courseId = (int)$_POST['course_id'];
 
+// التعامل مع العمليات المختلفة
 switch ($action) {
     case 'get_stats':
-        $response = getCourseDetailedStats($course_id);
+        getStats($courseId);
         break;
-        
     case 'get_lessons':
-        $show_completed = isset($_POST['show_completed']) ? (bool)$_POST['show_completed'] : true;
-        $response = getLessonsForDropdown($course_id, $show_completed);
+        $showCompleted = isset($_POST['show_completed']) ? filter_var($_POST['show_completed'], FILTER_VALIDATE_BOOLEAN) : true;
+        getLessons($courseId, $showCompleted);
         break;
-        
-    case 'toggle_completed_visibility':
-        $show_completed = isset($_POST['show_completed']) ? (bool)$_POST['show_completed'] : true;
-        $response = updateCompletedLessonsVisibility($course_id, $show_completed);
-        break;
-        
     default:
         http_response_code(400);
-        $response = ['status' => 'error', 'message' => 'Invalid action'];
+        echo json_encode(['error' => 'عملية غير صالحة']);
+        exit;
 }
 
-echo json_encode($response); 
+/**
+ * جلب إحصائيات الكورس
+ * 
+ * @param int $courseId معرف الكورس
+ * @return void
+ */
+function getStats($courseId) {
+    global $pdo;
+    
+    try {
+        // جلب جميع دروس الكورس
+        $stmt = $pdo->prepare("
+            SELECT id, title, duration, completed
+            FROM lessons
+            WHERE course_id = ?
+            ORDER BY order_number ASC
+        ");
+        $stmt->execute([$courseId]);
+        $lessons = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // حساب الإحصائيات
+        $totalLessons = count($lessons);
+        $completedLessons = 0;
+        $totalDuration = 0;
+        $completedDuration = 0;
+        
+        foreach ($lessons as $lesson) {
+            $duration = (int)$lesson['duration']; // المدة بالثواني
+            $totalDuration += $duration;
+            
+            if ($lesson['completed']) {
+                $completedLessons++;
+                $completedDuration += $duration;
+            }
+        }
+        
+        // تحويل الثواني إلى دقائق للعرض
+        $totalDurationMinutes = $totalDuration / 60;
+        $completedDurationMinutes = $completedDuration / 60;
+        
+        // حساب نسبة التقدم
+        $completionPercentage = $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
+        
+        // إرجاع البيانات بتنسيق JSON
+        echo json_encode([
+            'total_lessons' => $totalLessons,
+            'completed_lessons' => $completedLessons,
+            'total_duration' => $totalDurationMinutes,
+            'completed_duration' => $completedDurationMinutes,
+            'completion_percentage' => $completionPercentage
+        ]);
+        
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'خطأ في قاعدة البيانات: ' . $e->getMessage()]);
+        exit;
+    }
+}
+
+/**
+ * جلب قائمة دروس الكورس
+ * 
+ * @param int $courseId معرف الكورس
+ * @param bool $showCompleted عرض الدروس المكتملة
+ * @return void
+ */
+function getLessons($courseId, $showCompleted) {
+    global $pdo;
+    
+    try {
+        // بناء الاستعلام
+        $query = "
+            SELECT l.id, l.title, l.duration, l.completed, l.is_reviewed, l.is_important, l.is_theory,
+                   s.name as section_name
+            FROM lessons l
+            LEFT JOIN sections s ON l.section_id = s.id
+            WHERE l.course_id = ?
+        ";
+        
+        // إضافة شرط تصفية الدروس المكتملة إذا لزم الأمر
+        if (!$showCompleted) {
+            $query .= " AND l.completed = 0";
+        }
+        
+        $query .= " ORDER BY l.order_number ASC, l.id ASC";
+        
+        $stmt = $pdo->prepare($query);
+        $stmt->execute([$courseId]);
+        $lessons = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // إرجاع البيانات بتنسيق JSON
+        echo json_encode($lessons);
+        
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'خطأ في قاعدة البيانات: ' . $e->getMessage()]);
+        exit;
+    }
+}
+?> 

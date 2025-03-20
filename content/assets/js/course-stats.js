@@ -22,6 +22,11 @@ class CourseStats {
         this.completedCount = document.getElementById('completedCount');
         this.remainingCount = document.getElementById('remainingCount');
         
+        // عناصر الوقت
+        this.totalDuration = document.getElementById('totalDuration');
+        this.completedDuration = document.getElementById('completedDuration');
+        this.remainingDuration = document.getElementById('remainingDuration');
+        
         // القائمة المنسدلة
         this.lessonsDropdown = document.getElementById('lessonsDropdown');
         
@@ -48,7 +53,7 @@ class CourseStats {
             this.lessonsDropdown.addEventListener('change', (e) => {
                 const lessonId = e.target.value;
                 if (lessonId) {
-                    window.location.href = `http://videomx.com/content/views/lesson-details.php?id=${lessonId}`;
+                    window.location.href = `/content/views/lesson-details.php?id=${lessonId}`;
                 }
             });
         }
@@ -76,14 +81,20 @@ class CourseStats {
                 `;
                 
                 // إظهار رسالة للمستخدم
-                toastr.success(this.showCompleted ? 'تم إظهار جميع الدروس' : 'تم إخفاء الدروس المكتملة');
+                if (typeof toastr !== 'undefined') {
+                    toastr.success(this.showCompleted ? 'تم إظهار جميع الدروس' : 'تم إخفاء الدروس المكتملة');
+                }
             });
         }
     }
 
     async loadInitialData() {
-        await this.loadStats();
-        await this.loadLessons();
+        try {
+            await this.loadStats();
+            await this.loadLessons();
+        } catch (error) {
+            console.error('Error loading initial data:', error);
+        }
     }
 
     async loadStats() {
@@ -96,47 +107,68 @@ class CourseStats {
                 body: `action=get_stats&course_id=${this.courseId}`
             });
             
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Invalid response format:', text);
+                throw new Error('Invalid response format. Expected JSON.');
+            }
+            
             const stats = await response.json();
             this.updateStatsDisplay(stats);
             
         } catch (error) {
             console.error('Error loading stats:', error);
-            toastr.error('حدث خطأ أثناء تحميل الإحصائيات');
+            if (typeof toastr !== 'undefined') {
+                toastr.error('حدث خطأ أثناء تحميل الإحصائيات');
+            }
         }
     }
 
     updateStatsDisplay(stats) {
         // تحديث شريط التقدم
         if (this.progressBar) {
-            this.progressBar.style.width = `${stats.completion_percentage}%`;
-            this.progressBar.setAttribute('aria-valuenow', stats.completion_percentage);
-            this.progressBar.textContent = `${stats.completion_percentage}%`;
+            const percentage = stats.completion_percentage || 0;
+            this.progressBar.style.width = `${percentage}%`;
+            this.progressBar.setAttribute('aria-valuenow', percentage);
+            this.progressBar.textContent = `${percentage}%`;
         }
         
         // تحديث العدادات
         if (this.lessonCount) {
-            this.lessonCount.textContent = stats.total_lessons;
+            this.lessonCount.textContent = stats.total_lessons || 0;
         }
         if (this.completedCount) {
-            this.completedCount.textContent = stats.completed_lessons;
+            this.completedCount.textContent = stats.completed_lessons || 0;
         }
         if (this.remainingCount) {
-            this.remainingCount.textContent = stats.total_lessons - stats.completed_lessons;
+            const total = stats.total_lessons || 0;
+            const completed = stats.completed_lessons || 0;
+            this.remainingCount.textContent = total - completed;
         }
         
         // تحديث إحصائيات الوقت
-        const totalDuration = document.getElementById('totalDuration');
-        const remainingDuration = document.getElementById('remainingDuration');
-        
-        if (totalDuration) {
+        if (this.totalDuration) {
             const total = Math.floor(parseFloat(stats.total_duration) || 0);
-            totalDuration.textContent = this.formatDuration(total);
+            this.totalDuration.textContent = this.formatDuration(total);
         }
-        if (remainingDuration) {
+        
+        // تحديث وقت الدراسة المكتمل
+        if (this.completedDuration) {
+            const completed = Math.floor(parseFloat(stats.completed_duration) || 0);
+            this.completedDuration.textContent = this.formatDuration(completed);
+        }
+        
+        // تحديث وقت الدراسة المتبقي
+        if (this.remainingDuration) {
             const total = Math.floor(parseFloat(stats.total_duration) || 0);
             const completed = Math.floor(parseFloat(stats.completed_duration) || 0);
             const remaining = Math.max(0, total - completed);
-            remainingDuration.textContent = this.formatDuration(remaining);
+            this.remainingDuration.textContent = this.formatDuration(remaining);
         }
     }
 
@@ -166,7 +198,14 @@ class CourseStats {
             });
             
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Invalid response format:', text);
+                throw new Error('Invalid response format. Expected JSON.');
             }
             
             const lessons = await response.json();
@@ -174,7 +213,9 @@ class CourseStats {
             
         } catch (error) {
             console.error('Error loading lessons:', error);
-            toastr.error('حدث خطأ أثناء تحميل قائمة الدروس');
+            if (typeof toastr !== 'undefined') {
+                toastr.error('حدث خطأ أثناء تحميل قائمة الدروس');
+            }
         }
     }
 
@@ -191,7 +232,7 @@ class CourseStats {
             <div class="lesson-item ${lesson.completed ? 'completed' : ''} 
                                    ${lesson.is_reviewed ? 'reviewed' : ''} 
                                    ${lesson.id === window.LESSON_ID ? 'active' : ''}"
-                 onclick="window.location.href='http://videomx.com/content/views/lesson-details.php?id=${lesson.id}'">
+                 onclick="window.location.href='/content/views/lesson-details.php?id=${lesson.id}'">
                 <div class="lesson-status-icon">
                     ${lesson.completed ? '<i class="fas fa-check-circle"></i>' : 
                       lesson.is_reviewed ? '<i class="fas fa-bookmark"></i>' : 
@@ -199,7 +240,7 @@ class CourseStats {
                 </div>
                 <div class="lesson-title">${lesson.title}</div>
                 <div class="lesson-duration">
-                    <i class="far fa-clock"></i> ${this.formatDuration(lesson.duration)}
+                    <i class="far fa-clock"></i> ${this.formatDuration(lesson.duration / 60)}
                 </div>
             </div>
         `).join('');
