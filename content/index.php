@@ -1,6 +1,7 @@
 <?php
-require_once 'includes/functions.php';
-require_once 'includes/statistics.php';
+require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/statistics.php';
+require_once __DIR__ . '/includes/letter_filter.php';
 
 // معالجة طلب الحذف
 if (isset($_POST['delete_language'])) {
@@ -377,9 +378,69 @@ header.position-relative.overflow-hidden.py-16 {
         grid-template-columns: repeat(3, 1fr);
     }
 }
+
+.alphabet-filter {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.alphabet-filter .btn {
+    min-width: 40px;
+    margin: 2px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.alphabet-filter .btn.active {
+    background-color: #2196F3;
+    color: white;
+    border-color: #2196F3;
+    transform: translateY(-2px);
+}
+
+.alphabet-filter .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 768px) {
+    .alphabet-filter .btn {
+        min-width: 35px;
+        padding: 5px;
+        font-size: 0.9rem;
+    }
+}
 </style>
 
 <div class="container py-5">
+    <!-- فلتر الأحرف الأبجدية -->
+    <div class="alphabet-filter mb-4">
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+            <?php
+            // الحصول على الأحرف المتوفرة
+            $availableLetters = getAvailableLetters();
+            $selectedLetter = $_GET['letter'] ?? '';
+            
+            // زر عرض الكل
+            $allActive = empty($selectedLetter) ? 'active' : '';
+            ?>
+            <a href="index.php" class="btn btn-outline-primary <?php echo $allActive; ?>">
+                الكل
+            </a>
+            
+            <?php foreach ($availableLetters as $letter): ?>
+                <?php $active = ($selectedLetter === $letter) ? 'active' : ''; ?>
+                <a href="index.php?letter=<?php echo urlencode($letter); ?>" 
+                   class="btn btn-outline-primary <?php echo $active; ?>">
+                    <?php echo htmlspecialchars(strtoupper($letter)); ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
     <!-- شريط البحث -->
     <div class="row mb-4">
         <div class="col-md-6 mx-auto">
@@ -400,18 +461,23 @@ header.position-relative.overflow-hidden.py-16 {
     </div>
 
     <?php
-    // معالجة البحث والترتيب
+    // تعديل معالجة البحث والفلترة
     $search = $_GET['search'] ?? '';
+    $letter = $_GET['letter'] ?? '';
+
     if (!empty($search)) {
-        // إذا كان هناك بحث، استخدم نتائج البحث
         $searchResults = searchLanguages($search, $page, $perPage);
         $languages = $searchResults['results'];
         $totalLanguages = $searchResults['total'];
-        $totalPages = ceil($totalLanguages / $perPage);
+    } elseif (!empty($letter) && isValidLetter($letter)) {
+        $letterResults = getLanguagesByLetter($letter, $page, $perPage);
+        $languages = $letterResults['results'];
+        $totalLanguages = $letterResults['total'];
     } else {
-        // إذا لم يكن هناك بحث، استخدم الترتيب حسب عدد الدروس
         $languages = getLanguagesPaginated($page, $perPage, true);
+        $totalLanguages = getTotalLanguagesCount();
     }
+    $totalPages = ceil($totalLanguages / $perPage);
     
     if (empty($languages) && !empty($search)): ?>
         <div class="alert alert-info text-center">
