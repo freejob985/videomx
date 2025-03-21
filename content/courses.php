@@ -48,7 +48,14 @@ require_once 'includes/header.php';
                 </h4>
             </div>
 
-            
+            <!-- إضافة زر الأقسام -->
+            <div class="col-auto">
+                <a href="/sections/index.php?language_id=<?php echo (int)$language_id; ?>" class="btn btn-outline-primary">
+                    <i class="fas fa-list-alt me-1"></i>
+                    الأقسام
+                </a>
+            </div>
+
             <!-- زر الإعدادات على اليسار -->
             <div class="col-auto">
                 <a href="/add/add.php" class="btn btn-outline-primary">
