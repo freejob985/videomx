@@ -1,8 +1,63 @@
-    </main>
+</main>
     <!-- Footer Section -->
     <footer class="bg-gradient-to-r from-blue-800 to-blue-900 text-white py-8">
         <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- قسم اللغات المتوفرة -->
+                <?php
+                /**
+                 * إعداد الاتصال بقاعدة البيانات
+                 * يتم استخدام PDO للاتصال الآمن بقاعدة البيانات
+                 */
+                try {
+                    $pdo = new PDO(
+                        "mysql:host=localhost;dbname=courses_db;charset=utf8",
+                        "root",
+                        "",
+                        [
+                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+                        ]
+                    );
+
+                    /**
+                     * استعلام لجلب اللغات التي لديها دروس
+                     * يتم جلب اللغات التي لديها دروس فقط من خلال الربط مع جدول الدروس
+                     */
+                    $stmt = $pdo->query("
+                        SELECT DISTINCT l.id, l.name, COUNT(les.id) as lesson_count 
+                        FROM languages l 
+                        INNER JOIN lessons les ON les.course_id IN (
+                            SELECT id FROM courses WHERE language_id = l.id
+                        )
+                        GROUP BY l.id, l.name
+                        ORDER BY l.name ASC
+                    ");
+                    $languages = $stmt->fetchAll();
+                } catch(PDOException $e) {
+                    // تسجيل الخطأ بشكل آمن
+                    error_log("Database Error: " . $e->getMessage());
+                    $languages = []; // مصفوفة فارغة في حالة حدوث خطأ
+                }
+                ?>
+                <div>
+                    <h5 class="text-xl font-bold mb-4">اللغات المتوفرة</h5>
+                    <div class="grid grid-cols-2 gap-2">
+                        <?php foreach ($languages as $language): ?>
+                            <a href="http://videomx.com/sections/index.php?language_id=<?php echo htmlspecialchars($language['id']); ?>" 
+                               class="hover:text-blue-200 flex items-center bg-blue-700 bg-opacity-30 rounded-lg p-2 transition-all hover:bg-opacity-50"
+                               title="عرض دروس <?php echo htmlspecialchars($language['name']); ?>">
+                                <i class="fas fa-code ml-2"></i>
+                                <span><?php echo htmlspecialchars($language['name']); ?></span>
+                                <span class="mr-auto text-xs bg-blue-600 px-2 py-1 rounded-full" 
+                                      title="عدد الدروس المتوفرة">
+                                    <?php echo $language['lesson_count']; ?>
+                                </span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
                 <!-- قسم روابط الدروس -->
                 <div>
                     <h5 class="text-xl font-bold mb-4">عرض الدروس</h5>
@@ -115,4 +170,4 @@
         });
     </script>
 </body>
-</html> 
+</html>

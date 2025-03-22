@@ -509,6 +509,98 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             0% { transform: translate(-50%, -50%) rotate(0deg); }
             100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
+
+        /* تحديث أنماط القائمة السياقية */
+        .context-menu {
+            position: absolute; /* تغيير من fixed إلى absolute */
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border-radius: 8px;
+            padding: 10px 0;
+            min-width: 200px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            transform: translateY(10px);
+            right: 100%; /* إضافة جديدة */
+            top: 0; /* إضافة جديدة */
+            margin-right: 10px; /* إضافة جديدة */
+        }
+
+        .context-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .context-menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(-5px);
+        }
+
+        .context-menu-item i {
+            margin-left: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .context-menu-header {
+            padding: 10px 20px;
+            color: #fff;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 5px;
+        }
+
+        .context-menu-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin: 5px 0;
+        }
+
+        /* تحديث أنماط الروابط في Footer */
+        .footer-links li {
+            position: relative;
+        }
+
+        .footer-links li a {
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links li:hover .context-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .footer-links li a:hover {
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+        }
+
+        /* تحسين مظهر الأيقونات */
+        .footer-links li a i {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .footer-links li:hover a i {
+            transform: scale(1.2);
+        }
     </style>
 </head>
 <body>
@@ -773,58 +865,171 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </ul>
                 </div>
 
-                <!-- قسم الروابط الرئيسية -->
+                <!-- تحديث قسم الروابط الرئيسية في Footer -->
                 <div class="col-md-4 mb-4">
                     <h5 class="text-white mb-4">روابط رئيسية</h5>
                     <ul class="list-unstyled footer-links">
-                        <li class="mb-2">
+                        <li class="position-relative mb-2">
                             <a href="http://videomx.com/content/languages.php" class="text-white">
                                 <i class="fas fa-globe me-2"></i>
                                 اللغات
                             </a>
+                            <div class="context-menu">
+                                <div class="context-menu-header">
+                                    <i class="fas fa-globe me-2"></i>
+                                    قائمة اللغات
+                                </div>
+                                <a href="http://videomx.com/content/languages.php?type=programming" class="context-menu-item">
+                                    <i class="fas fa-code"></i>
+                                    لغات البرمجة
+                                </a>
+                                <a href="http://videomx.com/content/languages.php?type=spoken" class="context-menu-item">
+                                    <i class="fas fa-comments"></i>
+                                    اللغات المحكية
+                                </a>
+                            </div>
                         </li>
-                        <li class="mb-2">
+                        
+                        <li class="position-relative mb-2">
                             <a href="index.php" class="text-white">
                                 <i class="fas fa-home me-2"></i>
                                 الرئيسية
                             </a>
+                            <div class="context-menu">
+                                <div class="context-menu-header">
+                                    <i class="fas fa-home me-2"></i>
+                                    القائمة الرئيسية
+                                </div>
+                                <a href="index.php?view=grid" class="context-menu-item">
+                                    <i class="fas fa-th-large"></i>
+                                    عرض الشبكة
+                                </a>
+                                <a href="index.php?view=list" class="context-menu-item">
+                                    <i class="fas fa-list"></i>
+                                    عرض القائمة
+                                </a>
+                            </div>
                         </li>
-                        <li>
+                        
+                        <li class="position-relative mb-2">
                             <a href="http://videomx.com/content/index.php" class="text-white">
                                 <i class="fas fa-graduation-cap me-2"></i>
                                 الدورات
                             </a>
+                            <div class="context-menu">
+                                <div class="context-menu-header">
+                                    <i class="fas fa-graduation-cap me-2"></i>
+                                    قائمة الدورات
+                                </div>
+                                <a href="http://videomx.com/content/index.php?type=latest" class="context-menu-item">
+                                    <i class="fas fa-clock"></i>
+                                    أحدث الدورات
+                                </a>
+                                <a href="http://videomx.com/content/index.php?type=popular" class="context-menu-item">
+                                    <i class="fas fa-fire"></i>
+                                    الدورات الشائعة
+                                </a>
+                                <div class="context-menu-divider"></div>
+                                <a href="http://videomx.com/content/index.php?type=free" class="context-menu-item">
+                                    <i class="fas fa-gift"></i>
+                                    الدورات المجانية
+                                </a>
+                            </div>
                         </li>
-                        <li>
+                        
+                        <li class="position-relative mb-2">
                             <a href="http://videomx.com/review/" class="text-white">
                                 <i class="fas fa-star me-2"></i>
                                 المراجعة
                             </a>
+                            <div class="context-menu">
+                                <div class="context-menu-header">
+                                    <i class="fas fa-star me-2"></i>
+                                    قائمة المراجعة
+                                </div>
+                                <a href="http://videomx.com/review/?type=daily" class="context-menu-item">
+                                    <i class="fas fa-calendar-day"></i>
+                                    المراجعة اليومية
+                                </a>
+                                <a href="http://videomx.com/review/?type=weekly" class="context-menu-item">
+                                    <i class="fas fa-calendar-week"></i>
+                                    المراجعة الأسبوعية
+                                </a>
+                            </div>
                         </li>
-                        <li>
+                        
+                        <li class="position-relative">
                             <a href="http://videomx.com/content/search/" class="text-white">
                                 <i class="fas fa-search me-2"></i>
                                 البحث
                             </a>
+                            <div class="context-menu">
+                                <div class="context-menu-header">
+                                    <i class="fas fa-search me-2"></i>
+                                    خيارات البحث
+                                </div>
+                                <a href="http://videomx.com/content/search/?type=advanced" class="context-menu-item">
+                                    <i class="fas fa-sliders-h"></i>
+                                    بحث متقدم
+                                </a>
+                                <a href="http://videomx.com/content/search/tags.php" class="context-menu-item">
+                                    <i class="fas fa-tags"></i>
+                                    البحث بالوسوم
+                                </a>
+                            </div>
                         </li>
                     </ul>
                 </div>
 
-                <!-- قسم الروابط الإضافية -->
+                <!-- تحديث قسم الروابط الإضافية -->
                 <div class="col-md-4 mb-4">
                     <h5 class="text-white mb-4">روابط إضافية</h5>
                     <ul class="list-unstyled footer-links">
-                        <li class="mb-2">
+                        <li class="position-relative mb-2">
                             <a href="http://videomx.com/add/add.php" class="text-white">
                                 <i class="fas fa-cog me-2"></i>
                                 الإعدادات
                             </a>
+                            <div class="context-menu">
+                                <div class="context-menu-header">
+                                    <i class="fas fa-cog me-2"></i>
+                                    الإعدادات
+                                </div>
+                                <a href="http://videomx.com/add/profile.php" class="context-menu-item">
+                                    <i class="fas fa-user"></i>
+                                    الملف الشخصي
+                                </a>
+                                <a href="http://videomx.com/add/preferences.php" class="context-menu-item">
+                                    <i class="fas fa-sliders-h"></i>
+                                    تفضيلات العرض
+                                </a>
+                                <div class="context-menu-divider"></div>
+                                <a href="http://videomx.com/add/notifications.php" class="context-menu-item">
+                                    <i class="fas fa-bell"></i>
+                                    الإشعارات
+                                </a>
+                            </div>
                         </li>
-                        <li>
+                        
+                        <li class="position-relative">
                             <a href="http://videomx.com/GBT/" class="text-white ai-link">
                                 <i class="fas fa-robot me-2"></i>
                                 المساعد الذكي
                             </a>
+                            <div class="context-menu">
+                                <div class="context-menu-header">
+                                    <i class="fas fa-robot me-2"></i>
+                                    المساعد الذكي
+                                </div>
+                                <a href="http://videomx.com/GBT/chat.php" class="context-menu-item">
+                                    <i class="fas fa-comments"></i>
+                                    المحادثة الذكية
+                                </a>
+                                <a href="http://videomx.com/GBT/help.php" class="context-menu-item">
+                                    <i class="fas fa-question-circle"></i>
+                                    المساعدة
+                                </a>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -927,6 +1132,64 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
         }).showToast();
     }
+    </script>
+
+    <!-- تحديث سكريبت JavaScript -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuItems = document.querySelectorAll('.footer-links li');
+        
+        menuItems.forEach(item => {
+            const link = item.querySelector('a');
+            const menu = item.querySelector('.context-menu');
+            
+            if (menu) {
+                // تحديث موقع القائمة عند تحريك المؤشر
+                item.addEventListener('mouseenter', function(e) {
+                    const rect = link.getBoundingClientRect();
+                    const spaceRight = window.innerWidth - rect.right;
+                    const spaceLeft = rect.left;
+                    
+                    // تحديد موقع القائمة بناءً على المساحة المتاحة
+                    if (spaceRight >= 200) { // عرض القائمة
+                        menu.style.left = `${rect.right}px`;
+                        menu.style.right = 'auto';
+                    } else if (spaceLeft >= 200) {
+                        menu.style.right = `${window.innerWidth - rect.left}px`;
+                        menu.style.left = 'auto';
+                    } else {
+                        // إذا لم تكن هناك مساحة كافية على الجانبين، ضع القائمة فوق الرابط
+                        menu.style.left = `${rect.left}px`;
+                        menu.style.top = `${rect.top - menu.offsetHeight}px`;
+                    }
+                    
+                    menu.style.top = `${rect.top}px`;
+                    menu.classList.add('show');
+                });
+                
+                // إخفاء القائمة عند مغادرة المؤشر
+                item.addEventListener('mouseleave', function() {
+                    menu.classList.remove('show');
+                });
+                
+                // منع إخفاء القائمة عند النقر عليها
+                menu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+                
+                // إضافة تأثيرات حركية للروابط داخل القائمة
+                menu.querySelectorAll('.context-menu-item').forEach(menuItem => {
+                    menuItem.addEventListener('mouseenter', function() {
+                        this.querySelector('i').style.transform = 'scale(1.2)';
+                    });
+                    
+                    menuItem.addEventListener('mouseleave', function() {
+                        this.querySelector('i').style.transform = 'scale(1)';
+                    });
+                });
+            }
+        });
+    });
     </script>
 </body>
 </html>
