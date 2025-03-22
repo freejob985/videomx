@@ -1067,6 +1067,28 @@ function updateProgressBar() {
         progressBar.setAttribute('aria-valuemax', totalLessons);
     }
 }
+
+/**
+ * فتح صفحة تفاصيل الدرس في تاب جديد
+ * @param {number} lessonId - معرف الدرس
+ * @param {string} lessonTitle - عنوان الدرس
+ */
+function confirmLessonRedirect(lessonId, lessonTitle) {
+    Swal.fire({
+        title: lessonTitle,
+        text: 'هل تريد الانتقال إلى صفحة الدرس؟',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'نعم',
+        cancelButtonText: 'لا',
+        confirmButtonColor: '#28a745'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // فتح الرابط في تاب جديد
+            window.open(`/content/views/lesson-details.php?id=${lessonId}`, '_blank');
+        }
+    });
+}
 </script>
 
 <style>
