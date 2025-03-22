@@ -69,16 +69,16 @@ require_once '../includes/header.php';
                         <div class="section-description">
                             <?php 
                             $description = $section['description'];
-                            $shortDesc = mb_substr($description, 0, 100);
-                            $hasMore = mb_strlen($description) > 100;
+                            $shortDesc = strip_tags(mb_substr($description, 0, 100));
+                            $hasMore = mb_strlen(strip_tags($description)) > 100;
                             ?>
-                            <p class="card-text">
-                                <span class="short-desc"><?php echo htmlspecialchars($shortDesc); ?></span>
+                            <div class="description-content">
+                                <div class="short-desc"><?php echo $shortDesc; ?></div>
                                 <?php if ($hasMore): ?>
-                                    <span class="full-desc d-none"><?php echo htmlspecialchars($description); ?></span>
+                                    <div class="full-desc d-none"><?php echo $description; ?></div>
                                     <a href="#" class="toggle-desc text-primary" data-show-more="true">المزيد...</a>
                                 <?php endif; ?>
-                            </p>
+                            </div>
                         </div>
                         
                         <div class="mt-3">

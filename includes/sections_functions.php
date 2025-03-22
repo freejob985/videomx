@@ -229,19 +229,63 @@ function updateLessonSection($lesson_id, $section_id) {
  * تحديث حالة إكمال الدرس
  * @param int $lesson_id معرف الدرس
  * @param bool $completed حالة الإكمال
- * @return bool
+ * @return bool نجاح العملية
  */
 function updateLessonCompletion($lesson_id, $completed) {
     global $db;
     try {
         $stmt = $db->prepare("
             UPDATE lessons 
-            SET completed = ?, updated_at = CURRENT_TIMESTAMP 
+            SET completed = ?, 
+                completion_date = ?
             WHERE id = ?
         ");
-        return $stmt->execute([$completed ? 1 : 0, $lesson_id]);
-    } catch (PDOException $e) {
+        
+        $completion_date = $completed ? date('Y-m-d H:i:s') : null;
+        return $stmt->execute([$completed, $completion_date, $lesson_id]);
+    } catch (Exception $e) {
         error_log($e->getMessage());
-        throw new Exception('حدث خطأ أثناء تحديث حالة الدرس');
+        return false;
+    }
+}
+
+/**
+ * جلب ملاحظات الدرس
+ * @param int $lesson_id معرف الدرس
+ * @return array ملاحظات الدرس
+ */
+function getLessonNotes($lesson_id) {
+    global $db;
+    try {
+        $stmt = $db->prepare("
+            SELECT * FROM lesson_notes 
+            WHERE lesson_id = ? 
+            ORDER BY created_at DESC
+        ");
+        $stmt->execute([$lesson_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * إضافة ملاحظة جديدة للدرس
+ * @param int $lesson_id معرف الدرس
+ * @param string $content محتوى الملاحظة
+ * @return bool نجاح العملية
+ */
+function addLessonNote($lesson_id, $content) {
+    global $db;
+    try {
+        $stmt = $db->prepare("
+            INSERT INTO lesson_notes (lesson_id, content, created_at)
+            VALUES (?, ?, CURRENT_TIMESTAMP)
+        ");
+        return $stmt->execute([$lesson_id, $content]);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        return false;
     }
 } 
