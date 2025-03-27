@@ -98,9 +98,9 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
         
         .navbar {
-            background: linear-gradient(45deg, #1e3c72 0%, #2a5298 100%);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #2193b0, #6dd5ed);
             padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
         .card {
@@ -512,20 +512,23 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         /* تحديث أنماط القائمة السياقية */
         .context-menu {
-            position: absolute; /* تغيير من fixed إلى absolute */
+            position: fixed;
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             border-radius: 8px;
             padding: 10px 0;
             min-width: 200px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 1000;
+            z-index: 9999;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
-            transform: translateY(10px);
-            right: 100%; /* إضافة جديدة */
-            top: 0; /* إضافة جديدة */
-            margin-right: 10px; /* إضافة جديدة */
+            transition: all 0.2s ease;
+            transform: scale(0.8);
+        }
+
+        .context-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
         }
 
         .context-menu-item {
@@ -539,13 +542,18 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         .context-menu-item:hover {
             background: rgba(255,255,255,0.1);
-            transform: translateX(-5px);
+            padding-right: 25px;
         }
 
         .context-menu-item i {
             margin-left: 10px;
             width: 20px;
             text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .context-menu-item:hover i {
+            transform: scale(1.2);
         }
 
         .context-menu-header {
@@ -562,44 +570,55 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             margin: 5px 0;
         }
 
-        /* تحديث أنماط الروابط في Footer */
-        .footer-links li {
-            position: relative;
-        }
-
-        .footer-links li a {
-            display: flex;
-            align-items: center;
-            padding: 8px 15px;
-            color: white;
-            text-decoration: none;
+        /* تنسيق روابط القائمة */
+        .navbar-nav .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
             transition: all 0.3s ease;
         }
 
-        .footer-links li:hover .context-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .footer-links li a:hover {
+        .navbar-nav .nav-link:hover {
+            color: #fff !important;
             background: rgba(255,255,255,0.1);
-            border-radius: 6px;
+            transform: translateY(-2px);
         }
 
-        /* تحسين مظهر الأيقونات */
-        .footer-links li a i {
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 10px;
+        /* تنسيق الأيقونات */
+        .navbar-nav .nav-link i {
             transition: transform 0.3s ease;
         }
 
-        .footer-links li:hover a i {
+        .navbar-nav .nav-link:hover i {
             transform: scale(1.2);
+        }
+
+        /* تنسيق زر التبديل */
+        .navbar-toggler {
+            border: none;
+            padding: 0.5rem;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+            outline: none;
+        }
+
+        /* تحسينات للشاشات الصغيرة */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                background: rgba(255,255,255,0.1);
+                padding: 1rem;
+                border-radius: 10px;
+                margin-top: 1rem;
+            }
+            
+            .navbar-nav .nav-link {
+                padding: 0.75rem 1rem;
+                margin: 0.25rem 0;
+            }
         }
     </style>
 </head>
@@ -611,34 +630,76 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <i class="fas fa-graduation-cap me-2"></i>
                 منصة الكورسات التعليمية
             </a>
+            
+            <!-- إضافة زر التبديل للقائمة في الشاشات الصغيرة -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- محتوى القائمة -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <!-- القائمة الرئيسية -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <!-- روابط رئيسية -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="http://videomx.com/content/languages.php">
+                            <i class="fas fa-globe ms-1"></i>
+                            اللغات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home ms-1"></i>
+                            الرئيسية
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="http://videomx.com/content/index.php">
+                            <i class="fas fa-graduation-cap ms-1"></i>
+                            الدورات
+                        </a>
+                    </li>
+
+                    <!-- روابط إضافية -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="http://videomx.com/add/add.php">
+                            <i class="fas fa-cog ms-1"></i>
+                            الإعدادات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="http://videomx.com/GBT/">
+                            <i class="fas fa-robot ms-1"></i>
+                            المساعد الذكي
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
 
-    <!-- بعد navbar مباشرة -->
+    <!-- إضافة فلتر اللغات -->
     <div class="container mb-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="language-filters">
-                    <a href="index.php" class="language-btn <?php echo !isset($_GET['language_id']) && !isset($_GET['favorites']) ? 'active' : ''; ?>">
-                        <span class="btn-label">جميع الكورسات</span>
-                        <span class="count-badge"><?php 
-                            $totalLessons = array_sum(array_column($languages, 'lessons_count')); 
-                            echo $totalLessons;
-                        ?></span>
-                    </a>
-                    <a href="?favorites=1" class="language-btn <?php echo isset($_GET['favorites']) && $_GET['favorites'] == '1' ? 'active' : ''; ?>">
-                        <i class="fas fa-heart me-1"></i>
-                        <span class="btn-label">المفضلة</span>
-                    </a>
-                    <?php foreach($languages as $language): ?>
-                        <a href="?language_id=<?php echo $language['id']; ?>" 
-                           class="language-btn <?php echo (isset($_GET['language_id']) && $_GET['language_id'] == $language['id']) ? 'active' : ''; ?>">
-                            <span class="btn-label"><?php echo htmlspecialchars($language['name']); ?></span>
-                            <span class="count-badge"><?php echo $language['lessons_count']; ?></span>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
-            </div>
+        <div class="language-filters">
+            <a href="?favorites=1" class="language-btn <?php echo (isset($_GET['favorites']) && $_GET['favorites'] == '1') ? 'active' : ''; ?>">
+                <i class="fas fa-heart me-2"></i>
+                المفضلة
+            </a>
+            
+            <a href="?" class="language-btn <?php echo (!isset($_GET['language_id']) && !isset($_GET['favorites'])) ? 'active' : ''; ?>">
+                <i class="fas fa-globe me-2"></i>
+                جميع اللغات
+                <span class="count-badge"><?php echo count($courses); ?></span>
+            </a>
+            
+            <?php foreach($languages as $language): ?>
+                <a href="?language_id=<?php echo $language['id']; ?>" 
+                   class="language-btn <?php echo (isset($_GET['language_id']) && $_GET['language_id'] == $language['id']) ? 'active' : ''; ?>">
+                    <i class="fas fa-code me-2"></i>
+                    <?php echo htmlspecialchars($language['name']); ?>
+                    <span class="count-badge"><?php echo $language['courses_count']; ?></span>
+                </a>
+            <?php endforeach; ?>
         </div>
     </div>
 
@@ -937,7 +998,7 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </div>
                         </li>
                         
-                        <li class="position-relative mb-2">
+                        <li class="position-relative">
                             <a href="http://videomx.com/review/" class="text-white">
                                 <i class="fas fa-star me-2"></i>
                                 المراجعة
@@ -1146,38 +1207,46 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             if (menu) {
                 // تحديث موقع القائمة عند تحريك المؤشر
                 item.addEventListener('mouseenter', function(e) {
-                    const rect = link.getBoundingClientRect();
-                    const spaceRight = window.innerWidth - rect.right;
-                    const spaceLeft = rect.left;
+                    const rect = item.getBoundingClientRect();
+                    const windowWidth = window.innerWidth;
+                    const menuWidth = menu.offsetWidth;
                     
-                    // تحديد موقع القائمة بناءً على المساحة المتاحة
-                    if (spaceRight >= 200) { // عرض القائمة
-                        menu.style.left = `${rect.right}px`;
+                    // حساب المساحة المتاحة
+                    const spaceOnRight = windowWidth - (rect.right + menuWidth);
+                    const spaceOnLeft = rect.left - menuWidth;
+                    
+                    // تحديد موقع القائمة
+                    if (spaceOnRight > 0) {
+                        // عرض القائمة على اليمين
+                        menu.style.left = '100%';
                         menu.style.right = 'auto';
-                    } else if (spaceLeft >= 200) {
-                        menu.style.right = `${window.innerWidth - rect.left}px`;
+                        menu.style.top = '0';
+                    } else if (spaceOnLeft > 0) {
+                        // عرض القائمة على اليسار
+                        menu.style.right = '100%';
                         menu.style.left = 'auto';
+                        menu.style.top = '0';
                     } else {
-                        // إذا لم تكن هناك مساحة كافية على الجانبين، ضع القائمة فوق الرابط
-                        menu.style.left = `${rect.left}px`;
-                        menu.style.top = `${rect.top - menu.offsetHeight}px`;
+                        // عرض القائمة أعلى العنصر
+                        menu.style.left = '0';
+                        menu.style.right = 'auto';
+                        menu.style.top = '-100%';
                     }
                     
-                    menu.style.top = `${rect.top}px`;
                     menu.classList.add('show');
                 });
                 
-                // إخفاء القائمة عند مغادرة المؤشر
+                // إخفاء القائمة
                 item.addEventListener('mouseleave', function() {
                     menu.classList.remove('show');
                 });
                 
-                // منع إخفاء القائمة عند النقر عليها
+                // منع إخفاء القائمة عند النقر
                 menu.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
                 
-                // إضافة تأثيرات حركية للروابط داخل القائمة
+                // تأثيرات حركية للروابط
                 menu.querySelectorAll('.context-menu-item').forEach(menuItem => {
                     menuItem.addEventListener('mouseenter', function() {
                         this.querySelector('i').style.transform = 'scale(1.2)';
@@ -1188,6 +1257,111 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     });
                 });
             }
+        });
+    });
+    </script>
+
+    <!-- إضافة قائمة السياق العامة في نهاية body قبل السكريبتات -->
+    <div id="globalContextMenu" class="context-menu">
+        <div class="context-menu-header">
+            <i class="fas fa-bars me-2"></i>
+            القائمة الرئيسية
+        </div>
+        <a href="http://videomx.com/content/languages.php" class="context-menu-item">
+            <i class="fas fa-globe"></i>
+            اللغات
+        </a>
+        <a href="/" class="context-menu-item">
+            <i class="fas fa-home"></i>
+            الرئيسية
+        </a>
+        <a href="http://videomx.com/content/index.php" class="context-menu-item">
+            <i class="fas fa-graduation-cap"></i>
+            الدورات
+        </a>
+        <div class="context-menu-divider"></div>
+        <a href="http://videomx.com/add/add.php" class="context-menu-item">
+            <i class="fas fa-cog"></i>
+            الإعدادات
+        </a>
+        <a href="http://videomx.com/GBT/" class="context-menu-item">
+            <i class="fas fa-robot"></i>
+            المساعد الذكي
+        </a>
+    </div>
+
+    <!-- إضافة JavaScript جديد -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const contextMenu = document.getElementById('globalContextMenu');
+        
+        // منع ظهور قائمة السياق الافتراضية للمتصفح
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            
+            // تحديث موقع القائمة
+            const x = e.clientX;
+            const y = e.clientY;
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const menuWidth = contextMenu.offsetWidth;
+            const menuHeight = contextMenu.offsetHeight;
+            
+            // التأكد من أن القائمة تظهر داخل حدود الشاشة
+            let menuX = x;
+            let menuY = y;
+            
+            if (x + menuWidth > windowWidth) {
+                menuX = windowWidth - menuWidth;
+            }
+            
+            if (y + menuHeight > windowHeight) {
+                menuY = windowHeight - menuHeight;
+            }
+            
+            // تعيين موقع القائمة
+            contextMenu.style.left = `${menuX}px`;
+            contextMenu.style.top = `${menuY}px`;
+            
+            // إظهار القائمة
+            contextMenu.classList.add('show');
+        });
+        
+        // إخفاء القائمة عند النقر في أي مكان
+        document.addEventListener('click', function() {
+            contextMenu.classList.remove('show');
+        });
+        
+        // منع إخفاء القائمة عند النقر عليها
+        contextMenu.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        // إضافة تأثيرات حركية للروابط
+        contextMenu.querySelectorAll('.context-menu-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.querySelector('i').style.transform = 'scale(1.2)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.querySelector('i').style.transform = 'scale(1)';
+            });
+        });
+        
+        // إخفاء القائمة عند التمرير
+        let scrollTimeout;
+        window.addEventListener('scroll', function() {
+            contextMenu.classList.remove('show');
+            
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(function() {
+                contextMenu.classList.remove('show');
+            }, 100);
+        });
+        
+        // إخفاء القائمة عند تغيير حجم النافذة
+        window.addEventListener('resize', function() {
+            contextMenu.classList.remove('show');
         });
     });
     </script>
