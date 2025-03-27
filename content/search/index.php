@@ -178,32 +178,84 @@
         
         /* Tags Styling */
         .lesson-card .tags-container {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 12px;
+            background: rgba(0,0,0,0.02);
+            border-radius: 8px;
+            margin-top: 15px;
         }
         
         .lesson-card .tag {
-            color: #fff !important;
-            background: linear-gradient(135deg, #6c757d, #495057);
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #fff;
+            background: linear-gradient(135deg, #0d6efd, #0a58ca);
+            box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
             border: none;
-            margin: 0.25rem;
-            padding: 0.35rem 0.75rem;
-            border-radius: 50rem;
-            font-size: 0.875rem;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-decoration: none;
         }
         
         .lesson-card .tag i {
-            margin-right: 0.5rem;
             font-size: 0.75rem;
-            opacity: 0.9;
+            margin-right: 6px;
+            opacity: 0.8;
         }
         
         .lesson-card .tag:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+        }
+        
+        /* تنويع ألوان التاجات */
+        .lesson-card .tag:nth-child(3n+1) {
+            background: linear-gradient(135deg, #0dcaf0, #0b96b4);
+        }
+        
+        .lesson-card .tag:nth-child(3n+2) {
+            background: linear-gradient(135deg, #6f42c1, #59359a);
+        }
+        
+        .lesson-card .tag:nth-child(3n+3) {
+            background: linear-gradient(135deg, #fd7e14, #ca6510);
+        }
+        
+        /* تأثير النص عند التحويم */
+        .lesson-card .tag:hover {
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        /* تنسيق حاوية التاجات في حالة عدم وجود تاجات */
+        .lesson-card .tags-container:empty {
+            display: none;
+        }
+        
+        /* تنسيق رسالة عدم وجود تاجات */
+        .lesson-card .no-tags {
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+            width: 100%;
+            padding: 10px;
+        }
+        
+        /* تحسين عرض التاجات في الشاشات الصغيرة */
+        @media (max-width: 576px) {
+            .lesson-card .tags-container {
+                padding: 8px;
+            }
+            
+            .lesson-card .tag {
+                padding: 4px 10px;
+                font-size: 0.8rem;
+            }
         }
         
         /* Status Badges */

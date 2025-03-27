@@ -470,11 +470,18 @@ function displayLessonsGrid(lessons) {
 
         // Generate tags HTML only if tags exist
         const tags = lesson.tags ? lesson.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
-        const tagsBadges = tags.length > 0 ? tags.map(tag => 
-            `<span class="tag">
-                <i class="fas fa-tag"></i>${tag}
-            </span>`
-        ).join('') : '';
+        const tagsHtml = tags.length > 0 ? 
+            `<div class="tags-container">
+                ${tags.map(tag => 
+                    `<span class="tag" title="${tag}">
+                        <i class="fas fa-tag"></i>
+                        <span class="tag-text">${tag}</span>
+                     </span>`
+                ).join('')}
+            </div>` : 
+            `<div class="tags-container">
+                <span class="no-tags">لا توجد وسوم</span>
+            </div>`;
 
         // Determine card classes based on lesson status
         const cardClasses = [
@@ -516,9 +523,7 @@ function displayLessonsGrid(lessons) {
                             ${lesson.completed ? '<span class="status-badge completed"><i class="fas fa-check"></i>مكتمل</span>' : ''}
                         </div>
                         
-                        <div class="tags-container">
-                            ${tagsBadges || '<small class="text-muted">لا توجد وسوم</small>'}
-                        </div>
+                        ${tagsHtml}
                     </div>
                     <div class="card-footer">
                         <button onclick="openLessonModal(${lesson.id})" class="btn btn-primary w-100">
