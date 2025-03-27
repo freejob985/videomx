@@ -174,6 +174,9 @@ $(document).ready(function() {
 
     // Load languages on page load
     loadLanguages(1);
+
+    // تهيئة السليكت بوكس الخاص باللغات
+    initializeLanguageFilter();
 });
 
 // Global variables
@@ -185,32 +188,96 @@ let lessonsList = [];
 let currentLessonLanguageId = null;
 
 function loadFilters() {
-    // Load languages
-    $.get('api/get_filters.php?type=languages', function(data) {
-        $('#languageFilter').html('<option value="">اختر اللغة</option>');
-        data.forEach(lang => {
-            $('#languageFilter').append(`<option value="${lang.id}">${lang.name}</option>`);
-        });
-    });
+    // تهيئة فلتر اللغات
+    initializeLanguageFilter();
 
-    // Load statuses
-    $.get('api/get_filters.php?type=statuses', function(data) {
-        $('#statusFilter').html('<option value="">اختر الحالة</option>');
-        data.forEach(status => {
-            $('#statusFilter').append(`<option value="${status.id}">${status.name}</option>`);
-        });
-    });
+    // تهيئة فلتر الحالات مع القيمة الافتراضية
+    updateStatusFilter();
 
-    // Load sections
+    // تحميل الأقسام والكورسات
     loadSections();
-
-    // Load courses
     loadCourses();
 
-    // Handle language change to update sections and courses
+    // إضافة مستمعي الأحداث
     $('#languageFilter').on('change', function() {
+        const languageId = $(this).val();
+        updateStatusFilter(languageId);
         loadSections();
         loadCourses();
+    });
+}
+
+function initializeLanguageFilter() {
+    $.ajax({
+        url: 'api/get_languages.php',
+        method: 'GET',
+        data: { 
+            per_page: 100 // زيادة عدد العناصر لعرض كل اللغات
+        },
+        dataType: 'json',
+        success: function(response) {
+            if (response && response.languages) {
+                const languages = response.languages;
+                const languageSelect = $('#languageFilter');
+                
+                // إضافة خيار افتراضي
+                languageSelect.html('<option value="">اختر اللغة</option>');
+                
+                // إضافة اللغات المتاحة
+                languages.forEach(language => {
+                    languageSelect.append(`<option value="${language.id}">${language.name}</option>`);
+                });
+
+                // إضافة حدث تغيير اللغة
+                languageSelect.off('change').on('change', function() {
+                    const selectedLanguageId = $(this).val();
+                    updateStatusFilter(selectedLanguageId);
+                });
+            } else {
+                console.error('Invalid response format:', response);
+                toastr.error('تنسيق الاستجابة غير صالح');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading languages:', error);
+            toastr.error('حدث خطأ أثناء تحميل اللغات');
+        }
+    });
+}
+
+function updateStatusFilter(languageId) {
+    const statusSelect = $('#statusFilter');
+    
+    // إظهار حالة التحميل
+    statusSelect.prop('disabled', true);
+    
+    $.ajax({
+        url: 'api/get_statuses.php',
+        method: 'GET',
+        dataType: 'json',
+        data: languageId ? { language_id: languageId } : {},
+        success: function(response) {
+            if (response && response.status === 'success' && Array.isArray(response.data)) {
+                // إضافة خيار افتراضي
+                statusSelect.html('<option value="">اختر الحالة</option>');
+                
+                // إضافة الحالات المتاحة
+                response.data.forEach(status => {
+                    statusSelect.append(`<option value="${status.id}">${status.name}</option>`);
+                });
+            } else {
+                console.error('Invalid response format:', response);
+                toastr.error('تنسيق الاستجابة غير صالح');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading statuses:', error);
+            toastr.error('حدث خطأ أثناء تحميل الحالات');
+        },
+        complete: function() {
+            // إلغاء حالة التحميل
+            statusSelect.prop('disabled', false);
+        }
     });
 }
 
@@ -218,11 +285,24 @@ function loadSections() {
     const languageId = $('#languageFilter').val();
     const url = 'api/get_sections.php?language_id=' + (languageId ? languageId : '');
     
-    $.get(url, function(data) {
-        $('#sectionFilter').html('<option value="">اختر القسم</option>');
-        data.sections.forEach(section => {
-            $('#sectionFilter').append(`<option value="${section.id}">${section.name}</option>`);
-        });
+    $.ajax({
+        url: url,
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            const sectionFilter = $('#sectionFilter');
+            sectionFilter.html('<option value="">اختر القسم</option>');
+            
+            if (data && data.sections && Array.isArray(data.sections)) {
+                data.sections.forEach(section => {
+                    sectionFilter.append(`<option value="${section.id}">${section.name}</option>`);
+                });
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading sections:', error);
+            toastr.error('حدث خطأ أثناء تحميل الأقسام');
+        }
     });
 }
 
@@ -230,11 +310,24 @@ function loadCourses() {
     const languageId = $('#languageFilter').val();
     const url = 'api/get_filters.php?type=courses' + (languageId ? `&language_id=${languageId}` : '');
     
-    $.get(url, function(data) {
-        $('#courseFilter').html('<option value="">اختر الكورس</option>');
-        data.forEach(course => {
-            $('#courseFilter').append(`<option value="${course.id}">${course.name}</option>`);
-        });
+    $.ajax({
+        url: url,
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            const courseFilter = $('#courseFilter');
+            courseFilter.html('<option value="">اختر الكورس</option>');
+            
+            if (Array.isArray(data)) {
+                data.forEach(course => {
+                    courseFilter.append(`<option value="${course.id}">${course.name}</option>`);
+                });
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading courses:', error);
+            toastr.error('حدث خطأ أثناء تحميل الكورسات');
+        }
     });
 }
 
@@ -1025,7 +1118,10 @@ function loadLanguages(page = 1) {
     
     $.ajax({
         url: 'api/get_languages.php',
-        data: { page: page, per_page: 6 },
+        data: { 
+            page: page,
+            per_page: 100 // زيادة عدد العناصر لعرض كل اللغات
+        },
         method: 'GET',
         success: function(response) {
             list.empty();
@@ -1037,7 +1133,7 @@ function loadLanguages(page = 1) {
             
             response.languages.forEach(function(language) {
                 const languageCard = `
-                    <div class="col-md-6 col-lg-4">
+                    <div class="col-md-6 col-lg-4 mb-3">
                         <a href="http://videomx.com/content/courses.php?language_id=${language.id}" 
                            class="language-card d-block text-decoration-none">
                             <div class="language-info">
@@ -1045,10 +1141,10 @@ function loadLanguages(page = 1) {
                                     <div class="language-icon">
                                         <i class="${language.icon || 'fas fa-code'}"></i>
                                     </div>
-                                    <h6 class="language-name">${language.name}</h6>
+                                    <h6 class="language-name mb-0">${language.name}</h6>
                                 </div>
                                 <span class="badge">
-                                    ${language.lessons_count}
+                                    ${language.lessons_count || 0}
                                 </span>
                             </div>
                             <div class="language-stats">
@@ -1063,11 +1159,17 @@ function loadLanguages(page = 1) {
                 list.append(languageCard);
             });
             
-            // Update pagination
-            updateLanguagesPagination(response.current_page, response.total_pages);
+            // تحديث الترقيم فقط إذا كان هناك صفحات متعددة
+            if (response.total_pages > 1) {
+                updateLanguagesPagination(response.current_page, response.total_pages);
+            } else {
+                $('#languagesPagination').empty(); // إخفاء الترقيم إذا كانت صفحة واحدة
+            }
         },
-        error: function() {
+        error: function(xhr, status, error) {
+            console.error('Error loading languages:', error);
             toastr.error('حدث خطأ أثناء تحميل اللغات');
+            list.html('<div class="col-12 text-center text-white-50">حدث خطأ أثناء تحميل اللغات</div>');
         }
     });
 }
