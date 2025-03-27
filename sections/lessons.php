@@ -644,6 +644,25 @@ require_once '../includes/header.php';
 .analyzing .fa-brain {
     animation: brainPulse 1s infinite;
 }
+
+/* تنسيق زر Grok */
+.btn-grok {
+    background: linear-gradient(45deg, #6b21a8, #8b5cf6);
+}
+
+.btn-grok i {
+    color: white;
+    font-size: 1.2rem;
+}
+
+.btn-grok:hover {
+    background: linear-gradient(45deg, #5b1e94, #7c4ddb);
+}
+
+/* تأثير نبض للأيقونة */
+.btn-grok:hover i {
+    animation: pulse 1s infinite;
+}
 </style>
 
 <!-- معلومات القسم -->
@@ -691,8 +710,15 @@ require_once '../includes/header.php';
                     قائمة الدروس
                 </h4>
                 <div class="header-actions">
-                    <button class="btn btn-primary me-2" onclick="analyzeSectionContent()">
+                    <!-- إضافة زر تحليل Grok -->
+                    <button class="btn btn-grok me-2" onclick="analyzeSectionWithGrok()">
                         <i class="fas fa-brain me-1"></i>
+                        تحليل القسم مع Grok
+                    </button>
+                    
+                    <!-- الأزرار الموجودة مسبقاً -->
+                    <button class="btn btn-primary me-2" onclick="analyzeSectionContent()">
+                        <i class="fas fa-robot me-1"></i>
                         تحليل محتوى القسم
                     </button>
                     
@@ -770,6 +796,13 @@ require_once '../includes/header.php';
                                                 onclick="askGPTAboutLesson('<?php echo htmlspecialchars($lesson['title']); ?>', '<?php echo htmlspecialchars($section['name']); ?>', '<?php echo htmlspecialchars($language['name']); ?>')"
                                                 title="اسأل ChatGPT">
                                             <i class="fas fa-robot"></i>
+                                        </button>
+                                        
+                                        <!-- إضافة زر Grok -->
+                                        <button class="action-btn btn-grok" 
+                                                onclick="askGrokAboutLesson('<?php echo htmlspecialchars($lesson['title']); ?>', '<?php echo htmlspecialchars($section['name']); ?>', '<?php echo htmlspecialchars($language['name']); ?>')"
+                                                title="اسأل Grok">
+                                            <i class="fas fa-brain"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -1283,6 +1316,110 @@ ${finalExamplesText}
 
 الرجاء تقديم الإجابة بشكل منظم ومفصل مع التركيز على الجانب العملي والتطبيقي.`;
 }
+
+/**
+ * توجيه سؤال حول الدرس إلى Grok
+ * @param {string} lessonTitle - عنوان الدرس
+ * @param {string} sectionName - اسم القسم
+ * @param {string} languageName - اسم اللغة
+ */
+function askGrokAboutLesson(lessonTitle, sectionName, languageName) {
+    const question = formatGrokQuestion(
+        `شرح درس: ${lessonTitle}`,
+        `هذا الدرس جزء من قسم ${sectionName} في لغة ${languageName}`
+    );
+    directGrokLink(question);
+}
+
+/**
+ * تنسيق السؤال لـ Grok
+ * @param {string} title - عنوان السؤال
+ * @param {string} context - سياق السؤال
+ * @returns {string} السؤال المنسق
+ */
+function formatGrokQuestion(title, context) {
+    return `${title}
+
+السياق:
+${context}
+
+المطلوب:
+1. شرح مفصل للموضوع
+2. أمثلة عملية
+3. أفضل الممارسات
+4. مصادر إضافية للتعلم`;
+}
+
+/**
+ * تحليل القسم بالكامل باستخدام Grok
+ */
+function analyzeSectionWithGrok() {
+    // جمع معلومات القسم
+    const sectionName = document.querySelector('.section-info h3').textContent.trim();
+    const sectionDescription = document.querySelector('.section-description').textContent.trim();
+    
+    // جمع معلومات الدروس
+    const lessons = [];
+    document.querySelectorAll('tr[data-lesson-id]').forEach(row => {
+        const title = row.querySelector('.lesson-name').textContent.trim();
+        const course = row.querySelector('.course-badge').textContent.trim();
+        lessons.push({ title, course });
+    });
+    
+    // إنشاء السؤال الشامل
+    const question = formatGrokSectionAnalysis(sectionName, sectionDescription, lessons);
+    
+    // عرض مؤشر التحميل
+    Swal.fire({
+        title: 'جاري تحضير التحليل...',
+        text: 'سيتم فتح Grok مع تحليل شامل للقسم',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'متابعة',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#6b21a8'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            directGrokLink(question);
+        }
+    });
+}
+
+/**
+ * تنسيق تحليل القسم لـ Grok
+ * @param {string} sectionName - اسم القسم
+ * @param {string} sectionDescription - وصف القسم
+ * @param {Array} lessons - مصفوفة الدروس
+ * @returns {string} السؤال المنسق
+ */
+function formatGrokSectionAnalysis(sectionName, sectionDescription, lessons) {
+    const lessonsText = lessons.map((lesson, index) => 
+        `${index + 1}. ${lesson.title} (${lesson.course})`
+    ).join('\n');
+
+    return `تحليل شامل للقسم: ${sectionName}
+
+وصف القسم:
+${sectionDescription}
+
+قائمة الدروس:
+${lessonsText}
+
+المطلوب:
+1. تحليل شامل لمحتوى القسم وأهدافه التعليمية
+2. شرح تفصيلي لكل درس مع:
+   - المفاهيم الأساسية
+   - أمثلة عملية وأكواد توضيحية
+   - حالات استخدام واقعية
+   - تمارين وتطبيقات عملية
+3. مشروع متكامل يجمع مفاهيم جميع الدروس
+4. خريطة تعلم مقترحة لدراسة القسم
+5. مصادر إضافية للتعلم والتعمق
+6. نصائح وأفضل الممارسات
+7. اقتراحات لمشاريع إضافية للتطبيق العملي
+
+الرجاء تقديم الإجابة بشكل منظم ومفصل مع التركيز على الجانب العملي والتطبيقي.`;
+}
 </script>
 
 <style>
@@ -1311,3 +1448,6 @@ ${finalExamplesText}
 
 <!-- إضافة سكربت ChatGPT في نهاية الملف قبل إغلاق body -->
 <script src="/GBT/js/chatgpt-link.js"></script>
+
+<!-- إضافة سكربت Grok -->
+<script src="/GBT/js/grok-link.js"></script>
