@@ -1,0 +1,90 @@
+/* قائمة السياق الرئيسية */
+.context-menu {
+    position: fixed;
+    z-index: 10000;
+    width: 200px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    padding: 8px 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.98) translateY(-5px);
+    transform-origin: top left;
+    transition: all 0.2s ease;
+}
+
+.context-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1) translateY(0);
+}
+
+/* عناصر القائمة */
+.context-menu-item {
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    color: #2c3e50;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.context-menu-item:hover {
+    background: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+}
+
+.context-menu-item i {
+    width: 24px;
+    margin-left: 8px;
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+.context-menu-item:hover i {
+    color: #0d6efd;
+}
+
+/* خط فاصل */
+.context-menu-divider {
+    height: 1px;
+    background: rgba(0,0,0,0.1);
+    margin: 4px 0;
+}
+
+/* تأثيرات حركية */
+.context-menu-item.ai-link {
+    position: relative;
+    overflow: hidden;
+}
+
+.context-menu-item.ai-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, #0d6efd, #0a58ca);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.context-menu-item.ai-link:hover::after {
+    transform: scaleX(1);
+}
+
+/* تحسينات للهواتف */
+@media (max-width: 768px) {
+    .context-menu {
+        width: 180px;
+    }
+    
+    .context-menu-item {
+        padding: 10px 16px;
+        font-size: 1rem;
+    }
+} 
