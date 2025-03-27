@@ -1279,6 +1279,10 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <i class="fas fa-graduation-cap"></i>
             الدورات
         </a>
+        <a href="http://videomx.com/content/search/" class="context-menu-item">
+            <i class="fas fa-search"></i>
+            البحث
+        </a>
         <div class="context-menu-divider"></div>
         <a href="http://videomx.com/add/add.php" class="context-menu-item">
             <i class="fas fa-cog"></i>
