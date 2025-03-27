@@ -319,9 +319,86 @@ ${description || 'لا يوجد وصف متاح'}
 `;
 }
 
-// للتوافق مع الكود القديم
+/**
+ * نظام توجيه الأسئلة إلى ChatGPT
+ * ============================
+ * هذا النظام يسمح بإرسال الأسئلة مباشرة إلى ChatGPT وإدخالها تلقائياً
+ */
+
+/**
+ * توجيه السؤال إلى ChatGPT
+ * @param {string} question - السؤال المراد إرساله
+ */
 function directChatGPTLink(question) {
-    directAILink(question, 'CHATGPT');
+    if (!question) {
+        console.error('لم يتم تحديد سؤال');
+        return;
+    }
+    
+    // تشفير السؤال للاستخدام في URL
+    const encodedQuestion = encodeURIComponent(question);
+    
+    // فتح ChatGPT في نافذة جديدة
+    const chatWindow = window.open('https://chat.openai.com/', '_blank');
+    
+    // عدد محاولات البحث عن مربع النص
+    let attempts = 0;
+    const maxAttempts = 50;
+    
+    // دالة لمراقبة تحميل الصفحة وإضافة السؤال
+    const waitForPageLoad = () => {
+        const interval = setInterval(() => {
+            attempts++;
+            
+            try {
+                if (chatWindow.document.readyState === 'complete') {
+                    // البحث عن مربع النص
+                    const textArea = chatWindow.document.querySelector('textarea[placeholder="Send a message"]') || 
+                                   chatWindow.document.querySelector('textarea[data-id="root"]');
+                    
+                    if (textArea) {
+                        // فك تشفير السؤال
+                        const decodedQuestion = decodeURIComponent(encodedQuestion);
+                        
+                        // إضافة السؤال
+                        textArea.value = decodedQuestion;
+                        
+                        // تحديث قيمة مربع النص
+                        textArea.dispatchEvent(new Event('input', { bubbles: true }));
+                        textArea.dispatchEvent(new Event('change', { bubbles: true }));
+                        
+                        // تفعيل مربع النص
+                        textArea.focus();
+                        
+                        // محاكاة ضغط Enter
+                        const enterEvent = new KeyboardEvent('keydown', {
+                            key: 'Enter',
+                            code: 'Enter',
+                            keyCode: 13,
+                            which: 13,
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        textArea.dispatchEvent(enterEvent);
+                        
+                        clearInterval(interval);
+                        console.log('تم إضافة السؤال بنجاح');
+                    } else if (attempts >= maxAttempts) {
+                        clearInterval(interval);
+                        console.error('فشل في إضافة السؤال بعد عدة محاولات');
+                    }
+                }
+            } catch (error) {
+                clearInterval(interval);
+                console.error('خطأ في الوصول للصفحة:', error);
+            }
+        }, 300);
+    };
+
+    // إضافة مستمع لحدث تحميل الصفحة
+    if (chatWindow) {
+        chatWindow.addEventListener('load', waitForPageLoad);
+    }
 }
 
 // تصدير الدوال للاستخدام العام

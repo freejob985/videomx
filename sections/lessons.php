@@ -587,6 +587,31 @@ require_once '../includes/header.php';
         transform: translateY(-10px);
     }
 }
+
+/* تنسيق زر الذكاء الاصطناعي */
+.btn-ai {
+    background: linear-gradient(45deg, #10a37f, #1a7f64);
+}
+
+.btn-ai i {
+    color: white;
+    font-size: 1.2rem;
+}
+
+.btn-ai:hover {
+    background: linear-gradient(45deg, #0d8c6a, #156751);
+}
+
+/* إضافة تأثير نبض للأيقونة */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.btn-ai:hover i {
+    animation: pulse 1s infinite;
+}
 </style>
 
 <!-- معلومات القسم -->
@@ -701,6 +726,13 @@ require_once '../includes/header.php';
                                                 onclick="toggleLessonCompletion(<?php echo $lesson['id']; ?>, this)"
                                                 title="<?php echo $lesson['completed'] ? 'تم الإكمال' : 'تحديد كمكتمل'; ?>">
                                             <i class="fas <?php echo $lesson['completed'] ? 'fa-check-circle' : 'fa-circle'; ?>"></i>
+                                        </button>
+                                        
+                                        <!-- إضافة زر ChatGPT -->
+                                        <button class="action-btn btn-ai" 
+                                                onclick="askGPTAboutLesson('<?php echo htmlspecialchars($lesson['title']); ?>', '<?php echo htmlspecialchars($section['name']); ?>', '<?php echo htmlspecialchars($language['name']); ?>')"
+                                                title="اسأل ChatGPT">
+                                            <i class="fas fa-robot"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -1089,6 +1121,40 @@ function confirmLessonRedirect(lessonId, lessonTitle) {
         }
     });
 }
+
+/**
+ * توجيه سؤال حول الدرس إلى ChatGPT
+ * @param {string} lessonTitle - عنوان الدرس
+ * @param {string} sectionName - اسم القسم
+ * @param {string} languageName - اسم اللغة
+ */
+function askGPTAboutLesson(lessonTitle, sectionName, languageName) {
+    const question = formatLessonQuestion(lessonTitle, sectionName, languageName);
+    directChatGPTLink(question);
+}
+
+/**
+ * تنسيق السؤال للدرس
+ * @param {string} lessonTitle - عنوان الدرس
+ * @param {string} sectionName - اسم القسم
+ * @param {string} languageName - اسم اللغة
+ * @returns {string} السؤال المنسق
+ */
+function formatLessonQuestion(lessonTitle, sectionName, languageName) {
+    return `اريد شرح تفصيلي للدرس: ${lessonTitle}
+الموجود في قسم: ${sectionName}
+في لغة: ${languageName}
+
+المطلوب:
+1. شرح مفصل للمفاهيم الأساسية في هذا الدرس
+2. أمثلة عملية وأكواد توضيحية
+3. تطبيقات وحالات استخدام
+4. مشاريع صغيرة للتدريب
+5. أفضل الممارسات والنصائح
+6. مصادر إضافية للتعلم
+
+الرجاء تقديم الشرح بأسلوب سهل وواضح مع التركيز على الجانب العملي.`;
+}
 </script>
 
 <style>
@@ -1114,3 +1180,6 @@ function confirmLessonRedirect(lessonId, lessonTitle) {
     }
 }
 </style>
+
+<!-- إضافة سكربت ChatGPT في نهاية الملف قبل إغلاق body -->
+<script src="/GBT/js/chatgpt-link.js"></script>
