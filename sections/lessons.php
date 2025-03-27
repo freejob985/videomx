@@ -612,6 +612,38 @@ require_once '../includes/header.php';
 .btn-ai:hover i {
     animation: pulse 1s infinite;
 }
+
+/* تنسيق زر تحليل القسم */
+.btn-primary {
+    background: linear-gradient(135deg, #2193b0, #6dd5ed);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #1c7a94, #5bb8d0);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-primary:active {
+    transform: translateY(-1px);
+}
+
+.btn-primary i {
+    font-size: 1.1rem;
+}
+
+/* تأثير نبض للأيقونة عند التحليل */
+@keyframes brainPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.analyzing .fa-brain {
+    animation: brainPulse 1s infinite;
+}
 </style>
 
 <!-- معلومات القسم -->
@@ -659,6 +691,11 @@ require_once '../includes/header.php';
                     قائمة الدروس
                 </h4>
                 <div class="header-actions">
+                    <button class="btn btn-primary me-2" onclick="analyzeSectionContent()">
+                        <i class="fas fa-brain me-1"></i>
+                        تحليل محتوى القسم
+                    </button>
+                    
                     <button class="btn btn-light" onclick="window.print()">
                         <i class="fas fa-print me-1"></i>
                         طباعة
@@ -1154,6 +1191,97 @@ function formatLessonQuestion(lessonTitle, sectionName, languageName) {
 6. مصادر إضافية للتعلم
 
 الرجاء تقديم الشرح بأسلوب سهل وواضح مع التركيز على الجانب العملي.`;
+}
+
+/**
+ * تحليل محتوى القسم بالكامل باستخدام ChatGPT
+ * يقوم بإنشاء سؤال شامل عن القسم ودروسه
+ */
+function analyzeSectionContent() {
+    // جمع معلومات القسم
+    const sectionName = document.querySelector('.section-info h3').textContent.trim();
+    const sectionDescription = document.querySelector('.section-description').textContent.trim();
+    
+    // جمع معلومات الدروس
+    const lessons = [];
+    document.querySelectorAll('tr[data-lesson-id]').forEach(row => {
+        const title = row.querySelector('.lesson-name').textContent.trim();
+        const course = row.querySelector('.course-badge').textContent.trim();
+        lessons.push({ title, course });
+    });
+    
+    // إنشاء السؤال الشامل
+    const question = formatSectionAnalysisQuestion(sectionName, sectionDescription, lessons);
+    
+    // عرض مؤشر التحميل
+    Swal.fire({
+        title: 'جاري تحضير التحليل...',
+        text: 'سيتم فتح ChatGPT مع تحليل شامل للقسم',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'متابعة',
+        cancelButtonText: 'إلغاء'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            directChatGPTLink(question);
+        }
+    });
+}
+
+/**
+ * تنسيق السؤال الشامل للقسم
+ * @param {string} sectionName - اسم القسم
+ * @param {string} sectionDescription - وصف القسم
+ * @param {Array} lessons - مصفوفة الدروس
+ * @returns {string} السؤال المنسق
+ */
+function formatSectionAnalysisQuestion(sectionName, sectionDescription, lessons) {
+    const lessonsText = lessons.map((lesson, index) => 
+        `${index + 1}. ${lesson.title} (${lesson.course})`
+    ).join('\n');
+
+    const examplesText = lessons.map((lesson, index) => 
+        `**مثال ${index + 1}: ${lesson.title}**
+
+${lesson.exampleCode}
+
+**شرح:**
+${lesson.exampleExplanation}
+`).join('\n');
+
+    const finalExamplesText = `**أمثلة ختامية:**
+
+${examplesText}
+
+**شرح:**
+هذه الأمثلة الختامية تهدف إلى توضيح كيفية تطبيق المفاهيم الأساسية لكل درس في سياقات عملية. من خلال دراسة هذه الأمثلة، يمكنك الحصول على فهم أعمق لكيفية تطبيق ما تعلمته في القسم.`;
+
+    return `أريد تحليلاً شاملاً للقسم التالي:
+
+اسم القسم: ${sectionName}
+
+وصف القسم:
+${sectionDescription}
+
+قائمة الدروس:
+${lessonsText}
+
+المطلوب:
+1. تحليل شامل لمحتوى القسم وأهدافه التعليمية
+2. شرح تفصيلي لكل درس مع:
+   - المفاهيم الأساسية
+   - أمثلة عملية وأكواد توضيحية
+   - حالات استخدام واقعية
+   - تمارين وتطبيقات عملية
+3. مشروع متكامل يجمع مفاهيم جميع الدروس
+4. خريطة تعلم مقترحة لدراسة القسم
+5. مصادر إضافية للتعلم والتعمق
+6. نصائح وأفضل الممارسات
+7. اقتراحات لمشاريع إضافية للتطبيق العملي
+
+${finalExamplesText}
+
+الرجاء تقديم الإجابة بشكل منظم ومفصل مع التركيز على الجانب العملي والتطبيقي.`;
 }
 </script>
 
