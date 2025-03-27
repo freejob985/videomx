@@ -177,6 +177,12 @@ $(document).ready(function() {
 
     // تهيئة السليكت بوكس الخاص باللغات
     initializeLanguageFilter();
+
+    // مستمع حدث تغيير اللغة
+    $('#languageFilter').on('change', function() {
+        const languageId = $(this).val();
+        updateFilters(languageId);
+    });
 });
 
 // Global variables
@@ -191,47 +197,174 @@ function loadFilters() {
     // تهيئة فلتر اللغات
     initializeLanguageFilter();
 
-    // تهيئة فلتر الحالات مع القيمة الافتراضية
-    updateStatusFilter();
-
-    // تحميل الأقسام والكورسات
-    loadSections();
-    loadCourses();
-
-    // إضافة مستمعي الأحداث
+    // إضافة مستمع حدث واحد لتغيير اللغة
     $('#languageFilter').on('change', function() {
         const languageId = $(this).val();
-        updateStatusFilter(languageId);
-        loadSections();
-        loadCourses();
+        if (languageId) {
+            // تحديث جميع الفلاتر المعتمدة على اللغة في وقت واحد
+            Promise.all([
+                updateStatusFilter(languageId),
+                updateSections(languageId),
+                updateCourses(languageId)
+            ]).then(() => {
+                // إعادة تحميل الدروس بعد تحديث جميع الفلاتر
+                loadLessons(1);
+            }).catch(error => {
+                console.error('خطأ في تحديث الفلاتر:', error);
+                toastr.error('حدث خطأ أثناء تحديث الفلاتر');
+            });
+        } else {
+            // إفراغ جميع الفلاتر عند عدم اختيار لغة
+            resetFilters();
+        }
     });
 }
 
+/**
+ * إعادة تعيين جميع الفلاتر إلى الحالة الافتراضية
+ */
+function resetFilters() {
+    $('#statusFilter').html('<option value="">اختر الحالة</option>');
+    $('#sectionFilter').html('<option value="">اختر القسم</option>');
+    $('#courseFilter').html('<option value="">اختر الكورس</option>');
+    loadLessons(1);
+}
+
+/**
+ * تحديث فلتر الحالات
+ * @param {number} languageId - معرف اللغة
+ * @returns {Promise} وعد بإكمال التحديث
+ */
+function updateStatusFilter(languageId) {
+    return new Promise((resolve, reject) => {
+        const statusSelect = $('#statusFilter');
+        statusSelect.prop('disabled', true);
+
+        $.ajax({
+            url: 'api/get_statuses.php',
+            method: 'GET',
+            data: { language_id: languageId },
+            dataType: 'json',
+            success: function(response) {
+                if (response && response.status === 'success' && Array.isArray(response.data)) {
+                    statusSelect.html('<option value="">اختر الحالة</option>');
+                    response.data.forEach(status => {
+                        statusSelect.append(`<option value="${status.id}">${status.name}</option>`);
+                    });
+                    resolve();
+                } else {
+                    reject('تنسيق الاستجابة غير صالح');
+                }
+            },
+            error: function(xhr, status, error) {
+                reject(error);
+            },
+            complete: function() {
+                statusSelect.prop('disabled', false);
+            }
+        });
+    });
+}
+
+/**
+ * تحديث فلتر الأقسام
+ * @param {number} languageId - معرف اللغة
+ * @returns {Promise} وعد بإكمال التحديث
+ */
+function updateSections(languageId) {
+    return new Promise((resolve, reject) => {
+        const sectionSelect = $('#sectionFilter');
+        sectionSelect.prop('disabled', true);
+
+        $.ajax({
+            url: 'api/get_sections_by_language.php',
+            method: 'GET',
+            data: { language_id: languageId },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success && response.sections) {
+                    sectionSelect.html('<option value="">اختر القسم</option>');
+                    response.sections.forEach(section => {
+                        sectionSelect.append(
+                            $('<option>', {
+                                value: section.id,
+                                text: section.name,
+                                title: section.description || ''
+                            })
+                        );
+                    });
+                    resolve();
+                } else {
+                    reject(response.error || 'خطأ في جلب الأقسام');
+                }
+            },
+            error: function(xhr, status, error) {
+                reject(error);
+            },
+            complete: function() {
+                sectionSelect.prop('disabled', false);
+            }
+        });
+    });
+}
+
+/**
+ * تحديث فلتر الكورسات
+ * @param {number} languageId - معرف اللغة
+ * @returns {Promise} وعد بإكمال التحديث
+ */
+function updateCourses(languageId) {
+    return new Promise((resolve, reject) => {
+        const courseSelect = $('#courseFilter');
+        courseSelect.prop('disabled', true);
+
+        $.ajax({
+            url: 'api/get_courses_by_language.php',
+            method: 'GET',
+            data: { language_id: languageId },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success && response.courses) {
+                    courseSelect.html('<option value="">اختر الكورس</option>');
+                    response.courses.forEach(course => {
+                        courseSelect.append(
+                            $('<option>', {
+                                value: course.id,
+                                text: course.name
+                            })
+                        );
+                    });
+                    resolve();
+                } else {
+                    reject(response.error || 'خطأ في جلب الكورسات');
+                }
+            },
+            error: function(xhr, status, error) {
+                reject(error);
+            },
+            complete: function() {
+                courseSelect.prop('disabled', false);
+            }
+        });
+    });
+}
+
+// تحديث دالة initializeLanguageFilter لإزالة مستمع الحدث المكرر
 function initializeLanguageFilter() {
     $.ajax({
         url: 'api/get_languages.php',
         method: 'GET',
         data: { 
-            per_page: 100 // زيادة عدد العناصر لعرض كل اللغات
+            per_page: 100
         },
         dataType: 'json',
         success: function(response) {
             if (response && response.languages) {
-                const languages = response.languages;
                 const languageSelect = $('#languageFilter');
-                
-                // إضافة خيار افتراضي
                 languageSelect.html('<option value="">اختر اللغة</option>');
                 
-                // إضافة اللغات المتاحة
-                languages.forEach(language => {
+                response.languages.forEach(language => {
                     languageSelect.append(`<option value="${language.id}">${language.name}</option>`);
-                });
-
-                // إضافة حدث تغيير اللغة
-                languageSelect.off('change').on('change', function() {
-                    const selectedLanguageId = $(this).val();
-                    updateStatusFilter(selectedLanguageId);
                 });
             } else {
                 console.error('Invalid response format:', response);
@@ -241,42 +374,6 @@ function initializeLanguageFilter() {
         error: function(xhr, status, error) {
             console.error('Error loading languages:', error);
             toastr.error('حدث خطأ أثناء تحميل اللغات');
-        }
-    });
-}
-
-function updateStatusFilter(languageId) {
-    const statusSelect = $('#statusFilter');
-    
-    // إظهار حالة التحميل
-    statusSelect.prop('disabled', true);
-    
-    $.ajax({
-        url: 'api/get_statuses.php',
-        method: 'GET',
-        dataType: 'json',
-        data: languageId ? { language_id: languageId } : {},
-        success: function(response) {
-            if (response && response.status === 'success' && Array.isArray(response.data)) {
-                // إضافة خيار افتراضي
-                statusSelect.html('<option value="">اختر الحالة</option>');
-                
-                // إضافة الحالات المتاحة
-                response.data.forEach(status => {
-                    statusSelect.append(`<option value="${status.id}">${status.name}</option>`);
-                });
-            } else {
-                console.error('Invalid response format:', response);
-                toastr.error('تنسيق الاستجابة غير صالح');
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error loading statuses:', error);
-            toastr.error('حدث خطأ أثناء تحميل الحالات');
-        },
-        complete: function() {
-            // إلغاء حالة التحميل
-            statusSelect.prop('disabled', false);
         }
     });
 }
@@ -1323,4 +1420,94 @@ async function updateSection() {
         toastr.error(error.message || 'حدث خطأ أثناء تحديث القسم');
         console.error(error);
     }
+}
+
+/**
+ * تحديث قائمة الأقسام عند تغيير اللغة
+ * @param {number} languageId - معرف اللغة المحددة
+ */
+function updateSections(languageId) {
+    // إفراغ قائمة الأقسام
+    $('#sectionFilter').empty().append('<option value="">اختر القسم</option>');
+    
+    if (!languageId) return;
+
+    // جلب الأقسام من الخادم
+    $.ajax({
+        url: 'api/get_sections_by_language.php',
+        method: 'GET',
+        data: { language_id: languageId },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success && response.sections) {
+                // إضافة الأقسام إلى القائمة المنسدلة
+                response.sections.forEach(function(section) {
+                    $('#sectionFilter').append(
+                        $('<option>', {
+                            value: section.id,
+                            text: section.name,
+                            title: section.description || ''
+                        })
+                    );
+                });
+            } else {
+                console.error('خطأ في جلب الأقسام:', response.error);
+                toastr.error('حدث خطأ أثناء تحميل الأقسام');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('خطأ في الاتصال:', error);
+            toastr.error('حدث خطأ في الاتصال بالخادم');
+        }
+    });
+}
+
+/**
+ * تحديث قائمة الأقسام والكورسات عند تغيير اللغة
+ * @param {number} languageId - معرف اللغة المحددة
+ */
+function updateFilters(languageId) {
+    // تحديث الأقسام
+    updateSections(languageId);
+    // تحديث الكورسات
+    updateCourses(languageId);
+}
+
+/**
+ * تحديث قائمة الكورسات حسب اللغة المحددة
+ * @param {number} languageId - معرف اللغة المحددة
+ */
+function updateCourses(languageId) {
+    // إفراغ قائمة الكورسات
+    $('#courseFilter').empty().append('<option value="">اختر الكورس</option>');
+    
+    if (!languageId) return;
+
+    // جلب الكورسات من الخادم
+    $.ajax({
+        url: 'api/get_courses_by_language.php',
+        method: 'GET',
+        data: { language_id: languageId },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success && response.courses) {
+                // إضافة الكورسات إلى القائمة المنسدلة
+                response.courses.forEach(function(course) {
+                    $('#courseFilter').append(
+                        $('<option>', {
+                            value: course.id,
+                            text: course.name
+                        })
+                    );
+                });
+            } else {
+                console.error('خطأ في جلب الكورسات:', response.error);
+                toastr.error('حدث خطأ أثناء تحميل الكورسات');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('خطأ في الاتصال:', error);
+            toastr.error('حدث خطأ في الاتصال بالخادم');
+        }
+    });
 } 
