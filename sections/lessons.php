@@ -28,6 +28,9 @@ require_once '../includes/header.php';
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
+<!-- إضافة TinyMCE -->
+<script src="https://cdn.tiny.cloud/1/7e1mldkbut3yp4tyeob9lt5s57pb8wrb5fqbh11d6n782gm7/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
 <!-- شريط التنقل -->
 <div class="navigation-bar bg-light py-3 mb-4 border-bottom">
     <div class="container">
@@ -591,15 +594,21 @@ require_once '../includes/header.php';
 /* تنسيق زر الذكاء الاصطناعي */
 .btn-ai {
     background: linear-gradient(45deg, #10a37f, #1a7f64);
-}
-
-.btn-ai i {
     color: white;
-    font-size: 1.2rem;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
 .btn-ai:hover {
     background: linear-gradient(45deg, #0d8c6a, #156751);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-ai i {
+    font-size: 1.2rem;
 }
 
 /* إضافة تأثير نبض للأيقونة */
@@ -663,6 +672,29 @@ require_once '../includes/header.php';
 .btn-grok:hover i {
     animation: pulse 1s infinite;
 }
+
+/* تنسيق أزرار التحكم بالوصف */
+.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(220, 53, 69, 0.3);
+}
+
+.btn-outline-danger:active {
+    transform: translateY(-1px);
+}
+
+/* تنسيق أيقونة المسح */
+.btn-outline-danger i {
+    font-size: 0.9rem;
+}
 </style>
 
 <!-- معلومات القسم -->
@@ -672,9 +704,33 @@ require_once '../includes/header.php';
             <i class="fas fa-folder-open me-2"></i>
             <?php echo htmlspecialchars($section['name']); ?>
         </h3>
-        <div class="section-description mb-3">
-            <?php echo $section['description'] ?? ''; ?>
+        
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="flex-grow-1">
+                <?php if (!empty($section['description'])): ?>
+                    <div class="section-description">
+                        <?php echo $section['description']; ?>
+                    </div>
+                    <div class="mt-2">
+                        <button class="btn btn-outline-danger btn-sm" onclick="clearSectionDescription()">
+                            <i class="fas fa-trash-alt me-1"></i>
+                            مسح الوصف
+                        </button>
+                    </div>
+                <?php else: ?>
+                    <div class="text-muted">
+                        لا يوجد وصف للقسم
+                    </div>
+                    <div class="mt-2">
+                        <button class="btn btn-outline-primary btn-sm" onclick="editSectionDescription()">
+                            <i class="fas fa-edit me-1"></i>
+                            تحرير الوصف
+                        </button>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
+        
         <div class="section-stats">
             <div class="stat-item">
                 <i class="fas fa-book-open text-primary me-2"></i>
@@ -875,6 +931,34 @@ require_once '../includes/header.php';
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
                 <button type="button" class="btn btn-primary" onclick="updateSection()">حفظ التغييرات</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- موديول تحرير وصف القسم -->
+<div class="modal fade" id="editDescriptionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تحرير وصف القسم</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="sectionDescription" class="form-label">وصف القسم</label>
+                    <textarea id="sectionDescription" class="tinymce-editor"><?php echo $section['description'] ?? ''; ?></textarea>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <button class="btn btn-ai" onclick="getAIHelp()">
+                        <i class="fas fa-robot me-1"></i>
+                        مساعدة ChatGPT
+                    </button>
+                    <div>
+                        <button class="btn btn-secondary me-2" data-bs-dismiss="modal">إلغاء</button>
+                        <button class="btn btn-primary" onclick="saveSectionDescription()">حفظ التغييرات</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1415,6 +1499,329 @@ ${lessonsText}
 
 الرجاء تقديم الإجابة بشكل منظم ومفصل مع التركيز على الجانب العملي والتطبيقي.`;
 }
+
+/**
+ * دالة لإنشاء وصف للقسم باستخدام ChatGPT
+ * @param {string} sectionName - اسم القسم
+ * @param {string} languageName - اسم اللغة
+ */
+function generateSectionDescription(sectionName, languageName) {
+    // تشفير معلومات القسم واللغة
+    const encodedSection = encodeURIComponent(sectionName);
+    const encodedLanguage = encodeURIComponent(languageName);
+    const question = formatSectionQuestion(sectionName, languageName);
+    
+    // إنشاء رابط ChatGPT مع query string
+    const chatGPTUrl = 'https://chat.openai.com/?' + new URLSearchParams({
+        section: encodedSection,
+        language: encodedLanguage,
+        q: encodeURIComponent(question)
+    }).toString();
+    
+    // فتح نافذة ChatGPT
+    const chatWindow = window.open(chatGPTUrl, '_blank');
+    
+    // عدد محاولات البحث عن مربع النص
+    let attempts = 0;
+    const maxAttempts = 50;
+    
+    // دالة لمراقبة تحميل الصفحة وإضافة السؤال
+    const waitForPageLoad = () => {
+        const interval = setInterval(() => {
+            attempts++;
+            
+            try {
+                if (chatWindow.document.readyState === 'complete') {
+                    // البحث عن مربع النص
+                    const textArea = chatWindow.document.querySelector('textarea[placeholder="Send a message"]') || 
+                                   chatWindow.document.querySelector('textarea[data-id="root"]');
+                    
+                    if (textArea) {
+                        // فك تشفير السؤال
+                        const urlParams = new URLSearchParams(chatWindow.location.search);
+                        const urlQuestion = urlParams.get('q');
+                        
+                        if (urlQuestion) {
+                            const decodedQuestion = decodeURIComponent(urlQuestion);
+                            
+                            // إضافة السؤال
+                            textArea.value = decodedQuestion;
+                            
+                            // تحديث قيمة مربع النص
+                            textArea.dispatchEvent(new Event('input', { bubbles: true }));
+                            textArea.dispatchEvent(new Event('change', { bubbles: true }));
+                            
+                            // تفعيل مربع النص
+                            textArea.focus();
+                            
+                            // محاكاة ضغط Enter
+                            const enterEvent = new KeyboardEvent('keydown', {
+                                key: 'Enter',
+                                code: 'Enter',
+                                keyCode: 13,
+                                which: 13,
+                                bubbles: true,
+                                cancelable: true
+                            });
+                            textArea.dispatchEvent(enterEvent);
+                        }
+                        
+                        clearInterval(interval);
+                        console.log('تم إضافة السؤال بنجاح');
+                    } else if (attempts >= maxAttempts) {
+                        clearInterval(interval);
+                        console.error('فشل في إضافة السؤال بعد عدة محاولات');
+                    }
+                }
+            } catch (error) {
+                clearInterval(interval);
+                console.error('خطأ في الوصول للصفحة:', error);
+            }
+        }, 300);
+    };
+
+    // إضافة مستمع لحدث تحميل الصفحة
+    if (chatWindow) {
+        chatWindow.addEventListener('load', waitForPageLoad);
+    }
+}
+
+/**
+ * تنسيق السؤال لوصف القسم
+ * @param {string} sectionName - اسم القسم
+ * @param {string} languageName - اسم اللغة
+ * @returns {string} السؤال المنسق
+ */
+function formatSectionQuestion(sectionName, languageName) {
+    return `اريد وصف تفصيلي للقسم: ${sectionName} في لغة ${languageName}
+
+المطلوب:
+1. وصف مختصر للقسم في خمسة أسطر
+2. شرح المفاهيم الأساسية في هذا القسم
+3. أهداف تعليمية واضحة
+4. المتطلبات السابقة للقسم
+5. المخرجات المتوقعة بعد إكمال القسم
+6. أمثلة عملية وتطبيقية
+7. أفضل الممارسات والنصائح
+8. المصادر المفيدة لتعلم هذا القسم
+
+الرجاء تقديم الوصف بأسلوب سهل وواضح مع التركيز على الجانب العملي.`;
+}
+
+/**
+ * فتح موديول تحرير وصف القسم
+ */
+function editSectionDescription() {
+    const modal = new bootstrap.Modal(document.getElementById('editDescriptionModal'));
+    modal.show();
+}
+
+/**
+ * الحصول على مساعدة ChatGPT لكتابة الوصف
+ */
+function getAIHelp() {
+    const sectionName = '<?php echo addslashes($section['name']); ?>';
+    const languageName = '<?php echo addslashes($language['name']); ?>';
+    const currentDescription = tinymce.get('sectionDescription').getContent();
+    
+    // إنشاء السؤال
+    const question = `اريد تحسين وصف القسم التالي:
+
+اسم القسم: ${sectionName}
+اللغة: ${languageName}
+
+الوصف الحالي:
+${currentDescription || 'لا يوجد وصف حالي'}
+
+المطلوب:
+1. تحسين الوصف الحالي أو كتابة وصف جديد
+2. التركيز على النقاط التالية:
+    - المفاهيم الأساسية في القسم
+    - الأهداف التعليمية
+    - المتطلبات السابقة
+    - المخرجات المتوقعة
+3. جعل الوصف واضح ومفيد للمتعلمين
+
+ملاحظة: الرجاء تقديم الوصف فقط بدون أي مقدمات أو تعليقات إضافية.`;
+
+    // فتح ChatGPT في نافذة جديدة
+    window.open(`https://chat.openai.com/?q=${encodeURIComponent(question)}`, '_blank');
+}
+
+/**
+ * حفظ وصف القسم
+ */
+function saveSectionDescription() {
+    const description = tinymce.get('sectionDescription').getContent();
+    const sectionId = <?php echo $section_id; ?>;
+    
+    // عرض مؤشر التحميل
+    Swal.fire({
+        title: 'جاري الحفظ...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    // إرسال الطلب لتحديث الوصف
+    fetch('/sections/ajax/update_description.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            section_id: sectionId,
+            description: description
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const container = document.querySelector('.flex-grow-1');
+            if (description) {
+                container.innerHTML = `
+                    <div class="section-description">
+                        ${description}
+                    </div>
+                    <div class="mt-2">
+                        <button class="btn btn-outline-danger btn-sm" onclick="clearSectionDescription()">
+                            <i class="fas fa-trash-alt me-1"></i>
+                            مسح الوصف
+                        </button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="text-muted">
+                        لا يوجد وصف للقسم
+                    </div>
+                    <div class="mt-2">
+                        <button class="btn btn-outline-primary btn-sm" onclick="editSectionDescription()">
+                            <i class="fas fa-edit me-1"></i>
+                            تحرير الوصف
+                        </button>
+                    </div>
+                `;
+            }
+
+            // إغلاق الموديول
+            bootstrap.Modal.getInstance(document.getElementById('editDescriptionModal')).hide();
+
+            // عرض رسالة النجاح
+            Swal.fire({
+                icon: 'success',
+                title: 'تم الحفظ بنجاح',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        } else {
+            throw new Error(data.error || 'حدث خطأ أثناء الحفظ');
+        }
+    })
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: error.message
+        });
+    });
+}
+
+/**
+ * مسح وصف القسم
+ */
+function clearSectionDescription() {
+    Swal.fire({
+        title: 'تأكيد المسح',
+        text: 'هل أنت متأكد من مسح وصف القسم؟',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، امسح الوصف',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#dc3545'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const sectionId = <?php echo $section_id; ?>;
+            
+            // عرض مؤشر التحميل
+            Swal.fire({
+                title: 'جاري المسح...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch('/sections/ajax/update_description.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    section_id: sectionId,
+                    description: null
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const container = document.querySelector('.flex-grow-1');
+                    container.innerHTML = `
+                        <div class="text-muted">
+                            لا يوجد وصف للقسم
+                        </div>
+                        <div class="mt-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="editSectionDescription()">
+                                <i class="fas fa-edit me-1"></i>
+                                تحرير الوصف
+                            </button>
+                        </div>
+                    `;
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم مسح الوصف بنجاح',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } else {
+                    throw new Error(data.error || 'حدث خطأ أثناء مسح الوصف');
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: error.message
+                });
+            });
+        }
+    });
+}
+
+// تهيئة TinyMCE
+tinymce.init({
+    selector: '.tinymce-editor',
+    directionality: 'rtl',
+    language: 'ar',
+    height: 400,
+    plugins: [
+        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+        'insertdatetime', 'media', 'table', 'help', 'wordcount', 'directionality'
+    ],
+    toolbar: 'undo redo | formatselect | ' +
+        'bold italic backcolor | alignleft aligncenter ' +
+        'alignright alignjustify | bullist numlist outdent indent | ' +
+        'removeformat | ltr rtl | help',
+    content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial; font-size: 14px; }',
+    setup: function(editor) {
+        editor.on('change', function() {
+            editor.save(); // حفظ المحتوى في التيكست اريا
+        });
+    }
+});
 </script>
 
 <style>

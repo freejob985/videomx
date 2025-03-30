@@ -288,4 +288,77 @@ function addLessonNote($lesson_id, $content) {
         error_log($e->getMessage());
         return false;
     }
+}
+
+/**
+ * تحديث وصف القسم
+ * @param int $section_id معرف القسم
+ * @param string $description الوصف الجديد
+ * @return bool نجاح العملية
+ * @throws Exception في حالة حدوث خطأ
+ */
+function updateSectionDescription($section_id, $description) {
+    try {
+        global $db;
+        
+        // تنظيف وتحضير البيانات
+        $section_id = filter_var($section_id, FILTER_SANITIZE_NUMBER_INT);
+        $description = trim($description);
+        
+        // التحقق من وجود القسم
+        $stmt = $db->prepare("SELECT id FROM sections WHERE id = ?");
+        $stmt->execute([$section_id]);
+        if (!$stmt->fetch()) {
+            throw new Exception("القسم غير موجود");
+        }
+        
+        // تحديث الوصف
+        $stmt = $db->prepare("UPDATE sections SET description = ?, updated_at = NOW() WHERE id = ?");
+        $result = $stmt->execute([$description, $section_id]);
+        
+        if (!$result) {
+            throw new Exception("فشل تحديث وصف القسم");
+        }
+        
+        // تسجيل العملية في سجل النظام
+        logSystemActivity("تم تحديث وصف القسم رقم: " . $section_id);
+        
+        return true;
+    } catch (PDOException $e) {
+        // تسجيل الخطأ
+        logError("خطأ في تحديث وصف القسم: " . $e->getMessage());
+        throw new Exception("حدث خطأ أثناء تحديث وصف القسم");
+    }
+}
+
+/**
+ * تسجيل نشاط النظام
+ * @param string $activity وصف النشاط
+ */
+function logSystemActivity($activity) {
+    try {
+        global $db;
+        
+        $stmt = $db->prepare("INSERT INTO system_logs (activity, created_at) VALUES (?, NOW())");
+        $stmt->execute([$activity]);
+    } catch (PDOException $e) {
+        // تجاهل أخطاء التسجيل
+        error_log("خطأ في تسجيل النشاط: " . $e->getMessage());
+    }
+}
+
+/**
+ * تسجيل الأخطاء
+ * @param string $error وصف الخطأ
+ */
+function logError($error) {
+    try {
+        global $db;
+        
+        $stmt = $db->prepare("INSERT INTO error_logs (error_message, created_at) VALUES (?, NOW())");
+        $stmt->execute([$error]);
+    } catch (PDOException $e) {
+        // تسجيل في ملف السجل الافتراضي
+        error_log($error);
+    }
 } 
