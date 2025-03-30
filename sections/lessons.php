@@ -778,12 +778,7 @@ require_once '../includes/header.php';
                                                 title="نقل الدرس">
                                             <i class="fas fa-exchange-alt"></i>
                                         </button>
-                                        
-                                        <a href="/sections/edit_lesson.php?lesson_id=<?php echo $lesson['id']; ?>" 
-                                           class="action-btn btn-edit"
-                                           title="تعديل الدرس">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
+                            
                                         
                                         <button class="action-btn <?php echo $lesson['completed'] ? 'btn-complete' : 'btn-outline-success'; ?>"
                                                 onclick="toggleLessonCompletion(<?php echo $lesson['id']; ?>, this)"

@@ -225,6 +225,24 @@ include'../lesson-details/css.php';
                             <span class="d-none d-md-inline ms-1">ChatGPT</span>
                         </button>
 
+                        <!-- Grok Button -->
+                        <button class="btn btn-outline-secondary grok-link"
+                                data-title="<?php echo htmlspecialchars($lesson['title']); ?>"
+                                data-bs-toggle="tooltip"
+                                title="فتح في Grok">
+                            <i class="fas fa-brain"></i>
+                            <span class="d-none d-md-inline ms-1">Grok</span>
+                        </button>
+
+                        <!-- Gemini Button -->
+                        <button class="btn btn-outline-warning gemini-link"
+                                data-title="<?php echo htmlspecialchars($lesson['title']); ?>"
+                                data-bs-toggle="tooltip"
+                                title="فتح في Gemini">
+                            <i class="fas fa-brain"></i>
+                            <span class="d-none d-md-inline ms-1">Gemini</span>
+                        </button>
+
                         <!-- إضافة زر عرض الدروس -->
                         <a href="/content/lessons.php?course_id=<?php echo $lesson['course_id']; ?>" 
                            class="btn btn-outline-secondary"
@@ -934,6 +952,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<!-- قبل نهاية body، نضيف سكريبت Grok -->
+<script src="/content/assets/js/grok-link.js"></script>
+
+<!-- قبل نهاية body، نضيف سكريبت Fragments -->
+<script src="/content/assets/js/fragments-link.js"></script>
+
+<!-- قبل نهاية body، نضيف سكريبت Gemini -->
+<script src="/content/assets/js/gemini-link.js"></script>
 
 </body>
 </html>
