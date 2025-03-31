@@ -17,7 +17,12 @@ $stats = getCourseStats($language_id);
 $pageTitle = 'دورات ' . $language['name'];
 
 require_once 'includes/header.php';
+
+// إضافة ملفات القائمة السياقية
+
 ?>
+<link rel="stylesheet" href="/assets/css/contextMenu.css">
+<script src="/assets/js/contextMenu.js" defer></script>
 
 <!-- شريط التنقل العلوي -->
 <div class="navigation-bar bg-light py-3 mb-4 border-bottom">

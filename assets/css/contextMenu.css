@@ -1,0 +1,56 @@
+.custom-context-menu {
+    display: none;
+    position: fixed;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    min-width: 200px;
+    padding: 8px 0;
+    direction: rtl;
+}
+
+.custom-context-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.custom-context-menu li {
+    padding: 8px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.custom-context-menu li:hover {
+    background-color: #f0f0f0;
+}
+
+.custom-context-menu i {
+    margin-left: 12px;
+    width: 20px;
+    color: #007bff;
+}
+
+.custom-context-menu span {
+    color: #333;
+}
+
+/* تحريك القائمة */
+@keyframes menuFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.custom-context-menu {
+    animation: menuFadeIn 0.1s ease-out;
+    transform-origin: top left;
+} 
