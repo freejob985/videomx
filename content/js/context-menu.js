@@ -14,45 +14,39 @@ class ContextMenu {
         // إنشاء عنصر القائمة
         this.menu = document.createElement('div');
         this.menu.className = 'context-menu';
-        this.menu.setAttribute('dir', 'rtl'); // إضافة اتجاه RTL
-        document.body.appendChild(this.menu);
-
+        
         // إضافة عناصر القائمة
         this.menu.innerHTML = `
-            <a href="/content/languages.php" class="context-menu-item">
-                <i class="fas fa-language"></i>
-                <span>اللغات</span>
-            </a>
             <a href="/content/index.php" class="context-menu-item">
                 <i class="fas fa-home"></i>
-                <span>الرئيسية</span>
+                الرئيسية
             </a>
-            <a href="/content/index.php" class="context-menu-item">
-                <i class="fas fa-graduation-cap"></i>
-                <span>الدورات</span>
-            </a>
-            <a href="/" class="context-menu-item">
-                <i class="fas fa-door-open"></i>
-                <span>البوابة</span>
+            <a href="/content/languages.php" class="context-menu-item">
+                <i class="fas fa-globe"></i>
+                اللغات
             </a>
             <div class="context-menu-divider"></div>
             <a href="/content/search/" class="context-menu-item">
                 <i class="fas fa-search"></i>
-                <span>البحث</span>
-            </a>
-            <a href="/add/add.php" class="context-menu-item">
-                <i class="fas fa-cog"></i>
-                <span>الإعدادات</span>
+                البحث
             </a>
             <a href="/review/" class="context-menu-item">
-                <i class="fas fa-check-double"></i>
-                <span>المراجعة</span>
+                <i class="fas fa-clock"></i>
+                المراجعة
             </a>
-            <a href="/GBT/" class="context-menu-item">
+            <div class="context-menu-divider"></div>
+            <a href="/add/add.php" class="context-menu-item">
+                <i class="fas fa-cog"></i>
+                الإعدادات
+            </a>
+            <a href="http://videomx.com/GBT/" class="context-menu-item" target="_blank">
                 <i class="fas fa-robot"></i>
-                <span>المساعد الذكي</span>
+                المساعد الذكي
             </a>
         `;
+
+        // إضافة القائمة للصفحة
+        document.body.appendChild(this.menu);
 
         // إضافة مستمعي الأحداث
         this.addEventListeners();
@@ -62,49 +56,36 @@ class ContextMenu {
      * إضافة مستمعي الأحداث
      */
     addEventListeners() {
-        // إظهار القائمة عند النقر بالزر الأيمن
+        // تعديل معالجة النقر بالزر الأيمن
         document.addEventListener('contextmenu', (e) => {
             e.preventDefault();
-            this.show(e.clientX, e.clientY);
+            
+            // الحصول على إحداثيات النقر
+            const x = e.clientX;
+            const y = e.clientY;
+            
+            // إظهار القائمة في موقع النقر
+            this.show(x, y);
         });
 
-        // إخفاء القائمة عند النقر في أي مكان آخر
+        // تعديل إخفاء القائمة
         document.addEventListener('click', (e) => {
+            // التحقق من أن النقر ليس على القائمة نفسها
             if (!this.menu.contains(e.target)) {
                 this.hide();
             }
         });
 
-        // إخفاء القائمة عند الضغط على ESC
+        // إضافة معالج مفتاح ESC
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.hide();
             }
         });
 
-        // إضافة تأثيرات حركية للعناصر
-        const items = this.menu.querySelectorAll('.context-menu-item');
-        items.forEach(item => {
-            // إضافة تأثير عند التحويم
-            item.addEventListener('mouseenter', () => {
-                item.style.transform = 'translateX(-5px)';
-            });
-            
-            item.addEventListener('mouseleave', () => {
-                item.style.transform = 'translateX(0)';
-            });
-
-            // إضافة تأثير عند النقر
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                const href = item.getAttribute('href');
-                
-                // إضافة تأثير النقر
-                item.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    window.location.href = href;
-                }, 150);
-            });
+        // إخفاء القائمة عند التمرير
+        document.addEventListener('scroll', () => {
+            this.hide();
         });
     }
 
@@ -114,28 +95,35 @@ class ContextMenu {
      * @param {number} y - الموضع الرأسي
      */
     show(x, y) {
-        // تحديد موضع القائمة
+        // إخفاء القائمة أولاً لإعادة حساب الأبعاد
+        this.menu.style.display = 'block';
+        this.menu.style.visibility = 'hidden';
+
+        // حساب أبعاد القائمة والنافذة
         const menuWidth = this.menu.offsetWidth;
         const menuHeight = this.menu.offsetHeight;
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
 
-        // التأكد من عدم تجاوز حدود النافذة
+        // تعديل الموقع إذا كانت القائمة ستتجاوز حدود النافذة
+        let finalX = x;
+        let finalY = y;
+
         if (x + menuWidth > windowWidth) {
-            x = windowWidth - menuWidth - 10;
-        }
-        if (y + menuHeight > windowHeight) {
-            y = windowHeight - menuHeight - 10;
+            finalX = windowWidth - menuWidth;
         }
 
-        // تحديث موضع القائمة
-        this.menu.style.left = `${x}px`;
-        this.menu.style.top = `${y}px`;
-        
-        // إظهار القائمة مع تأثير حركي
-        requestAnimationFrame(() => {
-            this.menu.classList.add('show');
-        });
+        if (y + menuHeight > windowHeight) {
+            finalY = windowHeight - menuHeight;
+        }
+
+        // تعيين الموقع النهائي
+        this.menu.style.left = `${finalX}px`;
+        this.menu.style.top = `${finalY}px`;
+
+        // إظهار القائمة
+        this.menu.style.visibility = 'visible';
+        this.menu.classList.add('show');
     }
 
     /**

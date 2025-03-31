@@ -415,6 +415,12 @@ header.position-relative.overflow-hidden.py-16 {
 }
 </style>
 
+<!-- إضافة ملف CSS للقائمة السياقية -->
+<link rel="stylesheet" href="/content/css/context-menu.css">
+
+<!-- إضافة ملف JavaScript للقائمة السياقية -->
+<script src="/content/js/context-menu.js" defer></script>
+
 <div class="container py-5">
     <!-- فلتر الأحرف الأبجدية -->
     <div class="alphabet-filter mb-4">
