@@ -57,6 +57,9 @@ echo '<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>';
 echo '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.css">';
 echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.min.js"></script>';
 
+// إضافة بعد سطر 49 (بعد إضافة CSS الأخرى)
+echo '<link rel="stylesheet" href="css/context-menu.css">'; 
+
 ?>
 <style>
 .bootstrap-tagsinput {
@@ -2117,6 +2120,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<!-- إضافة قبل نهاية الـ body (قبل سطر 1450 تقريباً) -->
+<script src="js/context-menu.js"></script>
 
 </body>
 </html>

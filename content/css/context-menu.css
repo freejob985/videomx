@@ -1,0 +1,112 @@
+/* تنسيقات قائمة السياق */
+.context-menu {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 12px;
+    padding: 10px 0;
+    min-width: 250px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.context-menu-item {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    margin: 2px 0;
+}
+
+.context-menu-item:hover {
+    background-color: #f0f7ff;
+    color: #0d6efd;
+    padding-right: 25px;
+}
+
+.context-menu-item i {
+    width: 24px;
+    height: 24px;
+    margin-left: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    border-radius: 6px;
+    background: #f8f9fa;
+    color: #0d6efd;
+    transition: all 0.3s ease;
+}
+
+.context-menu-item:hover i {
+    transform: scale(1.1);
+    background: #0d6efd;
+    color: white;
+}
+
+.context-menu-divider {
+    height: 1px;
+    background-color: #e9ecef;
+    margin: 8px 15px;
+    opacity: 0.7;
+}
+
+/* تنسيقات خاصة للنسخة العربية */
+.rtl .context-menu-item {
+    flex-direction: row-reverse;
+}
+
+.rtl .context-menu-item:hover {
+    padding-right: 20px;
+    padding-left: 25px;
+}
+
+.rtl .context-menu-item i {
+    margin-left: 0;
+    margin-right: 12px;
+}
+
+/* تأثيرات حركية */
+.context-menu.show {
+    animation: contextMenuFadeIn 0.2s ease;
+    display: block;
+}
+
+@keyframes contextMenuFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* تنسيقات الأيقونات المخصصة */
+.context-menu-item i.fa-language { color: #2196F3; }
+.context-menu-item i.fa-home { color: #4CAF50; }
+.context-menu-item i.fa-graduation-cap { color: #9C27B0; }
+.context-menu-item i.fa-portal-enter { color: #FF9800; }
+.context-menu-item i.fa-search { color: #E91E63; }
+.context-menu-item i.fa-cog { color: #607D8B; }
+.context-menu-item i.fa-check-double { color: #8BC34A; }
+.context-menu-item i.fa-robot { color: #00BCD4; }
+
+/* تأثير التحويم على الأيقونات */
+.context-menu-item:hover i.fa-language { background: #2196F3; }
+.context-menu-item:hover i.fa-home { background: #4CAF50; }
+.context-menu-item:hover i.fa-graduation-cap { background: #9C27B0; }
+.context-menu-item:hover i.fa-portal-enter { background: #FF9800; }
+.context-menu-item:hover i.fa-search { background: #E91E63; }
+.context-menu-item:hover i.fa-cog { background: #607D8B; }
+.context-menu-item:hover i.fa-check-double { background: #8BC34A; }
+.context-menu-item:hover i.fa-robot { background: #00BCD4; } 
