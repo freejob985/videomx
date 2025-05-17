@@ -20,6 +20,7 @@ require_once '../includes/header.php';
 ?>
 
 <!-- إضافة CSS مخصص للتصميم المادي -->
+<link rel="stylesheet" href="/assets/css/context-menu.css">
 <style>
 /* إضافة أنماط جديدة لتثبيت الفوتر */
 html, body {
@@ -198,27 +199,34 @@ footer {
     </div>
 </div>
 
+<script src="/assets/js/context-menu.js"></script>
 <script>
 // التبديل بين الوصف المختصر والكامل
-document.querySelectorAll('.toggle-desc').forEach(link => {
-    link.addEventListener('click', function(e) {
-        e.preventDefault();
-        const card = this.closest('.section-description');
-        const shortDesc = card.querySelector('.short-desc');
-        const fullDesc = card.querySelector('.full-desc');
-        const showMore = this.getAttribute('data-show-more') === 'true';
-        
-        if (showMore) {
-            shortDesc.classList.add('d-none');
-            fullDesc.classList.remove('d-none');
-            this.textContent = 'أقل...';
-            this.setAttribute('data-show-more', 'false');
-        } else {
-            shortDesc.classList.remove('d-none');
-            fullDesc.classList.add('d-none');
-            this.textContent = 'المزيد...';
-            this.setAttribute('data-show-more', 'true');
-        }
+document.addEventListener('DOMContentLoaded', function() {
+    // تهيئة قائمة السياق
+    new ContextMenu();
+
+    // الكود الموجود مسبقاً
+    document.querySelectorAll('.toggle-desc').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const card = this.closest('.section-description');
+            const shortDesc = card.querySelector('.short-desc');
+            const fullDesc = card.querySelector('.full-desc');
+            const showMore = this.getAttribute('data-show-more') === 'true';
+            
+            if (showMore) {
+                shortDesc.classList.add('d-none');
+                fullDesc.classList.remove('d-none');
+                this.textContent = 'أقل...';
+                this.setAttribute('data-show-more', 'false');
+            } else {
+                shortDesc.classList.remove('d-none');
+                fullDesc.classList.add('d-none');
+                this.textContent = 'المزيد...';
+                this.setAttribute('data-show-more', 'true');
+            }
+        });
     });
 });
 </script>

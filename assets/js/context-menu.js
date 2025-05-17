@@ -10,111 +10,173 @@ class ContextMenu {
         this.menu.className = 'context-menu';
         document.body.appendChild(this.menu);
 
-        // إضافة العناصر للقائمة
-        this.menu.innerHTML = `
-            <div class="context-menu-item" data-action="view">
-                <i class="fas fa-play"></i>
-                عرض الدروس
-            </div>
-            <div class="context-menu-item" data-action="edit">
-                <i class="fas fa-edit"></i>
-                تعديل القسم
-            </div>
-            <div class="context-menu-separator"></div>
-            <div class="context-menu-item" data-action="share">
-                <i class="fas fa-share-alt"></i>
-                مشاركة
-            </div>
-            <div class="context-menu-item" data-action="report">
-                <i class="fas fa-flag"></i>
-                إبلاغ عن مشكلة
-            </div>
-        `;
-
         // إضافة مستمعات الأحداث
         document.addEventListener('contextmenu', this.handleContextMenu.bind(this));
         document.addEventListener('click', this.hideMenu.bind(this));
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') this.hideMenu();
+        });
         window.addEventListener('resize', this.hideMenu.bind(this));
         window.addEventListener('scroll', this.hideMenu.bind(this));
-
-        // إضافة مستمعات الأحداث لعناصر القائمة
-        this.menu.querySelectorAll('.context-menu-item').forEach(item => {
-            item.addEventListener('click', this.handleMenuItemClick.bind(this));
-        });
     }
 
     handleContextMenu(e) {
-        // التحقق مما إذا كان النقر على بطاقة القسم
-        const sectionCard = e.target.closest('.section-card');
-        if (!sectionCard) {
+        // التحقق من أن النقر على صف في الجدول
+        const row = e.target.closest('tr[data-lesson-id]');
+        if (!row) {
             this.hideMenu();
             return;
         }
 
         e.preventDefault();
         
-        // تخزين معرف القسم
-        this.menu.dataset.sectionId = sectionCard.dataset.sectionId;
+        const lessonId = row.dataset.lessonId;
+        const lessonTitle = row.querySelector('.lesson-name').textContent.trim();
+        const courseTitle = row.querySelector('.course-badge').textContent.trim();
+        const videoUrl = row.querySelector('.btn-play').getAttribute('onclick')?.match(/'([^']+)'/)?.[1] || '';
 
-        // عرض القائمة في موقع النقر
-        this.showMenu(e.clientX, e.clientY);
+        // تحديث محتوى القائمة
+        this.showMenu(e.clientX, e.clientY, {
+            lessonId,
+            lessonTitle,
+            courseTitle,
+            videoUrl
+        });
     }
 
-    showMenu(x, y) {
-        this.menu.style.display = 'block';
+    showMenu(x, y, data) {
+        // تحديث محتوى القائمة
+        this.menu.innerHTML = this.getMenuHTML(data);
         
-        // تعديل موقع القائمة لتجنب تجاوز حدود النافذة
+        // إعادة تعيين الأنماط قبل إظهار القائمة
+        this.menu.style.display = 'block';
+        this.menu.style.opacity = '0';
+        
+        // تحديد موقع القائمة
         const menuRect = this.menu.getBoundingClientRect();
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
 
+        // حساب الموقع مع مراعاة حدود النافذة
+        let menuX = x;
+        let menuY = y;
+
         if (x + menuRect.width > windowWidth) {
-            x = windowWidth - menuRect.width;
+            menuX = windowWidth - menuRect.width - 10;
         }
 
         if (y + menuRect.height > windowHeight) {
-            y = windowHeight - menuRect.height;
+            menuY = windowHeight - menuRect.height - 10;
         }
 
-        this.menu.style.left = x + 'px';
-        this.menu.style.top = y + 'px';
+        // تعيين الموقع النهائي
+        this.menu.style.left = `${menuX}px`;
+        this.menu.style.top = `${menuY}px`;
+
+        // إظهار القائمة مع التأثير الحركي
+        requestAnimationFrame(() => {
+            this.menu.classList.add('show');
+            this.menu.style.opacity = '1';
+        });
+
+        // إضافة مستمعات الأحداث للعناصر
+        this.addEventListeners(data);
     }
 
     hideMenu() {
-        this.menu.style.display = 'none';
+        this.menu.classList.remove('show');
+        this.menu.style.opacity = '0';
+        setTimeout(() => {
+            if (!this.menu.classList.contains('show')) {
+                this.menu.style.display = 'none';
+            }
+        }, 200);
     }
 
-    handleMenuItemClick(e) {
-        const action = e.currentTarget.dataset.action;
-        const sectionId = this.menu.dataset.sectionId;
+    getMenuHTML(data) {
+        return `
+            <div class="context-menu-item" data-action="play">
+                <i class="fas fa-play"></i>
+                تشغيل الدرس
+            </div>
+            <div class="context-menu-item" data-action="edit">
+                <i class="fas fa-edit"></i>
+                تعديل الدرس
+            </div>
+            <div class="context-menu-divider"></div>
+            <div class="context-menu-item" data-action="move">
+                <i class="fas fa-exchange-alt"></i>
+                نقل إلى قسم آخر
+            </div>
+            <div class="context-menu-item" data-action="complete">
+                <i class="fas fa-check-circle"></i>
+                تحديد كمكتمل
+            </div>
+            <div class="context-menu-divider"></div>
+            <div class="context-menu-item" data-action="ai">
+                <i class="fas fa-robot"></i>
+                تحليل مع ChatGPT
+            </div>
+            <div class="context-menu-item" data-action="grok">
+                <i class="fas fa-brain"></i>
+                تحليل مع Grok
+            </div>
+            <div class="context-menu-divider"></div>
+            <div class="context-menu-item" data-action="notes">
+                <i class="fas fa-sticky-note"></i>
+                إضافة ملاحظة
+            </div>
+        `;
+    }
 
+    addEventListeners(data) {
+        this.menu.querySelectorAll('.context-menu-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const action = e.currentTarget.dataset.action;
+                this.handleAction(action, data);
+                this.hideMenu();
+            });
+        });
+    }
+
+    handleAction(action, data) {
         switch (action) {
-            case 'view':
-                window.location.href = `/sections/lessons.php?section_id=${sectionId}`;
+            case 'play':
+                // استخدام الدالة الموجودة لتشغيل الفيديو
+                playVideo(data.videoUrl, data.lessonTitle);
                 break;
             case 'edit':
-                window.location.href = `/sections/edit.php?section_id=${sectionId}`;
+                // فتح صفحة تعديل الدرس
+                window.location.href = `/content/edit_lesson.php?id=${data.lessonId}`;
                 break;
-            case 'share':
-                // تنفيذ وظيفة المشاركة
-                this.shareSection(sectionId);
+            case 'move':
+                // استخدام الدالة الموجودة لتغيير القسم
+                editLessonSection(data.lessonId, currentSectionId);
                 break;
-            case 'report':
-                // تنفيذ وظيفة الإبلاغ
-                this.reportSection(sectionId);
+            case 'complete':
+                // تحديث حالة إكمال الدرس
+                const button = document.querySelector(`tr[data-lesson-id="${data.lessonId}"] .btn-complete`);
+                if (button) {
+                    toggleLessonCompletion(data.lessonId, button);
+                }
+                break;
+            case 'ai':
+                // تحليل الدرس مع ChatGPT
+                askGPTAboutLesson(data.lessonTitle, currentSectionName, currentLanguageName);
+                break;
+            case 'grok':
+                // تحليل الدرس مع Grok
+                askGrokAboutLesson(data.lessonTitle, currentSectionName, currentLanguageName);
+                break;
+            case 'notes':
+                // إضافة ملاحظة جديدة
+                showAddNoteModal(data.lessonId);
                 break;
         }
-
-        this.hideMenu();
     }
+}
 
-    shareSection(sectionId) {
-        // يمكن إضافة منطق المشاركة هنا
-        alert('جاري تطوير خاصية المشاركة...');
-    }
-
-    reportSection(sectionId) {
-        // يمكن إضافة منطق الإبلاغ هنا
-        alert('جاري تطوير خاصية الإبلاغ...');
-    }
-} 
+// تهيئة القائمة السياقية عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', () => {
+    window.contextMenu = new ContextMenu();
+}); 

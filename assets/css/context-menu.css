@@ -1,28 +1,39 @@
 .context-menu {
-    display: none;
     position: fixed;
-    z-index: 1000;
+    z-index: 10000;
     background: white;
     border-radius: 8px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 15px rgba(0,0,0,0.2);
     padding: 8px 0;
     min-width: 200px;
+    display: none;
+    opacity: 0;
+    transform: scale(0.98);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+}
+
+.context-menu.show {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    display: block;
 }
 
 .context-menu-item {
     padding: 8px 16px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     cursor: pointer;
-    color: #1e293b;
-    text-decoration: none;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
+    color: #333;
+    font-size: 14px;
 }
 
 .context-menu-item:hover {
-    background-color: #f1f5f9;
-    color: #4f46e5;
+    background-color: #f5f5f5;
+    color: #2193b0;
 }
 
 .context-menu-item i {
@@ -32,6 +43,43 @@
 
 .context-menu-divider {
     height: 1px;
-    background-color: #e2e8f0;
+    background-color: #e9ecef;
     margin: 8px 0;
+}
+
+/* تحسين المظهر للقوائم الفرعية */
+.context-submenu {
+    position: relative;
+}
+
+.context-submenu::after {
+    content: '\f054';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.context-submenu:hover::after {
+    color: #2193b0;
+}
+
+/* تأثيرات حركية */
+@keyframes menuFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.context-menu.show {
+    animation: menuFadeIn 0.2s ease forwards;
 } 

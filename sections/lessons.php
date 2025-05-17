@@ -1853,3 +1853,15 @@ tinymce.init({
 
 <!-- إضافة سكربت Grok -->
 <script src="/GBT/js/grok-link.js"></script>
+
+<!-- إضافة روابط CSS و JavaScript للقائمة السياقية -->
+<link rel="stylesheet" href="/assets/css/context-menu.css">
+<script src="/assets/js/context-menu.js"></script>
+
+<!-- إضافة المتغيرات العامة للقائمة السياقية -->
+<script>
+    // المتغيرات العامة المطلوبة للقائمة السياقية
+    const currentSectionId = <?php echo $section_id; ?>;
+    const currentSectionName = '<?php echo addslashes($section['name']); ?>';
+    const currentLanguageName = '<?php echo addslashes($language['name']); ?>';
+</script>
